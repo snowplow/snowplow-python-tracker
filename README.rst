@@ -12,7 +12,7 @@ Add analytics to your Python apps and Python games with the Snowplow_ event trac
 .. _Snowplow: http://snowplowanalytics.com
 .. _Python: http://python.org
 
-With this tracker you can collect event data from your Python-based applications or Python web servers/frameworks.
+With this tracker you can collect event data from your Python-based applications, games or Python web servers/frameworks.
 
 Find out more
 #############
