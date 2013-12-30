@@ -3,6 +3,7 @@ Python Analytics for Snowplow
 ======================================================
 .. image:: https://travis-ci.org/snowplow/snowplow-python-tracker.png
     :alt: Build Status
+    :target: https://travis-ci.org/snowplow/snowplow-python-tracker
 
 Overview
 ########
