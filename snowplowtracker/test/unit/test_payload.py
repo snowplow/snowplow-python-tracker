@@ -22,6 +22,7 @@
 
 import unittest
 import time
+from freezegun import freeze_time
 from snowplowtracker import payload
 
 
@@ -73,9 +74,10 @@ class TestPayload(unittest.TestCase):
         self.assertTrue(p.context['tid'] >= 100000 and
                         p.context['tid'] <= 999999)
 
+    @freeze_time("1970-01-01 00:00:01")
     def test_get_timestamp(self):
         p = payload.Payload()
-        self.assertTrue(p.context['dtm'] is not None)
+        self.assertTrue(p.context['dtm'] == 1000)   # 1970-01-01 00:00:01 in ms
 
     def test_set_timestamp(self):
         p = payload.Payload()
