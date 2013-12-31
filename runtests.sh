@@ -3,11 +3,11 @@
 
 cd $(dirname $0)
 
-# "python -m" differs from "python snowplow/test/runtests.py" in how it sets
-# up the default python path.  "python -m" uses the current directory,
-# while "python file.py" uses the directory containing "file.py" (which is
-# not what you want if file.py appears within a package you want to import
-# from)
+# Run any one of the following three commands.
+# Personally I prefer pytest because it has a neat output but travis-ci uses
+# nosetests. The choice of choosing nosetests or pytest should not make a
+# difference to the way tests are run (a test failing under nosetests *will*
+# fail under pytests and the other way round.
 
 # python -m snowplowtracker.test.runtests "$@"
 # nosetests
