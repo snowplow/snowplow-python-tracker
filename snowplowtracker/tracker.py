@@ -120,19 +120,20 @@ class Tracker:
 
             :param  payload:        Generated dict track()
             :type   payload:        payload
-            :rtype:                 str | None
+            :rtype:                 str | bool
         """
 
         r = requests.get(self.collector_uri, params=payload.context)
         code = r.status_code
         if code < 0 or code > 600:
             return ''.join(["Unrecognised status code [", str(code), "]"])
-        elif code > 400 and code < 500:
+        elif code >= 400 and code < 500:
             return ''.join(["HTTP status code [", str(code),
                             "] is a client error"])
-        elif code > 500:
+        elif code >= 500:
             return ''.join(["HTTP status code [", str(code),
                             "] is a server error"])
+        return True
 
     """
     Setter methods
@@ -233,7 +234,7 @@ class Tracker:
 
             :param  pb:             Payload builder
             :type   pb:             payload
-            :rtype:                 str | None
+            :rtype:                 str | bool
         """
         pb.add_dict(self.standard_nv_pairs)
         return self.http_get(pb)

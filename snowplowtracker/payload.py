@@ -88,10 +88,7 @@ class Payload:
             :type   dict_:          dict(*:*)
         """
         for f in dict_:
-            if base64:
-                self.context[f] = dict_[f] # TO IMPLEMENT
-            else:
-                self.context[f] = dict_[f]
+            self.context[f] = dict_[f]
 
     @contract
     def add_unstruct(self, dict_, encode_base64,
@@ -112,7 +109,7 @@ class Payload:
             :type   type_when_not_encoded:  str
         """
         def raise_error(f, type_):
-            raise RuntimeError(''.join([f, " in dict, is not a ", type_]))
+            raise RuntimeError(''.join([f, " in dict is not a ", type_]))
 
         types = ["int", "flt", "geo", "dt", "tm", "tms"]
 
@@ -120,17 +117,12 @@ class Payload:
             parts = f.split("$")
             if parts[-1] in types:
                 type_ = parts[-1]
-                if type_ == "int" and not isinstance(dict_[f], int):
-                    raise_error(f, type_)
-                if type_ == "flt" and not isinstance(dict_[f], float):
-                    raise_error(f, type_)
-                if type_ == "geo" and not isinstance(dict_[f], tuple):
-                    raise_error(f, type_)
-                if type_ == "dt" and not isinstance(dict_[f], int):
-                    raise_error(f, type_)
-                if type_ == "tm" and not isinstance(dict_[f], int):
-                    raise_error(f, type_)
-                if type_ == "tms" and not isinstance(dict_[f], int):
+                if ((type_ == "int" and not isinstance(dict_[f], int)) or
+                    (type_ == "flt" and not isinstance(dict_[f], float)) or
+                    (type_ == "geo" and not isinstance(dict_[f], tuple)) or
+                    (type_ == "dt" and not isinstance(dict_[f], int)) or
+                    (type_ == "tm" and not isinstance(dict_[f], int)) or
+                    (type_ == "tms" and not isinstance(dict_[f], int))):
                     raise_error(f, type_)
         json_dict = json.dumps(dict_)
 
