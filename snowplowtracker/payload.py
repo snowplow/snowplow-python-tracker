@@ -111,7 +111,7 @@ class Payload:
         def raise_error(f, type_):
             raise RuntimeError(''.join([f, " in dict is not a ", type_]))
 
-        types = ["int", "flt", "geo", "dt", "tm", "tms"]
+        types = ["int", "flt", "geo", "dt", "ts", "tms"]
 
         for f in dict_:
             parts = f.split("$")
@@ -121,7 +121,7 @@ class Payload:
                     (type_ == "flt" and not isinstance(dict_[f], float)) or
                     (type_ == "geo" and not isinstance(dict_[f], tuple)) or
                     (type_ == "dt" and not isinstance(dict_[f], int)) or
-                    (type_ == "tm" and not isinstance(dict_[f], int)) or
+                    (type_ == "ts" and not isinstance(dict_[f], int)) or
                     (type_ == "tms" and not isinstance(dict_[f], int))):
                     raise_error(f, type_)
         json_dict = json.dumps(dict_)
