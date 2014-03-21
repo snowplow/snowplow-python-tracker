@@ -39,6 +39,17 @@ Find out more
 .. _`Roadmap`: https://github.com/snowplow/snowplow/wiki/Python-Tracker-Roadmap
 .. _`Contributing`: https://github.com/snowplow/snowplow/wiki/Python-Tracker-Contributing
 
+Contributing quickstart
+#######################
+
+::
+
+  $ git clone --recursive https://github.com/snowplow/dev-environment.git
+  $ cd dev-environment
+  $ rm -rf .git*
+  $ ansible-playbook /vagrant/ansible-playbooks/snowplow-python-tracker.yml --inventory-file=/home/vagrant/ansible_hosts --connection=local
+  $ ...
+
 Copyright and license
 #####################
 
