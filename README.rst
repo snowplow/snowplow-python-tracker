@@ -47,7 +47,7 @@ Contributing quickstart
   guest$ git clone --recursive https://github.com/snowplow/dev-environment.git && cd dev-environment
   guest$ vagrant up && vagrant ssh
    host$ ansible-playbook /vagrant/ansible-playbooks/snowplow-python-tracker.yml --inventory-file=/home/vagrant/ansible_hosts --connection=local
-   host$ /vagrant/snowplow-python-tracker/runtests.sh
+   host$ /vagrant/snowplow-python-tracker/run-tests.sh
 
 Copyright and license
 #####################
