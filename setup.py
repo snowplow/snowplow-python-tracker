@@ -28,7 +28,7 @@ import os
 
 version_file_path = os.path.join(
     os.path.dirname(__file__),
-    'snowplowtracker',
+    'snowplow_tracker',
     '_version.py'
     )
 exec(open(version_file_path).read(), {}, locals())
@@ -40,17 +40,16 @@ authors_list = [
 authors_str = ', '.join(authors_list)
 
 authors_email_list = [
-    'anujmorex@gmail.com',
-    'alex@keplarllp.com',
+    'support@snowplowanalytics.com',
     ]
 authors_email_str = ', '.join(authors_email_list)
 
 setup(
-    name='snowplowtracker',
+    name='snowplow-tracker',
     version=__version__,
     author=authors_str,
     author_email=authors_email_str,
-    packages=['snowplowtracker', 'snowplowtracker.test'],
+    packages=['snowplow_tracker', 'snowplow_tracker.test'],
     url='http://snowplowanalytics.com',
     license='Apache License 2.0',
     description='Tracker for Snowplow Analytics.',

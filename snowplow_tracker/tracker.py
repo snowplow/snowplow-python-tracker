@@ -20,7 +20,7 @@
 """
 
 import requests
-from snowplowtracker import payload, _version
+from snowplow_tracker import payload, _version
 from contracts import contract, new_contract
 
 

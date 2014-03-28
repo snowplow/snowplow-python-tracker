@@ -23,7 +23,7 @@
 import unittest
 import time
 from freezegun import freeze_time
-from snowplowtracker import payload
+from snowplow_tracker import payload
 
 
 def is_subset(dict1, dict2):

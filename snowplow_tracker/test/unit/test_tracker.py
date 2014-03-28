@@ -21,7 +21,7 @@
 
 
 import unittest
-from snowplowtracker.tracker import Tracker
+from snowplow_tracker.tracker import Tracker
 
 
 class TestTracker(unittest.TestCase):

@@ -21,7 +21,7 @@
 
 import unittest
 import time
-from snowplowtracker import tracker
+from snowplow_tracker import tracker
 from httmock import all_requests, HTTMock
 
 
