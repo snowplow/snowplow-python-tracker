@@ -52,7 +52,7 @@ setup(
     packages=['snowplow_tracker', 'snowplow_tracker.test'],
     url='http://snowplowanalytics.com',
     license='Apache License 2.0',
-    description='Tracker for Snowplow Analytics.',
+    description='Snowplow event tracker for Python. Add analytics to your Python and Django apps, webapps and games',
     long_description=open('README.rst').read(),
 
     install_requires = [
