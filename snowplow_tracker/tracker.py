@@ -62,12 +62,13 @@ class Tracker:
             self.collector_uri = collector_uri
 
         self.config = {
-            "encode_base64":    DEFAULT_ENCODE_BASE64,
-            "platform":         DEFAULT_PLATFORM,
-            "version":          VERSION,
+            "encode_base64":    DEFAULT_ENCODE_BASE64
         }
 
-        self.standard_nv_pairs = {}
+        self.standard_nv_pairs = {
+            "p": DEFAULT_PLATFORM,
+            "tv": VERSION
+        }
 
     def cloudfront(collector_uri):
         return Tracker(collector_uri, "cloudfront")
@@ -154,7 +155,7 @@ class Tracker:
             :type   value:          str
         """
         if value in SUPPORTED_PLATFORMS:
-            self.config["platform"] = value
+            self.standard_nv_pairs["p"] = value
         else:
             raise RuntimeError(value + " is not a supported platform")
 
