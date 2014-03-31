@@ -18,18 +18,12 @@
     Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 '''
-import requests
+
 import unittest
 import time
 import re
 from snowplow_tracker import tracker
 from httmock import all_requests, HTTMock
-
-'''
-@all_requests
-def pass_response_content(url, request):
-    return 'True'
-'''
 
 def from_querystring(field, url):
     pattern = re.compile('^[^#]*[?&]' + field + '=([^&#]*)')
@@ -86,7 +80,6 @@ class IntegrationTest(unittest.TestCase):
         with HTTMock(pass_response_content):
             val = t.track_struct_event('Ecomm', 'add-to-basket', 'dog-skateboarding-video', 'hd', 13.99)
             assertion_array = {'se_ca': 'Ecomm', 'se_pr': 'hd', 'se_la': 'dog-skateboarding-video', 'se_va': '13.99', 'se_ac': 'add-to-basket', 'e': 'se'}
-            self.assertTrue(val)
             for key in assertion_array:
                 self.assertEquals(from_querystring(key, val), assertion_array[key]) 
 
@@ -96,7 +89,6 @@ class IntegrationTest(unittest.TestCase):
         t.config['encode_base64'] = False
         with HTTMock(pass_response_content):
             val = t.track_unstruct_event('viewed_product', {'product_id': 'ASO01043', 'price$flt': 49.95, 'walrus$tms': int(time.time() * 1000),})
-            self.assertTrue(val)
             assertion_array = {'e': 'ue', 'ue_na': 'viewed_product'}
             for key in assertion_array:
                 self.assertEquals(from_querystring(key, val), assertion_array[key]) 
