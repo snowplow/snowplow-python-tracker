@@ -134,7 +134,7 @@ class Tracker:
         elif code >= 500:
             return ''.join(["HTTP status code [", str(code),
                             "] is a server error"])
-        return True
+        return r.url
 
     """
     Setter methods
