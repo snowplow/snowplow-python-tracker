@@ -28,7 +28,7 @@ from contracts import contract, new_contract
 Constants & config
 """
 
-VERSION = "python-%s" % _version.__version__
+VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
 DEFAULT_PLATFORM = "pc"
 SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
