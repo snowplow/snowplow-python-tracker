@@ -1,1 +1,11 @@
-v0.1.0, 28 March, 2014 -- Initial release.
+Version 0.2.0 (2014-xx-xx)
+--------------------------
+Added support for Python 3.2 (#41) (TODO)
+Added support for Python 2.7 (#42) (TODO)
+Fixed versions in requirements.txt (#47) (TODO)
+Added platform and tracker version to payload (#50) (TODO)
+Changed tracker version prefix from "python-" to "py-" (#51) (TODO)
+
+Version 0.1.0 (2014-28-03)
+--------------------------
+Initial release
