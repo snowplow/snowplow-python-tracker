@@ -2,7 +2,7 @@ Version 0.2.0 (2014-xx-xx)
 --------------------------
 Added support for Python 3.2 (#41) (TODO)
 Added support for Python 2.7 (#42) (TODO)
-Fixed versions in requirements.txt (#47) (TODO)
+Fixed versions in requirements.txt (#47)
 Added platform and tracker version to payload (#50)
 Changed tracker version prefix from "python-" to "py-" (#51)
 
