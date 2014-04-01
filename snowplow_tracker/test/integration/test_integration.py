@@ -88,7 +88,7 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker('localhost')
         t.config['encode_base64'] = False
         with HTTMock(pass_response_content):
-            val = t.track_unstruct_event('viewed_product', {'product_id': 'ASO01043', 'price$flt': 49.95, 'walrus$tms': int(time.time() * 1000),})
+            val = t.track_unstruct_event('viewed_product', {'product_id': 'ASO01043', 'price$flt': 49.95, 'walrus$tms': int(time.time() * 1000)})
             assertion_array = {'e': 'ue', 'ue_na': 'viewed_product'}
             for key in assertion_array:
                 self.assertEquals(from_querystring(key, val), assertion_array[key]) 
@@ -96,7 +96,7 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_unstruct_event_base64(self):
         t = tracker.Tracker('localhost')
         with HTTMock(pass_response_content):
-            val = t.track_unstruct_event('viewed_product', {'product_id': 'ASO01043', 'price$flt': 49.95, 'walrus$tms': int(time.time() * 1000),})
+            val = t.track_unstruct_event('viewed_product', {'product_id': 'ASO01043', 'price$flt': 49.95, 'walrus$tms': int(time.time() * 1000)})
             assertion_array = {'e': 'ue', 'ue_na': 'viewed_product'}
             for key in assertion_array:
                 self.assertEquals(from_querystring(key, val), assertion_array[key]) 
@@ -126,3 +126,18 @@ class IntegrationTest(unittest.TestCase):
                                          })
         except RuntimeError as e:
             self.assertEquals("walrus$tms in dict is not a tms", str(e))
+
+    def test_integration_standard_nv_pairs(self):
+        t = tracker.Tracker('localhost', 'cf')
+        t.set_platform('mob')
+        t.set_user_id('user12345')
+        t.set_app_id('angry-birds-android')
+        t.set_screen_resolution(100, 200)
+        t.set_color_depth(24)
+        t.set_timezone('Europe London')
+        t.set_lang('en')
+        with HTTMock(pass_response_content):
+            val = t.track_page_view('localhost', 'local host', None)
+            assertion_array = {'tna': 'cf', 'e_vn': 'com.snowplowanalytics', 'res': '100x200', 'lang': 'en', 'aid': 'angry-birds-android', 'cd': '24', 'tz': 'Europe+London', 'p': 'mob', 'tv': 'py-0.1.0'}
+            for key in assertion_array:
+                self.assertEquals(from_querystring(key, val), assertion_array[key]) 
