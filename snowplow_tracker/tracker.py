@@ -328,12 +328,7 @@ class Tracker:
             :type   name:           non_empty_string
             :type   id_:            non_empty_string
         """
-        pb = payload.Payload(tstamp)
-        # Payload has value of "e" set to "sv" for screenviews
-        pb.add("e", "sv")
-        pb.add("sv_na", name)
-        pb.add("sv_id", id_)
-        return self.track(pb)
+        return self.track_unstruct_event("screen_view", {"name": name, "id": id_}, tstamp)
 
     @contract
     def track_struct_event(self, category, action, label, property_, value,

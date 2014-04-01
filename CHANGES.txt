@@ -1,6 +1,6 @@
 Version 0.2.0 (2014-xx-xx)
 --------------------------
-Changed track screen view to use an unstructured event (#53) (TODO)
+Changed track screen view to use an unstructured event (#53)
 Added ability to name individual instances of the Python Tracker (#52) (TODO)
 Validated GET payload in all integration tests (#33) (TODO)
 Added support for Python 3.2 (#41) (TODO)
