@@ -23,7 +23,7 @@ Find out more
 +---------------------------------+---------------------------+-------------------------+-----------------------------------+
 | Technical Docs                  | Setup Guide               | Roadmap                 | Contributing                      |
 +=================================+===========================+=========================+===================================+
-| |techdocs|                      | |setup|                   | |roadmap|               | |contributing|                    |
+| |techdocs|_                     | |setup|_                  | |roadmap|               | |contributing|                    |
 +---------------------------------+---------------------------+-------------------------+-----------------------------------+
 | `Technical Docs`_               | `Setup Guide`_            | `Roadmap`_              | `Contributing`_                   |
 +---------------------------------+---------------------------+-------------------------+-----------------------------------+
@@ -33,6 +33,8 @@ Find out more
 .. |roadmap| image:: https://d3i6fms1cm1j0i.cloudfront.net/github/images/roadmap.png
 .. |contributing| image:: https://d3i6fms1cm1j0i.cloudfront.net/github/images/contributing.png
 
+.. _techdocs: https://github.com/snowplow/snowplow/wiki/Python-Tracker
+.. _setup: https://github.com/snowplow/snowplow/wiki/Python-Tracker-Setup
 
 .. _`Technical Docs`: https://github.com/snowplow/snowplow/wiki/Python-Tracker
 .. _`Setup Guide`: https://github.com/snowplow/snowplow/wiki/Python-Tracker-Setup
