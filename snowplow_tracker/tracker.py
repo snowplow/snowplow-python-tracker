@@ -34,6 +34,7 @@ DEFAULT_PLATFORM = "pc"
 SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
 HTTP_ERRORS = set(["Host not found", "No address associated with name",
                   "No address associated with hostname", ])
+DEFAULT_VENDOR = "com.snowplowanalytics"
 
 
 """
@@ -228,16 +229,20 @@ class Tracker:
     """
 
     @contract
-    def track(self, pb):
+    def track(self, pb, snowplow_schema=True):
         """
             Called by all tracking events to add the standard name-value pairs
             to the Payload object irrespective of the tracked event.
 
-            :param  pb:             Payload builder
-            :type   pb:             payload
-            :rtype:                 str | bool
+            :param  pb:              Payload builder
+            :type   pb:              payload
+            :param  snowplow_schema: Whether the event schema is authored by Snowplow
+            :type   snowplow_schema: bool
+            :rtype:                  str | bool
         """
         pb.add_dict(self.standard_nv_pairs)
+        if snowplow_schema:
+            pb.add("e_vn", DEFAULT_VENDOR)
         return self.http_get(pb)
 
     @contract
@@ -328,7 +333,7 @@ class Tracker:
             :type   name:           non_empty_string
             :type   id_:            non_empty_string
         """
-        return self.track_unstruct_event("screen_view", {"name": name, "id": id_}, tstamp)
+        return self.track_unstruct_event("screen_view", {"name": name, "id": id_}, tstamp, True)
 
     @contract
     def track_struct_event(self, category, action, label, property_, value,
@@ -357,17 +362,18 @@ class Tracker:
         return self.track(pb)
 
     @contract
-    def track_unstruct_event(self, event_name, dict_, tstamp=None):
+    def track_unstruct_event(self, event_name, dict_, tstamp=None, snowplow_schema=False):
         """
-            :param  event_name:     The name of the event
-            :type   event_name:     non_empty_string
-            :param  dict_:          The properties of the event
-            :type   dict_:          dict(str:*)
+            :param  event_name:      The name of the event
+            :type   event_name:      non_empty_string
+            :param  dict_:           The properties of the event
+            :type   dict_:           dict(str:*)
+            :param  snowplow_schema: Whether the event schema is authored by Snowplow
+            :type   snowplow_schema: bool
         """
         pb = payload.Payload(tstamp)
 
         pb.add("e", "ue")
         pb.add("ue_na", event_name)
         pb.add_unstruct(dict_, self.config["encode_base64"], "ue_px", "ue_pr")
-
-        return self.track(pb)
+        return self.track(pb, snowplow_schema)
