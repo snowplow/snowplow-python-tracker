@@ -71,7 +71,7 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker.hostname('localhost')
         with HTTMock(pass_response_content):
             val = t.track_screen_view('Game HUD 2', 'Hello!')
-            assertion_array = {'sv_na': 'Game+HUD+2', 'sv_id': 'Hello%21', 'e': 'sv'}
+            assertion_array = {'e': 'ue', 'ue_na': 'screen_view'}
             for key in assertion_array:
                 self.assertEquals(from_querystring(key, val), assertion_array[key])            
 
