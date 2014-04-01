@@ -50,7 +50,7 @@ class Tracker:
                  and len(s) > 0) or s is None)
     new_contract('payload', lambda s: isinstance(s, payload.Payload))
 
-    def __init__(self, collector_uri):
+    def __init__(self, collector_uri, namespace=""):
         """
         Constructor
         """
@@ -62,7 +62,8 @@ class Tracker:
 
         self.standard_nv_pairs = {
             "p": DEFAULT_PLATFORM,
-            "tv": VERSION
+            "tv": VERSION,
+            "tna": namespace
         }
 
     @contract
