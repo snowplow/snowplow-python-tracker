@@ -77,7 +77,8 @@ class Payload:
         """
             Add a name value pair to the Payload object
         """
-        self.context[name] = value
+        if not (value == '' or value is None):
+            self.context[name] = value
 
     @contract
     def add_dict(self, dict_, base64=False):
@@ -88,7 +89,7 @@ class Payload:
             :type   dict_:          dict(*:*)
         """
         for f in dict_:
-            self.context[f] = dict_[f]
+            self.add(f, dict_[f])
 
     @contract
     def add_unstruct(self, dict_, encode_base64,
