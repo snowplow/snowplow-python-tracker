@@ -46,13 +46,13 @@ def fail_response_content(url, request):
 class IntegrationTest(unittest.TestCase):
 
     def test_integration_page_view(self):
-        t = tracker.Tracker.hostname('localhost')
+        t = tracker.Tracker('localhost')
         with HTTMock(pass_response_content):
             val = t.track_page_view('http://savethearctic.org', 'Save The Arctic', None)
             self.assertEquals(from_querystring('page', val), 'Save+The+Arctic')
 
     def test_integration_ecommerce_transaction(self):
-        t = tracker.Tracker.hostname('localhost')
+        t = tracker.Tracker('localhost')
         with HTTMock(pass_response_content):
             val = t.track_ecommerce_transaction('12345', 'Web', 9.99, 1.98, 3.05, 'London', 'Denver', 'Greenland')
             assertion_array = {'tr_tt': '9.99', 'e': 'tr', 'tr_id': '12345', 'tr_sh': '3.05', 'tr_st': 'Denver', 'tr_af': 'Web', 'tr_co': 'Greenland', 'tr_tx': '1.98', 'tr_ci': 'London'}
@@ -60,7 +60,7 @@ class IntegrationTest(unittest.TestCase):
                 self.assertEquals(from_querystring(key, val), assertion_array[key])
 
     def test_integration_ecommerce_transaction_item(self):
-        t = tracker.Tracker.hostname('localhost')
+        t = tracker.Tracker('localhost')
         with HTTMock(pass_response_content):
             val = t.track_ecommerce_transaction_item('12345', 'pbz0025', 'black-tarot', 'tarot', 7.99, 2)
             assertion_array = {'ti_ca': 'tarot', 'ti_id': '12345', 'ti_qu': '2', 'ti_sk': 'pbz0025', 'e': 'ti', 'ti_nm': 'black-tarot', 'ti_pr': '7.99'}
@@ -68,7 +68,7 @@ class IntegrationTest(unittest.TestCase):
                 self.assertEquals(from_querystring(key, val), assertion_array[key])
 
     def test_integration_screen_view(self):
-        t = tracker.Tracker.hostname('localhost')
+        t = tracker.Tracker('localhost')
         with HTTMock(pass_response_content):
             val = t.track_screen_view('Game HUD 2', 'Hello!')
             assertion_array = {'e': 'ue', 'ue_na': 'screen_view'}
@@ -76,7 +76,7 @@ class IntegrationTest(unittest.TestCase):
                 self.assertEquals(from_querystring(key, val), assertion_array[key])            
 
     def test_integration_struct_event(self):
-        t = tracker.Tracker.hostname('localhost')
+        t = tracker.Tracker('localhost')
         with HTTMock(pass_response_content):
             val = t.track_struct_event('Ecomm', 'add-to-basket', 'dog-skateboarding-video', 'hd', 13.99)
             assertion_array = {'se_ca': 'Ecomm', 'se_pr': 'hd', 'se_la': 'dog-skateboarding-video', 'se_va': '13.99', 'se_ac': 'add-to-basket', 'e': 'se'}
@@ -85,7 +85,7 @@ class IntegrationTest(unittest.TestCase):
 
 
     def test_integration_unstruct_event_non_base64(self):
-        t = tracker.Tracker.hostname('localhost')
+        t = tracker.Tracker('localhost')
         t.config['encode_base64'] = False
         with HTTMock(pass_response_content):
             val = t.track_unstruct_event('viewed_product', {'product_id': 'ASO01043', 'price$flt': 49.95, 'walrus$tms': int(time.time() * 1000),})
@@ -94,7 +94,7 @@ class IntegrationTest(unittest.TestCase):
                 self.assertEquals(from_querystring(key, val), assertion_array[key]) 
 
     def test_integration_unstruct_event_base64(self):
-        t = tracker.Tracker.hostname('localhost')
+        t = tracker.Tracker('localhost')
         with HTTMock(pass_response_content):
             val = t.track_unstruct_event('viewed_product', {'product_id': 'ASO01043', 'price$flt': 49.95, 'walrus$tms': int(time.time() * 1000),})
             assertion_array = {'e': 'ue', 'ue_na': 'viewed_product'}
@@ -102,7 +102,7 @@ class IntegrationTest(unittest.TestCase):
                 self.assertEquals(from_querystring(key, val), assertion_array[key]) 
 
     def test_integration_unstruct_event_non_base64_error(self):
-        t = tracker.Tracker.hostname('localhost')
+        t = tracker.Tracker('localhost')
         t.config['encode_base64'] = False
         try:
             val = t.track_unstruct_event('viewed_product',
@@ -116,7 +116,7 @@ class IntegrationTest(unittest.TestCase):
 
 
     def test_integration_unstruct_event_base64_error(self):
-        t = tracker.Tracker.hostname('localhost')
+        t = tracker.Tracker('localhost')
         try:
             val = t.track_unstruct_event('viewed_product',
                                          {

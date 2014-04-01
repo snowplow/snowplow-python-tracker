@@ -50,17 +50,11 @@ class Tracker:
                  and len(s) > 0) or s is None)
     new_contract('payload', lambda s: isinstance(s, payload.Payload))
 
-    def __init__(self, collector_uri, collector_type):
+    def __init__(self, collector_uri):
         """
         Constructor
         """
-        self.collector_uri = collector_uri
-        if collector_type is "cloudfront":
-            self.collector_uri = Tracker.new_tracker_for_cf(collector_uri)
-        elif collector_type is "custom":
-            self.collector_uri = Tracker.new_tracker_for_uri(collector_uri)
-        else:
-            self.collector_uri = collector_uri
+        self.collector_uri = self.as_collector_uri(collector_uri)
 
         self.config = {
             "encode_base64":    DEFAULT_ENCODE_BASE64
@@ -71,44 +65,16 @@ class Tracker:
             "tv": VERSION
         }
 
-    def cloudfront(collector_uri):
-        return Tracker(collector_uri, "cloudfront")
+    @contract
+    def as_collector_uri(self, host):
+        """
+            Method to create a URL
 
-    def hostname(collector_uri):
-        return Tracker(collector_uri, "custom")
-
-    """
-    Methods to create a URL
-    """
-
-    def as_collector_uri(host):
+            :param  host:        URL input by user
+            :type   host:        str
+            :rtype:              str
+        """
         return ''.join(["http://", host, "/i"])
-
-    def collector_uri_from_cf(cf_subdomain):
-        host = ''.join([cf_subdomain, ".cloudfront.net"])
-        return Tracker.as_collector_uri(host)
-
-    @contract
-    def new_tracker_for_uri(host):
-        """
-            Converts a domain name tst.example.com to http://tst.example.com/i
-
-            :param  host:           Custom server hostname
-            :type   host:           non_empty_string
-            :rtype:                 non_empty_string
-        """
-        return Tracker.as_collector_uri(host)
-
-    @contract
-    def new_tracker_for_cf(cf_subdomain):
-        """
-            Converts a subdomain abc1234 to http://abc1234.cloudfront.net/i
-
-            :param  cf_subdomain:   Cloudfront subdomain
-            :type   cf_subdomain:   non_empty_string
-            :rtype:                 non_empty_string
-        """
-        return Tracker.collector_uri_from_cf(cf_subdomain)
 
     """
     Fire a GET request

@@ -1,5 +1,7 @@
 Version 0.2.0 (2014-xx-xx)
 --------------------------
+Changed API to no longer specify a collector URL option (#57) 
+Removed the "URL from Cloudfront subdomain" option (#56)
 Started sending event vendor parameter through on querystring (#55)
 Changed track screen view to use an unstructured event (#53)
 Added ability to name individual instances of the Python Tracker (#52) (TODO)
