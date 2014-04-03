@@ -89,7 +89,6 @@ class Tracker:
 
             :param  payload:        Generated dict track()
             :type   payload:        payload
-            :rtype:                 str | bool
         """
 
         r = requests.get(self.collector_uri, params=payload.context)
@@ -205,7 +204,6 @@ class Tracker:
             :type   pb:              payload
             :param  snowplow_schema: Whether the event schema is authored by Snowplow
             :type   snowplow_schema: bool
-            :rtype:                  str | bool
         """
         pb.add_dict(self.standard_nv_pairs)
         if snowplow_schema:

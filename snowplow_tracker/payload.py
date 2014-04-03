@@ -46,7 +46,7 @@ class Payload:
     """
     Special payload creation functions
     """
-
+    @staticmethod
     def set_transaction_id():
         """
             Set transaction ID for the payload once during the lifetime of the
