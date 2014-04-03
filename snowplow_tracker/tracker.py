@@ -209,7 +209,7 @@ class Tracker:
         """
         pb.add_dict(self.standard_nv_pairs)
         if snowplow_schema:
-            pb.add("e_vn", DEFAULT_VENDOR)
+            pb.add("evn", DEFAULT_VENDOR)
         return self.http_get(pb)
 
     @contract
