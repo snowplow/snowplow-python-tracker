@@ -291,12 +291,12 @@ class Tracker:
         return self.track(pb)
 
     @contract
-    def track_screen_view(self, name, id_, tstamp=None):
+    def track_screen_view(self, name, id_=None, tstamp=None):
         """
-            This function is not a part of the protocol. Undocumented.
-
+            :param  name:           The name of the screen view event
             :type   name:           non_empty_string
-            :type   id_:            non_empty_string
+            :param  id_:            Screen view ID
+            :type   id_:            non_empty_string | None
         """
         return self.track_unstruct_event("screen_view", {"name": name, "id": id_}, tstamp, True)
 
