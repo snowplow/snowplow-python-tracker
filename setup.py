@@ -61,6 +61,6 @@ setup(
 
     install_requires = [
         "requests",
-        "pycontract",
+        "pycontracts",
     ],
 )
