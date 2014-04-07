@@ -54,7 +54,7 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_ecommerce_transaction(self):
         t = tracker.Tracker('localhost')
         with HTTMock(pass_response_content):
-            val = t.track_ecommerce_transaction('12345', 'Web', 9.99, 1.98, 3.05, 'London', 'Denver', 'Greenland')
+            val = t.track_ecommerce_transaction('12345', 9.99, 'Web', 1.98, 3.05, 'London', 'Denver', 'Greenland')
             assertion_array = {'tr_tt': '9.99', 'e': 'tr', 'tr_id': '12345', 'tr_sh': '3.05', 'tr_st': 'Denver', 'tr_af': 'Web', 'tr_co': 'Greenland', 'tr_tx': '1.98', 'tr_ci': 'London'}
             for key in assertion_array:
                 self.assertEquals(from_querystring(key, val), assertion_array[key])
@@ -62,7 +62,7 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_ecommerce_transaction_item(self):
         t = tracker.Tracker('localhost')
         with HTTMock(pass_response_content):
-            val = t.track_ecommerce_transaction_item('12345', 'pbz0025', 'black-tarot', 'tarot', 7.99, 2)
+            val = t.track_ecommerce_transaction_item('12345', 'pbz0025', 7.99, 2, 'black-tarot', 'tarot')
             assertion_array = {'ti_ca': 'tarot', 'ti_id': '12345', 'ti_qu': '2', 'ti_sk': 'pbz0025', 'e': 'ti', 'ti_nm': 'black-tarot', 'ti_pr': '7.99'}
             for key in assertion_array:
                 self.assertEquals(from_querystring(key, val), assertion_array[key])

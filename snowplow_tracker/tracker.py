@@ -211,14 +211,14 @@ class Tracker:
         return self.http_get(pb)
 
     @contract
-    def track_page_view(self, page_url, page_title, referrer, tstamp=None):
+    def track_page_view(self, page_url, page_title=None, referrer=None, tstamp=None):
         """
             :param  page_url:       URL of the viewed page
-            :type   page_url:       non_empty_string
+            :type   page_url:       non_empty_string | None
             :param  page_title:     Title of the viewed page
-            :type   page_title:     non_empty_string
+            :type   page_title:     non_empty_string | None
             :param  referrer:       Referrer of the page
-            :type   referrer:       string_or_none
+            :type   referrer:       non_empty_string | None
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "pv")           # pv: page view
@@ -228,21 +228,21 @@ class Tracker:
         return self.track(pb)
 
     @contract
-    def track_ecommerce_transaction(self, order_id, tr_affiliation,
-                                    tr_total_value, tr_tax_value, tr_shipping,
-                                    tr_city, tr_state, tr_country,
+    def track_ecommerce_transaction(self, order_id, tr_total_value,
+                                    tr_affiliation=None, tr_tax_value=None, tr_shipping=None,
+                                    tr_city=None, tr_state=None, tr_country=None,
                                     tstamp=None):
         """
             :param  order_id:       ID of the eCommerce transaction
             :type   order_id:       non_empty_string
-            :param  tr_affiliation: Transaction affiliation
-            :type   tr_affiliation: string_or_none
             :param  tr_total_value: Total transaction value
             :type   tr_total_value: int | float
+            :param  tr_affiliation: Transaction affiliation
+            :type   tr_affiliation: string_or_none
             :param  tr_tax_value:   Transaction tax value
-            :type   tr_tax_value:   int | float
+            :type   tr_tax_value:   int | float | None
             :param  tr_shipping:    Delivery cost charged
-            :type   tr_shipping:    int | float
+            :type   tr_shipping:    int | float | None
             :param  tr_city:        Delivery address city
             :type   tr_city:        string_or_none
             :param  tr_state:       Delivery address state
@@ -263,22 +263,22 @@ class Tracker:
         return self.track(pb)
 
     @contract
-    def track_ecommerce_transaction_item(self, ti_id, ti_sku, ti_name,
-                                         ti_category, ti_price, ti_quantity,
+    def track_ecommerce_transaction_item(self, ti_id, ti_sku, ti_price, ti_quantity,
+                                         ti_name=None, ti_category=None,
                                          tstamp=None):
         """
             :param  ti_id:          Order ID
             :type   ti_id:          non_empty_string
             :param  ti_sku:         Item SKU
             :type   ti_sku:         non_empty_string
-            :param  ti_name:        Item name
-            :type   ti_name:        non_empty_string
-            :param  ti_category:    Item category
-            :type   ti_category:    non_empty_string
             :param  ti_price:       Item price
             :type   ti_price:       int | float
             :param  ti_quantity:    Item quantity
             :type   ti_quantity:    int
+            :param  ti_name:        Item name
+            :type   ti_name:        non_empty_string | None
+            :param  ti_category:    Item category
+            :type   ti_category:    non_empty_string | None
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "ti")
@@ -301,7 +301,7 @@ class Tracker:
         return self.track_unstruct_event("screen_view", {"name": name, "id": id_}, tstamp, True)
 
     @contract
-    def track_struct_event(self, category, action, label, property_, value,
+    def track_struct_event(self, category, action, label=None, property_=None, value=None,
                            tstamp=None):
         """
             :param  category:       Category of the event
@@ -310,12 +310,12 @@ class Tracker:
             :type   action:         non_empty_string
             :param  label:          Refer to the object the action is
                                     performed on
-            :type   label:          non_empty_string
+            :type   label:          non_empty_string | None
             :param  property_:      Property associated with either the action
                                     or the object
-            :type   property_:      non_empty_string
+            :type   property_:      non_empty_string | None
             :param  value:          A value associated with the user action
-            :type   value:          int | float
+            :type   value:          int | float | None
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "se")
