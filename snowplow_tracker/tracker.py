@@ -130,7 +130,7 @@ class Tracker:
     def set_user_id(self, user_id):
         """
             :param  user_id:        User ID
-            :type   user_id:        str
+            :type   user_id:        non_empty_string
         """
         self.standard_nv_pairs["uid"] = user_id
 
@@ -214,11 +214,11 @@ class Tracker:
     def track_page_view(self, page_url, page_title=None, referrer=None, tstamp=None):
         """
             :param  page_url:       URL of the viewed page
-            :type   page_url:       non_empty_string | None
+            :type   page_url:       non_empty_string
             :param  page_title:     Title of the viewed page
-            :type   page_title:     non_empty_string | None
+            :type   page_title:     string_or_none
             :param  referrer:       Referrer of the page
-            :type   referrer:       non_empty_string | None
+            :type   referrer:       string_or_none
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "pv")           # pv: page view
@@ -276,9 +276,9 @@ class Tracker:
             :param  ti_quantity:    Item quantity
             :type   ti_quantity:    int
             :param  ti_name:        Item name
-            :type   ti_name:        non_empty_string | None
+            :type   ti_name:        string_or_none
             :param  ti_category:    Item category
-            :type   ti_category:    non_empty_string | None
+            :type   ti_category:    string_or_none
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "ti")
@@ -296,7 +296,7 @@ class Tracker:
             :param  name:           The name of the screen view event
             :type   name:           non_empty_string
             :param  id_:            Screen view ID
-            :type   id_:            non_empty_string | None
+            :type   id_:            string_or_none
         """
         return self.track_unstruct_event("screen_view", {"name": name, "id": id_}, tstamp, True)
 
@@ -310,10 +310,10 @@ class Tracker:
             :type   action:         non_empty_string
             :param  label:          Refer to the object the action is
                                     performed on
-            :type   label:          non_empty_string | None
+            :type   label:          string_or_none
             :param  property_:      Property associated with either the action
                                     or the object
-            :type   property_:      non_empty_string | None
+            :type   property_:      string_or_none
             :param  value:          A value associated with the user action
             :type   value:          int | float | None
         """
