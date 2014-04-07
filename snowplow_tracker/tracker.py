@@ -14,7 +14,7 @@
     express or implied. See the Apache License Version 2.0 for the specific
     language governing permissions and limitations there under.
 
-    Authors: Anuj More, Alex Dean
+    Authors: Anuj More, Alex Dean, Fred Blundun
     Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
@@ -44,11 +44,11 @@ Tracker class
 
 class Tracker:
 
-    new_contract('non_empty_string', lambda s: isinstance(s, str)
+    new_contract("non_empty_string", lambda s: isinstance(s, str)
                  and len(s) > 0)
-    new_contract('string_or_none', lambda s: (isinstance(s, str)
+    new_contract("string_or_none", lambda s: (isinstance(s, str)
                  and len(s) > 0) or s is None)
-    new_contract('payload', lambda s: isinstance(s, payload.Payload))
+    new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
     def __init__(self, collector_uri, namespace=""):
         """
@@ -75,7 +75,7 @@ class Tracker:
             :type   host:        str
             :rtype:              str
         """
-        return ''.join(["http://", host, "/i"])
+        return "".join(["http://", host, "/i"])
 
     """
     Fire a GET request
@@ -94,12 +94,12 @@ class Tracker:
         r = requests.get(self.collector_uri, params=payload.context)
         code = r.status_code
         if code < 0 or code > 600:
-            return ''.join(["Unrecognised status code [", str(code), "]"])
+            return "".join(["Unrecognised status code [", str(code), "]"])
         elif code >= 400 and code < 500:
-            return ''.join(["HTTP status code [", str(code),
+            return "".join(["HTTP status code [", str(code),
                             "] is a client error"])
         elif code >= 500:
-            return ''.join(["HTTP status code [", str(code),
+            return "".join(["HTTP status code [", str(code),
                             "] is a server error"])
         return r.url
 
@@ -150,7 +150,7 @@ class Tracker:
             :type   width:          int,>0
             :type   height:         int,>0
         """
-        self.standard_nv_pairs["res"] = ''.join([str(width), "x", str(height)])
+        self.standard_nv_pairs["res"] = "".join([str(width), "x", str(height)])
 
     @contract
     def set_viewport(self, width, height):
@@ -160,7 +160,7 @@ class Tracker:
             :type   width:          int,>0
             :type   height:         int,>0
         """
-        self.standard_nv_pairs["vp"] = ''.join([str(width), "x", str(height)])
+        self.standard_nv_pairs["vp"] = "".join([str(width), "x", str(height)])
 
     @contract
     def set_color_depth(self, depth):

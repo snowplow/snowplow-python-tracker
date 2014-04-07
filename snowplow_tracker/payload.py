@@ -14,7 +14,7 @@
     express or implied. See the Apache License Version 2.0 for the specific
     language governing permissions and limitations there under.
 
-    Authors: Anuj More, Alex Dean
+    Authors: Anuj More, Alex Dean, Fred Blundun
     Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
@@ -36,7 +36,7 @@ class Payload:
 
         self.context = {}
         # Set transaction for every event
-        self.context['tid'] = Payload.set_transaction_id()
+        self.context["tid"] = Payload.set_transaction_id()
         # Set timestamp for every event
         self.set_timestamp(tstamp)
         if dict_ is not None:
@@ -67,7 +67,7 @@ class Payload:
             value = int(tstamp * 1000)
         else:
             value = tstamp
-        self.context['dtm'] = value
+        self.context["dtm"] = value
 
     """
     Payload creators
@@ -77,7 +77,7 @@ class Payload:
         """
             Add a name value pair to the Payload object
         """
-        if not (value == '' or value is None):
+        if not (value == "" or value is None):
             self.context[name] = value
 
     @contract
@@ -110,7 +110,7 @@ class Payload:
             :type   type_when_not_encoded:  str
         """
         def raise_error(f, type_):
-            raise RuntimeError(''.join([f, " in dict is not a ", type_]))
+            raise RuntimeError("".join([f, " in dict is not a ", type_]))
 
         types = ["int", "flt", "geo", "dt", "ts", "tms"]
 
@@ -128,7 +128,7 @@ class Payload:
         json_dict = json.dumps(dict_)
 
         if encode_base64:
-            self.add(type_when_encoded, base64.urlsafe_b64encode(json_dict.encode('ascii')))
+            self.add(type_when_encoded, base64.urlsafe_b64encode(json_dict.encode("ascii")))
         else:
             self.add(type_when_not_encoded, json_dict)
 
