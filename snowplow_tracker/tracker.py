@@ -228,7 +228,7 @@ class Tracker:
     @contract
     def track_ecommerce_transaction(self, order_id, tr_total_value,
                                     tr_affiliation=None, tr_tax_value=None, tr_shipping=None,
-                                    tr_city=None, tr_state=None, tr_country=None,
+                                    tr_city=None, tr_state=None, tr_country=None, tr_currency=None,
                                     tstamp=None):
         """
             :param  order_id:       ID of the eCommerce transaction
@@ -247,6 +247,8 @@ class Tracker:
             :type   tr_state:       string_or_none
             :param  tr_country:     Delivery address country
             :type   tr_country:     string_or_none
+            :param  tr_currency:    The currency the price is expressed in
+            :type   tr_currency:    string_or_none
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "tr")
@@ -262,7 +264,7 @@ class Tracker:
 
     @contract
     def track_ecommerce_transaction_item(self, ti_id, ti_sku, ti_price, ti_quantity,
-                                         ti_name=None, ti_category=None,
+                                         ti_name=None, ti_category=None, tr_currency=None,
                                          tstamp=None):
         """
             :param  ti_id:          Order ID
@@ -277,6 +279,8 @@ class Tracker:
             :type   ti_name:        string_or_none
             :param  ti_category:    Item category
             :type   ti_category:    string_or_none
+            :param  tr_currency:    The currency the price is expressed in
+            :type   tr_currency:    string_or_none
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "ti")
