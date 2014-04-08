@@ -205,7 +205,7 @@ class Tracker:
         return self.http_get(pb)
 
     @contract
-    def track_page_view(self, page_url, page_title=None, referrer=None, tstamp=None):
+    def track_page_view(self, page_url, page_title=None, referrer=None, context=None, tstamp=None):
         """
             :param  page_url:       URL of the viewed page
             :type   page_url:       non_empty_string
@@ -213,6 +213,8 @@ class Tracker:
             :type   page_title:     string_or_none
             :param  referrer:       Referrer of the page
             :type   referrer:       string_or_none
+            :param  context:        Custom context for the event
+            :type   context:        dict(str:*) | None
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "pv")           # pv: page view
@@ -220,12 +222,14 @@ class Tracker:
         pb.add("page", page_title)
         pb.add("refr", referrer)
         pb.add("evn", DEFAULT_VENDOR)
+        pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.track(pb)
 
     @contract
     def track_ecommerce_transaction(self, order_id, tr_total_value,
                                     tr_affiliation=None, tr_tax_value=None, tr_shipping=None,
                                     tr_city=None, tr_state=None, tr_country=None, tr_currency=None,
+                                    context=None,
                                     tstamp=None):
         """
             :param  order_id:       ID of the eCommerce transaction
@@ -246,6 +250,8 @@ class Tracker:
             :type   tr_country:     string_or_none
             :param  tr_currency:    The currency the price is expressed in
             :type   tr_currency:    string_or_none
+            :param  context:        Custom context for the event
+            :type   context:        dict(str:*) | None
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "tr")
@@ -258,11 +264,13 @@ class Tracker:
         pb.add("tr_st", tr_state)
         pb.add("tr_co", tr_country)
         pb.add("evn", DEFAULT_VENDOR)
+        pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.track(pb)
 
     @contract
     def track_ecommerce_transaction_item(self, ti_id, ti_sku, ti_price, ti_quantity,
                                          ti_name=None, ti_category=None, tr_currency=None,
+                                         context=None,
                                          tstamp=None):
         """
             :param  ti_id:          Order ID
@@ -279,6 +287,8 @@ class Tracker:
             :type   ti_category:    string_or_none
             :param  tr_currency:    The currency the price is expressed in
             :type   tr_currency:    string_or_none
+            :param  context:        Custom context for the event
+            :type   context:        dict(str:*) | None
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "ti")
@@ -289,20 +299,24 @@ class Tracker:
         pb.add("ti_pr", ti_price)
         pb.add("ti_qu", ti_quantity)
         pb.add("evn", DEFAULT_VENDOR)
+        pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.track(pb)
 
     @contract
-    def track_screen_view(self, name, id_=None, tstamp=None):
+    def track_screen_view(self, name, id_=None, context=None, tstamp=None):
         """
             :param  name:           The name of the screen view event
             :type   name:           non_empty_string
             :param  id_:            Screen view ID
             :type   id_:            string_or_none
+            :param  context:        Custom context for the event
+            :type   context:        dict(str:*) | None
         """
-        return self.track_unstruct_event("screen_view", {"name": name, "id": id_}, DEFAULT_VENDOR, tstamp)
+        return self.track_unstruct_event("screen_view", {"name": name, "id": id_}, DEFAULT_VENDOR, context, tstamp)
 
     @contract
     def track_struct_event(self, category, action, label=None, property_=None, value=None,
+                           context=None,
                            tstamp=None):
         """
             :param  category:       Category of the event
@@ -317,6 +331,8 @@ class Tracker:
             :type   property_:      string_or_none
             :param  value:          A value associated with the user action
             :type   value:          int | float | None
+            :param  context:        Custom context for the event
+            :type   context:        dict(str:*) | None
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "se")
@@ -326,10 +342,11 @@ class Tracker:
         pb.add("se_pr", property_)
         pb.add("se_va", value)
         pb.add("evn", DEFAULT_VENDOR)
+        pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.track(pb)
 
     @contract
-    def track_unstruct_event(self, event_name, dict_, event_vendor=None, tstamp=None):
+    def track_unstruct_event(self, event_name, dict_, event_vendor=None, context=None, tstamp=None):
         """
             :param  event_name:      The name of the event
             :type   event_name:      non_empty_string
@@ -337,6 +354,8 @@ class Tracker:
             :type   dict_:           dict(str:*)
             :param  event_vendor:    The author of the event
             :type   event_vendor:    string_or_none
+            :param  context:        Custom context for the event
+            :type   context:        dict(str:*) | None
         """
         pb = payload.Payload(tstamp)
 
@@ -344,4 +363,5 @@ class Tracker:
         pb.add("ue_na", event_name)
         pb.add_unstruct(dict_, self.config["encode_base64"], "ue_px", "ue_pr")
         pb.add("evn", event_vendor)
+        pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.track(pb)
