@@ -22,7 +22,7 @@
 import unittest
 import time
 import re
-from snowplow_tracker import tracker
+from snowplow_tracker import tracker, _version
 from httmock import all_requests, HTTMock
 
 def from_querystring(field, url):
@@ -138,6 +138,6 @@ class IntegrationTest(unittest.TestCase):
         t.set_lang("en")
         with HTTMock(pass_response_content):
             val = t.track_page_view("localhost", "local host", None)
-            assertion_array = {"tna": "cf", "evn": "com.snowplowanalytics", "res": "100x200", "lang": "en", "aid": "angry-birds-android", "cd": "24", "tz": "Europe+London", "p": "mob", "tv": "py-0.2.0"}
+            assertion_array = {"tna": "cf", "evn": "com.snowplowanalytics", "res": "100x200", "lang": "en", "aid": "angry-birds-android", "cd": "24", "tz": "Europe+London", "p": "mob", "tv": "py-" + _version.__version__}
             for key in assertion_array:
                 self.assertEquals(from_querystring(key, val), assertion_array[key]) 
