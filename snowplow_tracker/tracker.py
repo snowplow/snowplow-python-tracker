@@ -21,8 +21,7 @@
 
 import requests
 from snowplow_tracker import payload, _version
-from contracts import contract, new_contract
-
+from contracts import contract, new_contract, disable_all
 
 """
 Constants & config
@@ -48,10 +47,13 @@ class Tracker:
                  and len(s) > 0) or s is None)
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
-    def __init__(self, collector_uri, namespace=""):
+    def __init__(self, collector_uri, namespace="", contracts=True):
         """
         Constructor
         """
+        if not contracts:
+            disable_all()
+
         self.collector_uri = self.as_collector_uri(collector_uri)
 
         self.config = {
