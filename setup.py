@@ -14,7 +14,7 @@
     express or implied. See the Apache License Version 2.0 for the specific
     language governing permissions and limitations there under.
 
-    Authors: Anuj More, Alex Dean
+    Authors: Anuj More, Alex Dean, Fred Blundun
     Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
@@ -40,6 +40,7 @@ exec(open(version_file_path).read(), {}, locals())
 authors_list = [
     'Anuj More',
     'Alexander Dean',
+    'Fred Blundun'
     ]
 authors_str = ', '.join(authors_list)
 

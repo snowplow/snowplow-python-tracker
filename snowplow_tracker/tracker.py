@@ -32,8 +32,6 @@ VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
 DEFAULT_PLATFORM = "pc"
 SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
-HTTP_ERRORS = set(["Host not found", "No address associated with name",
-                  "No address associated with hostname", ])
 DEFAULT_VENDOR = "com.snowplowanalytics"
 
 
