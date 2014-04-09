@@ -8,7 +8,10 @@ install:
   - "pip install httmock"
   - "pip install freezegun"
   - "pip install nose"
-  - "pip install coverage"
+  - "pip install coveralls"
   - "pip install -r requirements.txt"
 # command to run tests
-script: nosetests --with-coverage --cover-package=snowplow_tracker
+script:
+  nosetests --with-coverage --cover-package=snowplow_tracker
+after_success:
+  coveralls
