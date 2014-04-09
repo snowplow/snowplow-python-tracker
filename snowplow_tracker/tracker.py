@@ -47,7 +47,8 @@ class Tracker:
                  and len(s) > 0) or s is None)
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
-    def __init__(self, collector_uri, namespace="", contracts=True):
+    def __init__(self, collector_uri, 
+                 namespace="", encode_base64=DEFAULT_ENCODE_BASE64, app_id=None, contracts=True):
         """
         Constructor
         """
@@ -57,13 +58,14 @@ class Tracker:
         self.collector_uri = self.as_collector_uri(collector_uri)
 
         self.config = {
-            "encode_base64":    DEFAULT_ENCODE_BASE64
+            "encode_base64":    encode_base64
         }
 
         self.standard_nv_pairs = {
             "p": DEFAULT_PLATFORM,
             "tv": VERSION,
-            "tna": namespace
+            "tna": namespace,
+            "aid": app_id
         }
 
     @contract
@@ -108,14 +110,6 @@ class Tracker:
     """
 
     @contract
-    def set_base64_to(self, value):
-        """
-            :param  value:          Boolean value
-            :type   value:          bool
-        """
-        self.config["encode_base64"] = value
-
-    @contract
     def set_platform(self, value):
         """
             :param  value:          One of ["pc", "tv", "mob", "cnsl", "iot"]
@@ -133,14 +127,6 @@ class Tracker:
             :type   user_id:        non_empty_string
         """
         self.standard_nv_pairs["uid"] = user_id
-
-    @contract
-    def set_app_id(self, app_id):
-        """
-            :param  app_id:         App ID
-            :type   app_id:         str
-        """
-        self.standard_nv_pairs["aid"] = app_id
 
     @contract
     def set_screen_resolution(self, width, height):

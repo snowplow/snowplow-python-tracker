@@ -85,8 +85,7 @@ class IntegrationTest(unittest.TestCase):
 
 
     def test_integration_unstruct_event_non_base64(self):
-        t = tracker.Tracker("localhost")
-        t.config["encode_base64"] = False
+        t = tracker.Tracker("localhost", encode_base64=False)
         with HTTMock(pass_response_content):
             val = t.track_unstruct_event("viewed_product", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)})
             assertion_array = {"e": "ue", "ue_na": "viewed_product"}
@@ -102,8 +101,7 @@ class IntegrationTest(unittest.TestCase):
                 self.assertEquals(from_querystring(key, val), assertion_array[key]) 
 
     def test_integration_unstruct_event_non_base64_error(self):
-        t = tracker.Tracker("localhost")
-        t.config["encode_base64"] = False
+        t = tracker.Tracker("localhost", encode_base64=False)
         try:
             val = t.track_unstruct_event("viewed_product",
                                {
@@ -128,10 +126,9 @@ class IntegrationTest(unittest.TestCase):
             self.assertEquals("walrus$tms in dict is not a tms", str(e))
 
     def test_integration_standard_nv_pairs(self):
-        t = tracker.Tracker("localhost", "cf")
+        t = tracker.Tracker("localhost", "cf", app_id="angry-birds-android")
         t.set_platform("mob")
         t.set_user_id("user12345")
-        t.set_app_id("angry-birds-android")
         t.set_screen_resolution(100, 200)
         t.set_color_depth(24)
         t.set_timezone("Europe London")
