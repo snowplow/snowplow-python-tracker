@@ -1,6 +1,6 @@
 Version 0.3.0 (2014-xx-xx)
 --------------------------
-Added coveralls code coverage button (#64) (TODO)
+Added coveralls code coverage button (#64)
 Added currency parameter to ecommerce tracking methods (#62)
 Added config option to disable contracts (#61)
 Added event_vendor as argument to track_unstruct_event (#54)

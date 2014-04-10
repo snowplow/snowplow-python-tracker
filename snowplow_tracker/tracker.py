@@ -20,6 +20,7 @@
 """
 
 import requests
+import time
 from snowplow_tracker import payload, _version
 from contracts import contract, new_contract, disable_all
 
@@ -218,7 +219,7 @@ class Tracker:
                                     tr_affiliation=None, tr_tax_value=None, tr_shipping=None,
                                     tr_city=None, tr_state=None, tr_country=None, tr_currency=None,
                                     context=None,
-                                    tstamp=None):
+                                    tstamp=None, tid=None):
         """
             :param  order_id:       ID of the eCommerce transaction
             :type   order_id:       non_empty_string
@@ -252,6 +253,7 @@ class Tracker:
         pb.add("tr_st", tr_state)
         pb.add("tr_co", tr_country)
         pb.add("evn", DEFAULT_VENDOR)
+        pb.add("tid", tid)
         pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.track(pb)
 
@@ -259,7 +261,7 @@ class Tracker:
     def track_ecommerce_transaction_item(self, ti_id, ti_sku, ti_price, ti_quantity,
                                          ti_name=None, ti_category=None, tr_currency=None,
                                          context=None,
-                                         tstamp=None):
+                                         tstamp=None, tid=None):
         """
             :param  ti_id:          Order ID
             :type   ti_id:          non_empty_string
@@ -287,8 +289,37 @@ class Tracker:
         pb.add("ti_pr", ti_price)
         pb.add("ti_qu", ti_quantity)
         pb.add("evn", DEFAULT_VENDOR)
+        pb.add("tid", tid)
         pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.track(pb)
+    
+    @contract
+    def track_transaction(self, transaction, items, context=None, tstamp=None):
+        """
+            :param  transaction     The transaction event
+            :type   transaction     dict(str:*)
+            :param  items:          The items in the transaction
+            :type   items:          list(dict(str:*))
+            :param  context:        Custom context for the event
+            :type   context:        dict(str:*) | None
+        """
+        if tstamp is None:
+            tstamp = time.time()
+
+        tid = payload.Payload.set_transaction_id()
+
+        transaction["tstamp"] = tstamp
+        transaction["tid"] = tid
+        self.track_ecommerce_transaction(**transaction)
+
+        if "currency" in transaction:
+            for item in items:
+                item["currency"] = transaction["currency"]
+
+        for item in items:
+            item["tstamp"] = tstamp
+            item["tid"] = tid
+            self.track_ecommerce_transaction_item(**item)
 
     @contract
     def track_screen_view(self, name, id_=None, context=None, tstamp=None):
