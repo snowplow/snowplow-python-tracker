@@ -51,7 +51,7 @@ class Tracker:
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
     def __init__(self, collector_uri, 
-                 namespace="", encode_base64=DEFAULT_ENCODE_BASE64, app_id=None, contracts=True):
+                 namespace=None, app_id=None, encode_base64=DEFAULT_ENCODE_BASE64, contracts=True):
         """
         Constructor
         """
@@ -327,7 +327,7 @@ class Tracker:
         if "tr_currency" in transaction:
             for item in items:
                 item["ti_currency"] = transaction["tr_currency"]
-        
+
         for item in items:
             item["tstamp"] = tstamp
             item["tid"] = tid

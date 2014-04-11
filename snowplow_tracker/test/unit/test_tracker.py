@@ -33,7 +33,13 @@ class TestTracker(unittest.TestCase):
     Testing URI generator
     """
 
-    def test_as_collector_uri(self):
+    def test_initialisation(self):
+        t = Tracker("d3rkrsqld9gmqf.cloudfront.net", "cloudfront", encode_base64= False, app_id="AF003")
+        self.assertEquals(t.standard_nv_pairs["tna"], "cloudfront")
+        self.assertEquals(t.standard_nv_pairs["aid"], "AF003")
+        self.assertEquals(t.config["encode_base64"], False)
+
+    def test_collector_uri_construction(self):
         host = "d3rkrsqld9gmqf.cloudfront.net"
         output = Tracker(host).collector_uri
         exp_output = "http://d3rkrsqld9gmqf.cloudfront.net/i"

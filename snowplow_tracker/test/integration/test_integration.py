@@ -43,7 +43,10 @@ def pass_response_content(url, request):
 
 @all_requests
 def fail_response_content(url, request):
-    return (False, 501)
+    return {
+        "url": request.url,
+        "status_code": 501
+    }
 
 
 class IntegrationTest(unittest.TestCase):
@@ -178,3 +181,9 @@ class IntegrationTest(unittest.TestCase):
 
             for key in ["dtm", "tid"]:
                 self.assertEquals(from_querystring(key, querystrings[-3]), from_querystring(key, querystrings[-2]))
+
+    def test_integration_request_failure(self):
+        t = tracker.Tracker("drnv83ldfo4ed.cloudfront.net")
+        with HTTMock(fail_response_content):
+            tracking_return_value = t.track_page_view("Title page")
+            self.assertEquals(tracking_return_value, (False, 501))
