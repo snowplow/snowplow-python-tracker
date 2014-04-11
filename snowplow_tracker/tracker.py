@@ -33,12 +33,14 @@ DEFAULT_ENCODE_BASE64 = True
 DEFAULT_PLATFORM = "pc"
 SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
 DEFAULT_VENDOR = "com.snowplowanalytics"
+HTTP_ERRORS = {"host not found",
+               "No address associated with name",
+               "No address associated with hostname"}
 
 
 """
 Tracker class
 """
-
 
 class Tracker:
 
@@ -92,19 +94,20 @@ class Tracker:
 
             :param  payload:        Generated dict track()
             :type   payload:        payload
+            :rtype:                 tuple(bool, int | str)
         """
 
         r = requests.get(self.collector_uri, params=payload.context)
         code = r.status_code
-        if code < 0 or code > 600:
-            return "".join(["Unrecognised status code [", str(code), "]"])
+        if code in HTTP_ERRORS:
+            return (False, "Host [" + r.url + "] not found (possible connectivity error")
+        elif code < 0 or code > 600:
+            return (False, code)
         elif code >= 400 and code < 500:
-            return "".join(["HTTP status code [", str(code),
-                            "] is a client error"])
+            return (False, code)
         elif code >= 500:
-            return "".join(["HTTP status code [", str(code),
-                            "] is a server error"])
-        return r.url
+            return (False, code)
+        return (True, code)
 
     """
     Setter methods
@@ -310,7 +313,9 @@ class Tracker:
 
         transaction["tstamp"] = tstamp
         transaction["tid"] = tid
-        self.track_ecommerce_transaction(**transaction)
+        transaction_result = self.track_ecommerce_transaction(**transaction)
+
+        item_results = []
 
         if "currency" in transaction:
             for item in items:
@@ -319,7 +324,9 @@ class Tracker:
         for item in items:
             item["tstamp"] = tstamp
             item["tid"] = tid
-            self.track_ecommerce_transaction_item(**item)
+            item_results.append(self.track_ecommerce_transaction_item(**item))
+
+        return {"transaction_result": transaction_result, "item_results": item_results}
 
     @contract
     def track_screen_view(self, name, id_=None, context=None, tstamp=None):
