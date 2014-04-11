@@ -258,6 +258,7 @@ class Tracker:
         pb.add("tr_ci", tr_city)
         pb.add("tr_st", tr_state)
         pb.add("tr_co", tr_country)
+        pb.add("tr_cu", tr_currency)
         pb.add("evn", DEFAULT_VENDOR)
         pb.add("tid", tid)
         pb.add_json(context, self.config["encode_base64"], "cx", "co")
@@ -265,7 +266,7 @@ class Tracker:
 
     @contract
     def track_ecommerce_transaction_item(self, ti_id, ti_sku, ti_price, ti_quantity,
-                                         ti_name=None, ti_category=None, tr_currency=None,
+                                         ti_name=None, ti_category=None, ti_currency=None,
                                          context=None,
                                          tstamp=None, tid=None):
         """
@@ -281,8 +282,8 @@ class Tracker:
             :type   ti_name:        string_or_none
             :param  ti_category:    Item category
             :type   ti_category:    string_or_none
-            :param  tr_currency:    The currency the price is expressed in
-            :type   tr_currency:    string_or_none
+            :param  ti_currency:    The currency the price is expressed in
+            :type   ti_currency:    string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
             :rtype:                 tuple(bool, int | str)
@@ -295,6 +296,7 @@ class Tracker:
         pb.add("ti_ca", ti_category)
         pb.add("ti_pr", ti_price)
         pb.add("ti_qu", ti_quantity)
+        pb.add("ti_cu", ti_currency)
         pb.add("evn", DEFAULT_VENDOR)
         pb.add("tid", tid)
         pb.add_json(context, self.config["encode_base64"], "cx", "co")
@@ -322,10 +324,10 @@ class Tracker:
 
         item_results = []
 
-        if "currency" in transaction:
+        if "tr_currency" in transaction:
             for item in items:
-                item["currency"] = transaction["currency"]
-
+                item["ti_currency"] = transaction["tr_currency"]
+        
         for item in items:
             item["tstamp"] = tstamp
             item["tid"] = tid
