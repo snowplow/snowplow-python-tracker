@@ -192,6 +192,7 @@ class Tracker:
 
             :param  pb:              Payload builder
             :type   pb:              payload
+            :rtype:                  tuple(bool, int | str)
         """
         pb.add_dict(self.standard_nv_pairs)
         return self.http_get(pb)
@@ -207,6 +208,7 @@ class Tracker:
             :type   referrer:       string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
+            :rtype:                 tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "pv")           # pv: page view
@@ -244,6 +246,7 @@ class Tracker:
             :type   tr_currency:    string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
+            :rtype:                 tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "tr")
@@ -282,6 +285,7 @@ class Tracker:
             :type   tr_currency:    string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
+            :rtype:                 tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "ti")
@@ -305,6 +309,7 @@ class Tracker:
             :type   items:          list(dict(str:*))
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
+            :rtype:                 dict(str: tuple(bool, int | str) | list(tuple(bool, int | str)))
         """
         if tstamp is None:
             tstamp = time.time()
@@ -337,6 +342,7 @@ class Tracker:
             :type   id_:            string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
+            :rtype:                 tuple(bool, int | str)
         """
         return self.track_unstruct_event("screen_view", {"name": name, "id": id_}, DEFAULT_VENDOR, context, tstamp)
 
@@ -359,6 +365,7 @@ class Tracker:
             :type   value:          int | float | None
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
+            :rtype:                 tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "se")
@@ -382,6 +389,7 @@ class Tracker:
             :type   event_vendor:    string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
+            :rtype:                 tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
 
