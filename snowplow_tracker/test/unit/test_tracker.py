@@ -29,15 +29,15 @@ class TestTracker(unittest.TestCase):
     def setUp(self):
         pass
 
-    """
-    Testing URI generator
-    """
-
     def test_initialisation(self):
         t = Tracker("d3rkrsqld9gmqf.cloudfront.net", "cloudfront", encode_base64= False, app_id="AF003")
         self.assertEquals(t.standard_nv_pairs["tna"], "cloudfront")
         self.assertEquals(t.standard_nv_pairs["aid"], "AF003")
         self.assertEquals(t.config["encode_base64"], False)
+
+    """
+    Testing URI generator
+    """
 
     def test_collector_uri_construction(self):
         host = "d3rkrsqld9gmqf.cloudfront.net"

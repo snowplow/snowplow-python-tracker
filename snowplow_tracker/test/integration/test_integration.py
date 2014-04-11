@@ -57,14 +57,6 @@ class IntegrationTest(unittest.TestCase):
             t.track_page_view("http://savethearctic.org", "Save The Arctic", None)
             self.assertEquals(from_querystring("page", querystrings[-1]),"Save+The+Arctic")
 
-    def test_integration_ecommerce_transaction(self):
-        t = tracker.Tracker("localhost")
-        with HTTMock(pass_response_content):
-            t.track_ecommerce_transaction("12345", 9.99, "Web", 1.98, 3.05, "Sacramento", "California", "USA")
-            expected_fields = {"tr_tt": "9.99", "e": "tr", "tr_id": "12345", "tr_sh": "3.05", "tr_st": "California", "tr_af": "Web", "tr_co": "USA", "tr_tx": "1.98", "tr_ci": "Sacramento"}
-            for key in expected_fields:
-                self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
-
     def test_integration_ecommerce_transaction_item(self):
         t = tracker.Tracker("localhost")
         with HTTMock(pass_response_content):
@@ -72,6 +64,36 @@ class IntegrationTest(unittest.TestCase):
             expected_fields = {"ti_ca": "tarot", "ti_id": "12345", "ti_qu": "2", "ti_sk": "pbz0025", "e": "ti", "ti_nm": "black-tarot", "ti_pr": "7.99", "ti_cu": "GBP"}
             for key in expected_fields:
                 self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+
+    def test_integration_ecommerce_transaction(self):
+        t = tracker.Tracker("localhost")
+        with HTTMock(pass_response_content):
+            t.track_ecommerce_transaction("6a8078be", 45, tr_city="London", tr_currency="GBP", items=
+                [{  
+                    "ti_sku": "pbz0026",
+                    "ti_price": 20,
+                    "ti_quantity": 1
+                },
+                {
+                    "ti_sku": "pbz0038",
+                    "ti_price": 15,
+                    "ti_quantity": 1  
+                }])
+
+            expected_fields = {"e": "tr", "tr_id": "6a8078be", "tr_tt": "45", "tr_ci": "London", "tr_cu": "GBP"}
+            for key in expected_fields:
+                self.assertEquals(from_querystring(key, querystrings[-3]), expected_fields[key])
+
+            expected_fields = {"e": "ti",  "ti_id": "6a8078be", "ti_sk": "pbz0026", "ti_pr": "20", "ti_cu": "GBP"}
+            for key in expected_fields:
+                self.assertEquals(from_querystring(key, querystrings[-2]), expected_fields[key])
+
+            expected_fields = {"e": "ti",  "ti_id": "6a8078be", "ti_sk": "pbz0038", "ti_pr": "15", "ti_cu": "GBP"}
+            for key in expected_fields:
+                self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+
+            for key in ["dtm", "tid"]:
+                self.assertEquals(from_querystring(key, querystrings[-3]), from_querystring(key, querystrings[-2]))
 
     def test_integration_screen_view(self):
         t = tracker.Tracker("localhost")
@@ -88,7 +110,6 @@ class IntegrationTest(unittest.TestCase):
             expected_fields = {"se_ca": "Ecomm", "se_pr": "hd", "se_la": "dog-skateboarding-video", "se_va": "13.99", "se_ac": "add-to-basket", "e": "se"}
             for key in expected_fields:
                 self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
-
 
     def test_integration_unstruct_event_non_base64(self):
         t = tracker.Tracker("localhost", encode_base64=False)
@@ -145,45 +166,7 @@ class IntegrationTest(unittest.TestCase):
             for key in expected_fields:
                 self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
-    def test_integration_transaction(self):
-        t = tracker.Tracker("localhost")
-        with HTTMock(pass_response_content):
-            t.track_transaction(
-                {"order_id": "6a8078be",
-                 "tr_total_value": 45,
-                 "tr_city": "London", 
-                 "tr_currency": "GBP"},
-
-                [{  
-                    "ti_id": "6a8078be",
-                    "ti_sku": "pbz0026",
-                    "ti_price": 20,
-                    "ti_quantity": 1
-                },
-                {
-                    "ti_id": "6a8078be",
-                    "ti_sku": "pbz0038",
-                    "ti_price": 15,
-                    "ti_quantity": 1  
-                }])
-
-            expected_fields = {"e": "tr", "tr_id": "6a8078be", "tr_tt": "45", "tr_ci": "London", "tr_cu": "GBP"}
-            for key in expected_fields:
-                self.assertEquals(from_querystring(key, querystrings[-3]), expected_fields[key])
-
-            expected_fields = {"e": "ti",  "ti_id": "6a8078be", "ti_sk": "pbz0026", "ti_pr": "20", "ti_cu": "GBP"}
-            for key in expected_fields:
-                self.assertEquals(from_querystring(key, querystrings[-2]), expected_fields[key])
-
-            expected_fields = {"e": "ti",  "ti_id": "6a8078be", "ti_sk": "pbz0038", "ti_pr": "15", "ti_cu": "GBP"}
-            for key in expected_fields:
-                self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
-
-            for key in ["dtm", "tid"]:
-                self.assertEquals(from_querystring(key, querystrings[-3]), from_querystring(key, querystrings[-2]))
-
     def test_integration_request_failure(self):
         t = tracker.Tracker("drnv83ldfo4ed.cloudfront.net")
         with HTTMock(fail_response_content):
             tracking_return_value = t.track_page_view("Title page")
-            self.assertEquals(tracking_return_value, (False, 501))
