@@ -60,7 +60,7 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_ecommerce_transaction_item(self):
         t = tracker.Tracker("localhost")
         with HTTMock(pass_response_content):
-            t.track_ecommerce_transaction_item("12345", "pbz0025", 7.99, 2, "black-tarot", "tarot", ti_currency="GBP")
+            t.track_ecommerce_transaction_item("12345", "pbz0025", 7.99, 2, "black-tarot", "tarot", currency="GBP")
             expected_fields = {"ti_ca": "tarot", "ti_id": "12345", "ti_qu": "2", "ti_sk": "pbz0025", "e": "ti", "ti_nm": "black-tarot", "ti_pr": "7.99", "ti_cu": "GBP"}
             for key in expected_fields:
                 self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
@@ -68,16 +68,16 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_ecommerce_transaction(self):
         t = tracker.Tracker("localhost")
         with HTTMock(pass_response_content):
-            t.track_ecommerce_transaction("6a8078be", 45, tr_city="London", tr_currency="GBP", items=
+            t.track_ecommerce_transaction("6a8078be", 45, city="London", currency="GBP", items=
                 [{  
-                    "ti_sku": "pbz0026",
-                    "ti_price": 20,
-                    "ti_quantity": 1
+                    "sku": "pbz0026",
+                    "price": 20,
+                    "quantity": 1
                 },
                 {
-                    "ti_sku": "pbz0038",
-                    "ti_price": 15,
-                    "ti_quantity": 1  
+                    "sku": "pbz0038",
+                    "price": 15,
+                    "quantity": 1  
                 }])
 
             expected_fields = {"e": "tr", "tr_id": "6a8078be", "tr_tt": "45", "tr_ci": "London", "tr_cu": "GBP"}

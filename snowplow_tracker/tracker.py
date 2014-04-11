@@ -220,71 +220,71 @@ class Tracker:
         return self.track(pb)
 
     @contract
-    def track_ecommerce_transaction_item(self, ti_id, ti_sku, ti_price, ti_quantity,
-                                         ti_name=None, ti_category=None, ti_currency=None,
+    def track_ecommerce_transaction_item(self, order_id, sku, price, quantity,
+                                         name=None, category=None, currency=None,
                                          context=None,
                                          tstamp=None, tid=None):
         """
             This is an internal method called by track_ecommerce_transaction.
             It is not for public use.
 
-            :param  ti_id:          Order ID
-            :type   ti_id:          non_empty_string
-            :param  ti_sku:         Item SKU
-            :type   ti_sku:         non_empty_string
-            :param  ti_price:       Item price
-            :type   ti_price:       int | float
-            :param  ti_quantity:    Item quantity
-            :type   ti_quantity:    int
-            :param  ti_name:        Item name
-            :type   ti_name:        string_or_none
-            :param  ti_category:    Item category
-            :type   ti_category:    string_or_none
-            :param  ti_currency:    The currency the price is expressed in
-            :type   ti_currency:    string_or_none
+            :param  order_id:    Order ID
+            :type   order_id:    non_empty_string
+            :param  sku:         Item SKU
+            :type   sku:         non_empty_string
+            :param  price:       Item price
+            :type   price:       int | float
+            :param  quantity:    Item quantity
+            :type   quantity:    int
+            :param  name:        Item name
+            :type   name:        string_or_none
+            :param  category:    Item category
+            :type   category:    string_or_none
+            :param  currency:    The currency the price is expressed in
+            :type   currency:    string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
             :rtype:                 tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "ti")
-        pb.add("ti_id", ti_id)
-        pb.add("ti_sk", ti_sku)
-        pb.add("ti_nm", ti_name)
-        pb.add("ti_ca", ti_category)
-        pb.add("ti_pr", ti_price)
-        pb.add("ti_qu", ti_quantity)
-        pb.add("ti_cu", ti_currency)
+        pb.add("ti_id", order_id)
+        pb.add("ti_sk", sku)
+        pb.add("ti_nm", name)
+        pb.add("ti_ca", category)
+        pb.add("ti_pr", price)
+        pb.add("ti_qu", quantity)
+        pb.add("ti_cu", currency)
         pb.add("evn", DEFAULT_VENDOR)
         pb.add("tid", tid)
         pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.track(pb)
 
     @contract
-    def track_ecommerce_transaction(self, order_id, tr_total_value,
-                          tr_affiliation=None, tr_tax_value=None, tr_shipping=None,
-                          tr_city=None, tr_state=None, tr_country=None,  tr_currency=None,
+    def track_ecommerce_transaction(self, order_id, total_value,
+                          affiliation=None, tax_value=None, shipping=None,
+                          city=None, state=None, country=None,  currency=None,
                           items=None,
                           context=None, tstamp=None):
         """
             :param  order_id:       ID of the eCommerce transaction
             :type   order_id:       non_empty_string
-            :param  tr_total_value: Total transaction value
-            :type   tr_total_value: int | float
-            :param  tr_affiliation: Transaction affiliation
-            :type   tr_affiliation: string_or_none
-            :param  tr_tax_value:   Transaction tax value
-            :type   tr_tax_value:   int | float | None
-            :param  tr_shipping:    Delivery cost charged
-            :type   tr_shipping:    int | float | None
-            :param  tr_city:        Delivery address city
-            :type   tr_city:        string_or_none
-            :param  tr_state:       Delivery address state
-            :type   tr_state:       string_or_none
-            :param  tr_country:     Delivery address country
-            :type   tr_country:     string_or_none
-            :param  tr_currency:    The currency the price is expressed in
-            :type   tr_currency:    string_or_none
+            :param  total_value: Total transaction value
+            :type   total_value: int | float
+            :param  affiliation: Transaction affiliation
+            :type   affiliation: string_or_none
+            :param  tax_value:   Transaction tax value
+            :type   tax_value:   int | float | None
+            :param  shipping:    Delivery cost charged
+            :type   shipping:    int | float | None
+            :param  city:        Delivery address city
+            :type   city:        string_or_none
+            :param  state:       Delivery address state
+            :type   state:       string_or_none
+            :param  country:     Delivery address country
+            :type   country:     string_or_none
+            :param  currency:    The currency the price is expressed in
+            :type   currency:    string_or_none
             :param  items:          The items in the transaction
             :type   items:          list(dict(str:*))
             :param  context:        Custom context for the event
@@ -301,14 +301,14 @@ class Tracker:
         pb = payload.Payload(tstamp)
         pb.add("e", "tr")
         pb.add("tr_id", order_id)
-        pb.add("tr_tt", tr_total_value)
-        pb.add("tr_af", tr_affiliation)
-        pb.add("tr_tx", tr_tax_value)
-        pb.add("tr_sh", tr_shipping)
-        pb.add("tr_ci", tr_city)
-        pb.add("tr_st", tr_state)
-        pb.add("tr_co", tr_country)
-        pb.add("tr_cu", tr_currency)
+        pb.add("tr_tt", total_value)
+        pb.add("tr_af", affiliation)
+        pb.add("tr_tx", tax_value)
+        pb.add("tr_sh", shipping)
+        pb.add("tr_ci", city)
+        pb.add("tr_st", state)
+        pb.add("tr_co", country)
+        pb.add("tr_cu", currency)
         pb.add("evn", DEFAULT_VENDOR)
         pb.add("tid", tid)
         pb.add("dtm", tstamp)
@@ -321,8 +321,8 @@ class Tracker:
         for item in items:
             item["tstamp"] = str(tstamp)
             item["tid"] = tid
-            item["ti_id"] = order_id
-            item["ti_currency"] = tr_currency
+            item["order_id"] = order_id
+            item["currency"] = currency
             item_results.append(self.track_ecommerce_transaction_item(**item))
         
         return {"transaction_result": transaction_result, "item_results": item_results}
