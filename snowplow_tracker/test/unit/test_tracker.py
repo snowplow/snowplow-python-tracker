@@ -14,7 +14,7 @@
     express or implied. See the Apache License Version 2.0 for the specific
     language governing permissions and limitations there under.
 
-    Authors: Anuj More, Alex Dean
+    Authors: Anuj More, Alex Dean, Fred Blundun
     Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
@@ -30,45 +30,11 @@ class TestTracker(unittest.TestCase):
         pass
 
     """
-    Testing URI generators
+    Testing URI generator
     """
 
     def test_as_collector_uri(self):
-        host = "hello.snowplow.com"
-        output = Tracker.as_collector_uri(host)
-        exp_output = ''.join(["http://", host, "/i"])
+        host = "d3rkrsqld9gmqf.cloudfront.net"
+        output = Tracker(host).collector_uri
+        exp_output = "http://d3rkrsqld9gmqf.cloudfront.net/i"
         self.assertEquals(output, exp_output)
-
-    def test_collector_uri_from_cf(self):
-        cf_subdomain = "d3rkrsqld9gmqf"
-        output = Tracker.collector_uri_from_cf(cf_subdomain)
-        exp_output = ''.join(["http://", cf_subdomain, ".cloudfront.net/i"])
-        self.assertEquals(output, exp_output)
-
-    def test_new_tracker_for_uri(self):
-        host = "hello.snowplow.com"
-        output = Tracker.new_tracker_for_uri(host)
-        exp_output = ''.join(["http://", host, "/i"])
-        self.assertEquals(output, exp_output)
-
-    def test_new_tracker_for_cf(self):
-        cf_subdomain = "d3rkrsqld9gmqf"
-        output = Tracker.new_tracker_for_cf(cf_subdomain)
-        exp_output = ''.join(["http://", cf_subdomain, ".cloudfront.net/i"])
-        self.assertEquals(output, exp_output)
-
-    """
-    Testing class methods
-    """
-
-    def test_cloudfront(self):
-        cf_subdomain = "abc"
-        output = Tracker.cloudfront(cf_subdomain)
-        self.assertEquals(output.collector_uri, Tracker.new_tracker_for_cf(
-                          cf_subdomain))
-
-    def test_hostname(self):
-        host = "walrus.snowplow.com"
-        output = Tracker.hostname(host)
-        self.assertEquals(output.collector_uri, Tracker.new_tracker_for_uri(
-                          host))

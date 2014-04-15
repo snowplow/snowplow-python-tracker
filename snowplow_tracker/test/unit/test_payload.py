@@ -14,7 +14,7 @@
     express or implied. See the Apache License Version 2.0 for the specific
     language governing permissions and limitations there under.
 
-    Authors: Anuj More, Alex Dean
+    Authors: Anuj More, Alex Dean, Fred Blundun
     Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
@@ -52,8 +52,8 @@ class TestPayload(unittest.TestCase):
         self.assertTrue(is_subset({}, p.context))
 
     def test_object_generation_2(self):
-        p = payload.Payload(None, {'test1': 'result1', 'test2': 'result2', })
-        output = {'test1': 'result1', 'test2': 'result2'}
+        p = payload.Payload(None, {"test1": "result1", "test2": "result2", })
+        output = {"test1": "result1", "test2": "result2"}
         self.assertTrue(is_subset(output, p.context))
 
     def test_add(self):
@@ -71,30 +71,30 @@ class TestPayload(unittest.TestCase):
 
     def test_get_transaction_id(self):
         p = payload.Payload()
-        self.assertTrue(p.context['tid'] >= 100000 and
-                        p.context['tid'] <= 999999)
+        self.assertTrue(p.context["tid"] >= 100000 and
+                        p.context["tid"] <= 999999)
 
     @freeze_time("1970-01-01 00:00:01")
     def test_get_timestamp(self):
         p = payload.Payload()
-        self.assertTrue(p.context['dtm'] == 1000)   # 1970-01-01 00:00:01 in ms
+        self.assertTrue(p.context["dtm"] == 1000)   # 1970-01-01 00:00:01 in ms
 
     def test_set_timestamp(self):
         p = payload.Payload()
         p.set_timestamp(0)
-        self.assertEquals(p.context['dtm'], 0)
+        self.assertEquals(p.context["dtm"], 0)
 
     def test_set_timestamp(self):
         p = payload.Payload()
         p.set_timestamp(12345654321)
-        self.assertEquals(p.context['dtm'], 12345654321000)
+        self.assertEquals(p.context["dtm"], 12345654321000)
 
     def test_add_unstruct_1(self):
         p = payload.Payload()
         try:
-            p.add_unstruct({'product_id': 'ASO01043',
-                        'price$flt': 33,                 # ERROR
-                        'walrus$tms': int(time.time() * 1000),
+            p.add_unstruct({"product_id": "ASO01043",
+                        "price$flt": 33,                 # ERROR
+                        "walrus$tms": int(time.time() * 1000),
                        }, False, "ue_px", "ue_pe")
         except RuntimeError as e:
             self.assertEquals("price$flt in dict is not a flt", str(e))
@@ -102,31 +102,9 @@ class TestPayload(unittest.TestCase):
     def test_add_unstruct_2(self):
         p = payload.Payload()
         try:
-            p.add_unstruct({'product_id': 'ASO01043',
-                        'price$flt': 33.3,
-                        'walrus$tms': 'hello world!',   # ERROR
+            p.add_unstruct({"product_id": "ASO01043",
+                        "price$flt": 33.3,
+                        "walrus$tms": "hello world!",   # ERROR
                        }, True, "ue_px", "ue_pe")
         except RuntimeError as e:
             self.assertEquals("walrus$tms in dict is not a tms", str(e))
-
-    """
-        DO NOT TRUST THESE TESTS. THE OUTPUT DEPENDS ON THE ORDERING OF THE
-        ELEMENTS IN THE DICT!
-    def test_add_unstruct_3(self):
-        p = payload.Payload()
-        p.add_unstruct({'product_id': 'ASO01043',
-                        'price$flt': 33.3,
-                        'walrus$tms': 1388494669990,
-                       }, True, "ue_px", "ue_pe")
-        self.assertTrue(p.context['ue_px'], b'eyJwcmljZSRmbHQiOiAzMy4zLCAicHJvZHVjdF9pZCI6ICJBU08wMTA0MyIsICJ3YWxydXMkdG1zIjogMTM4ODQ5NDI2MDAxOH0=')
-
-    def test_add_unstruct_4(self):
-        p = payload.Payload()
-        p.add_unstruct({'product_id': 'ASO01043',
-                        'price$flt': 33.3,
-                        'walrus$tms': 1388494669990,
-                       }, False, "ue_px", "ue_pe")
-        print(p.context['ue_pe'])
-        self.assertEquals(p.context['ue_pe'],
-                '{"walrus$tms": 1388494669990, "price$flt": 33.3, "product_id": "ASO01043"}')
-    """

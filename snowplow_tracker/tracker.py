@@ -14,7 +14,7 @@
     express or implied. See the Apache License Version 2.0 for the specific
     language governing permissions and limitations there under.
 
-    Authors: Anuj More, Alex Dean
+    Authors: Anuj More, Alex Dean, Fred Blundun
     Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
@@ -28,12 +28,11 @@ from contracts import contract, new_contract
 Constants & config
 """
 
-VERSION = "python-%s" % _version.__version__
+VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
 DEFAULT_PLATFORM = "pc"
 SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
-HTTP_ERRORS = set(["Host not found", "No address associated with name",
-                  "No address associated with hostname", ])
+DEFAULT_VENDOR = "com.snowplowanalytics"
 
 
 """
@@ -43,70 +42,38 @@ Tracker class
 
 class Tracker:
 
-    new_contract('non_empty_string', lambda s: isinstance(s, str)
+    new_contract("non_empty_string", lambda s: isinstance(s, str)
                  and len(s) > 0)
-    new_contract('string_or_none', lambda s: (isinstance(s, str)
+    new_contract("string_or_none", lambda s: (isinstance(s, str)
                  and len(s) > 0) or s is None)
-    new_contract('payload', lambda s: isinstance(s, payload.Payload))
+    new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
-    def __init__(self, collector_uri, collector_type):
+    def __init__(self, collector_uri, namespace=""):
         """
         Constructor
         """
-        self.collector_uri = collector_uri
-        if collector_type is "cloudfront":
-            self.collector_uri = Tracker.new_tracker_for_cf(collector_uri)
-        elif collector_type is "custom":
-            self.collector_uri = Tracker.new_tracker_for_uri(collector_uri)
-        else:
-            self.collector_uri = collector_uri
+        self.collector_uri = self.as_collector_uri(collector_uri)
 
         self.config = {
-            "encode_base64":    DEFAULT_ENCODE_BASE64,
-            "platform":         DEFAULT_PLATFORM,
-            "version":          VERSION,
+            "encode_base64":    DEFAULT_ENCODE_BASE64
         }
 
-        self.standard_nv_pairs = {}
-
-    def cloudfront(collector_uri):
-        return Tracker(collector_uri, "cloudfront")
-
-    def hostname(collector_uri):
-        return Tracker(collector_uri, "custom")
-
-    """
-    Methods to create a URL
-    """
-
-    def as_collector_uri(host):
-        return ''.join(["http://", host, "/i"])
-
-    def collector_uri_from_cf(cf_subdomain):
-        host = ''.join([cf_subdomain, ".cloudfront.net"])
-        return Tracker.as_collector_uri(host)
+        self.standard_nv_pairs = {
+            "p": DEFAULT_PLATFORM,
+            "tv": VERSION,
+            "tna": namespace
+        }
 
     @contract
-    def new_tracker_for_uri(host):
+    def as_collector_uri(self, host):
         """
-            Converts a domain name tst.example.com to http://tst.example.com/i
+            Method to create a URL
 
-            :param  host:           Custom server hostname
-            :type   host:           non_empty_string
-            :rtype:                 non_empty_string
+            :param  host:        URL input by user
+            :type   host:        str
+            :rtype:              str
         """
-        return Tracker.as_collector_uri(host)
-
-    @contract
-    def new_tracker_for_cf(cf_subdomain):
-        """
-            Converts a subdomain abc1234 to http://abc1234.cloudfront.net/i
-
-            :param  cf_subdomain:   Cloudfront subdomain
-            :type   cf_subdomain:   non_empty_string
-            :rtype:                 non_empty_string
-        """
-        return Tracker.collector_uri_from_cf(cf_subdomain)
+        return "".join(["http://", host, "/i"])
 
     """
     Fire a GET request
@@ -120,20 +87,19 @@ class Tracker:
 
             :param  payload:        Generated dict track()
             :type   payload:        payload
-            :rtype:                 str | bool
         """
 
         r = requests.get(self.collector_uri, params=payload.context)
         code = r.status_code
         if code < 0 or code > 600:
-            return ''.join(["Unrecognised status code [", str(code), "]"])
+            return "".join(["Unrecognised status code [", str(code), "]"])
         elif code >= 400 and code < 500:
-            return ''.join(["HTTP status code [", str(code),
+            return "".join(["HTTP status code [", str(code),
                             "] is a client error"])
         elif code >= 500:
-            return ''.join(["HTTP status code [", str(code),
+            return "".join(["HTTP status code [", str(code),
                             "] is a server error"])
-        return True
+        return r.url
 
     """
     Setter methods
@@ -154,7 +120,7 @@ class Tracker:
             :type   value:          str
         """
         if value in SUPPORTED_PLATFORMS:
-            self.config["platform"] = value
+            self.standard_nv_pairs["p"] = value
         else:
             raise RuntimeError(value + " is not a supported platform")
 
@@ -162,7 +128,7 @@ class Tracker:
     def set_user_id(self, user_id):
         """
             :param  user_id:        User ID
-            :type   user_id:        str
+            :type   user_id:        non_empty_string
         """
         self.standard_nv_pairs["uid"] = user_id
 
@@ -182,7 +148,7 @@ class Tracker:
             :type   width:          int,>0
             :type   height:         int,>0
         """
-        self.standard_nv_pairs["res"] = ''.join([str(width), "x", str(height)])
+        self.standard_nv_pairs["res"] = "".join([str(width), "x", str(height)])
 
     @contract
     def set_viewport(self, width, height):
@@ -192,7 +158,7 @@ class Tracker:
             :type   width:          int,>0
             :type   height:         int,>0
         """
-        self.standard_nv_pairs["vp"] = ''.join([str(width), "x", str(height)])
+        self.standard_nv_pairs["vp"] = "".join([str(width), "x", str(height)])
 
     @contract
     def set_color_depth(self, depth):
@@ -227,25 +193,28 @@ class Tracker:
     """
 
     @contract
-    def track(self, pb):
+    def track(self, pb, snowplow_schema=True):
         """
             Called by all tracking events to add the standard name-value pairs
             to the Payload object irrespective of the tracked event.
 
-            :param  pb:             Payload builder
-            :type   pb:             payload
-            :rtype:                 str | bool
+            :param  pb:              Payload builder
+            :type   pb:              payload
+            :param  snowplow_schema: Whether the event schema is authored by Snowplow
+            :type   snowplow_schema: bool
         """
         pb.add_dict(self.standard_nv_pairs)
+        if snowplow_schema:
+            pb.add("evn", DEFAULT_VENDOR)
         return self.http_get(pb)
 
     @contract
-    def track_page_view(self, page_url, page_title, referrer, tstamp=None):
+    def track_page_view(self, page_url, page_title=None, referrer=None, tstamp=None):
         """
             :param  page_url:       URL of the viewed page
             :type   page_url:       non_empty_string
             :param  page_title:     Title of the viewed page
-            :type   page_title:     non_empty_string
+            :type   page_title:     string_or_none
             :param  referrer:       Referrer of the page
             :type   referrer:       string_or_none
         """
@@ -257,21 +226,21 @@ class Tracker:
         return self.track(pb)
 
     @contract
-    def track_ecommerce_transaction(self, order_id, tr_affiliation,
-                                    tr_total_value, tr_tax_value, tr_shipping,
-                                    tr_city, tr_state, tr_country,
+    def track_ecommerce_transaction(self, order_id, tr_total_value,
+                                    tr_affiliation=None, tr_tax_value=None, tr_shipping=None,
+                                    tr_city=None, tr_state=None, tr_country=None,
                                     tstamp=None):
         """
             :param  order_id:       ID of the eCommerce transaction
             :type   order_id:       non_empty_string
-            :param  tr_affiliation: Transaction affiliation
-            :type   tr_affiliation: string_or_none
             :param  tr_total_value: Total transaction value
             :type   tr_total_value: int | float
+            :param  tr_affiliation: Transaction affiliation
+            :type   tr_affiliation: string_or_none
             :param  tr_tax_value:   Transaction tax value
-            :type   tr_tax_value:   int | float
+            :type   tr_tax_value:   int | float | None
             :param  tr_shipping:    Delivery cost charged
-            :type   tr_shipping:    int | float
+            :type   tr_shipping:    int | float | None
             :param  tr_city:        Delivery address city
             :type   tr_city:        string_or_none
             :param  tr_state:       Delivery address state
@@ -292,22 +261,22 @@ class Tracker:
         return self.track(pb)
 
     @contract
-    def track_ecommerce_transaction_item(self, ti_id, ti_sku, ti_name,
-                                         ti_category, ti_price, ti_quantity,
+    def track_ecommerce_transaction_item(self, ti_id, ti_sku, ti_price, ti_quantity,
+                                         ti_name=None, ti_category=None,
                                          tstamp=None):
         """
             :param  ti_id:          Order ID
             :type   ti_id:          non_empty_string
             :param  ti_sku:         Item SKU
             :type   ti_sku:         non_empty_string
-            :param  ti_name:        Item name
-            :type   ti_name:        non_empty_string
-            :param  ti_category:    Item category
-            :type   ti_category:    non_empty_string
             :param  ti_price:       Item price
             :type   ti_price:       int | float
             :param  ti_quantity:    Item quantity
             :type   ti_quantity:    int
+            :param  ti_name:        Item name
+            :type   ti_name:        string_or_none
+            :param  ti_category:    Item category
+            :type   ti_category:    string_or_none
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "ti")
@@ -320,22 +289,17 @@ class Tracker:
         return self.track(pb)
 
     @contract
-    def track_screen_view(self, name, id_, tstamp=None):
+    def track_screen_view(self, name, id_=None, tstamp=None):
         """
-            This function is not a part of the protocol. Undocumented.
-
+            :param  name:           The name of the screen view event
             :type   name:           non_empty_string
-            :type   id_:            non_empty_string
+            :param  id_:            Screen view ID
+            :type   id_:            string_or_none
         """
-        pb = payload.Payload(tstamp)
-        # Payload has value of "e" set to "sv" for screenviews
-        pb.add("e", "sv")
-        pb.add("sv_na", name)
-        pb.add("sv_id", id_)
-        return self.track(pb)
+        return self.track_unstruct_event("screen_view", {"name": name, "id": id_}, tstamp, True)
 
     @contract
-    def track_struct_event(self, category, action, label, property_, value,
+    def track_struct_event(self, category, action, label=None, property_=None, value=None,
                            tstamp=None):
         """
             :param  category:       Category of the event
@@ -344,12 +308,12 @@ class Tracker:
             :type   action:         non_empty_string
             :param  label:          Refer to the object the action is
                                     performed on
-            :type   label:          non_empty_string
+            :type   label:          string_or_none
             :param  property_:      Property associated with either the action
                                     or the object
-            :type   property_:      non_empty_string
+            :type   property_:      string_or_none
             :param  value:          A value associated with the user action
-            :type   value:          int | float
+            :type   value:          int | float | None
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "se")
@@ -361,17 +325,18 @@ class Tracker:
         return self.track(pb)
 
     @contract
-    def track_unstruct_event(self, event_name, dict_, tstamp=None):
+    def track_unstruct_event(self, event_name, dict_, tstamp=None, snowplow_schema=False):
         """
-            :param  event_name:     The name of the event
-            :type   event_name:     non_empty_string
-            :param  dict_:          The properties of the event
-            :type   dict_:          dict(str:*)
+            :param  event_name:      The name of the event
+            :type   event_name:      non_empty_string
+            :param  dict_:           The properties of the event
+            :type   dict_:           dict(str:*)
+            :param  snowplow_schema: Whether the event schema is authored by Snowplow
+            :type   snowplow_schema: bool
         """
         pb = payload.Payload(tstamp)
 
         pb.add("e", "ue")
         pb.add("ue_na", event_name)
         pb.add_unstruct(dict_, self.config["encode_base64"], "ue_px", "ue_pr")
-
-        return self.track(pb)
+        return self.track(pb, snowplow_schema)

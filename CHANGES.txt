@@ -1,1 +1,19 @@
-v0.1.0, 28 March, 2014 -- Initial release.
+Version 0.2.0 (2014-xx-xx)
+--------------------------
+Fixed Pycontracts dependency (#63)
+Made unrequired tracker method arguments optional (#40)
+Linked the Technical Docs and Setup Guide images to the appropriate pages (#60)
+Changed API to no longer specify a collector URL option (#57) 
+Removed the "URL from Cloudfront subdomain" option (#56)
+Started sending event vendor parameter through on querystring (#55)
+Changed track screen view to use an unstructured event (#53)
+Added ability to name individual instances of the Python Tracker (#52)
+Validated GET payload in all integration tests (#33)
+Added support for Python 2.7 (#42)
+Fixed versions in requirements.txt (#47)
+Added platform and tracker version to payload (#50)
+Changed tracker version prefix from "python-" to "py-" (#51)
+
+Version 0.1.0 (2014-28-03)
+--------------------------
+Initial release
