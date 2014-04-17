@@ -100,7 +100,7 @@ class Tracker:
         r = requests.get(self.collector_uri, params=payload.context)
         code = r.status_code
         if code in HTTP_ERRORS:
-            return (False, "Host [" + r.url + "] not found (possible connectivity error")
+            return (False, "Host [" + r.url + "] not found (possible connectivity error)")
         elif code < 0 or code > 600:
             return (False, code)
         elif code >= 400 and code < 500:

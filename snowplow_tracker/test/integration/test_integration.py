@@ -68,7 +68,7 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_ecommerce_transaction(self):
         t = tracker.Tracker("localhost")
         with HTTMock(pass_response_content):
-            t.track_ecommerce_transaction("6a8078be", 45, city="London", currency="GBP", items=
+            t.track_ecommerce_transaction("6a8078be", 35, city="London", currency="GBP", items=
                 [{  
                     "sku": "pbz0026",
                     "price": 20,
@@ -80,7 +80,7 @@ class IntegrationTest(unittest.TestCase):
                     "quantity": 1  
                 }])
 
-            expected_fields = {"e": "tr", "tr_id": "6a8078be", "tr_tt": "45", "tr_ci": "London", "tr_cu": "GBP"}
+            expected_fields = {"e": "tr", "tr_id": "6a8078be", "tr_tt": "35", "tr_ci": "London", "tr_cu": "GBP"}
             for key in expected_fields:
                 self.assertEquals(from_querystring(key, querystrings[-3]), expected_fields[key])
 

@@ -86,7 +86,7 @@ class TestPayload(unittest.TestCase):
 
     def test_set_timestamp(self):
         p = payload.Payload()
-        p.set_timestamp(12345654321)
+        p.set_timestamp(12345654321000)
         self.assertEquals(p.context["dtm"], 12345654321000)
 
     def test_add_unstruct_1(self):

@@ -62,9 +62,9 @@ class Payload:
             :param  tstamp:         Timestamp value
         """
         if tstamp is None:
-            tstamp = time.time()
-        if tstamp and isinstance(tstamp, (int, float)):
-            value = int(tstamp * 1000)
+            value = int(time.time() * 1000)
+        elif tstamp and isinstance(tstamp, (int, float)):
+            value = int(tstamp)
         else:
             value = tstamp
         self.context["dtm"] = value
