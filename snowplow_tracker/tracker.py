@@ -102,13 +102,10 @@ class Tracker:
         code = r.status_code
         if code in HTTP_ERRORS:
             return (False, "Host [" + r.url + "] not found (possible connectivity error)")
-        elif code < 0 or code > 600:
+        elif code < 0 or code >= 400:
             return (False, code)
-        elif code >= 400 and code < 500:
-            return (False, code)
-        elif code >= 500:
-            return (False, code)
-        return (True, code)
+        else:
+            return (True, code)
 
     """
     Setter methods
@@ -341,7 +338,10 @@ class Tracker:
             :type   context:        dict(str:*) | None
             :rtype:                 tuple(bool, int | str)
         """
-        return self.track_unstruct_event("screen_view", {"name": name, "id": id_}, DEFAULT_VENDOR, context, tstamp)
+        screen_view_properties = {"name": name}
+        if id_ is not None:
+            screen_view_properties["id"] = id_
+        return self.track_unstruct_event("screen_view", screen_view_properties, DEFAULT_VENDOR, context, tstamp)
 
     @contract
     def track_struct_event(self, category, action, label=None, property_=None, value=None,

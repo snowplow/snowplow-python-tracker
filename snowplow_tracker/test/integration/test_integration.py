@@ -99,7 +99,7 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker("localhost")
         with HTTMock(pass_response_content):
             t.track_screen_view("Game HUD 2", "Hello!")
-            expected_fields = {"e": "ue", "ue_na": "screen_view"}
+            expected_fields = {"e": "ue", "ue_na": "screen_view", "evn": "com.snowplowanalytics"}
             for key in expected_fields:          
                 self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
