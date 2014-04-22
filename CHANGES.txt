@@ -1,5 +1,6 @@
 Version 0.3.0 (2014-xx-xx)
 --------------------------
+Added custom context vendor configuration option (#67)
 Changed the return value of the tracking methods to a tuple (#65)
 Added coveralls code coverage button (#64)
 Added currency parameter to ecommerce tracking methods (#62)

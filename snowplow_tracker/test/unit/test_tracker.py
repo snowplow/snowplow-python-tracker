@@ -30,10 +30,11 @@ class TestTracker(unittest.TestCase):
         pass
 
     def test_initialisation(self):
-        t = Tracker("d3rkrsqld9gmqf.cloudfront.net", "cloudfront", encode_base64= False, app_id="AF003")
+        t = Tracker("d3rkrsqld9gmqf.cloudfront.net", "cloudfront", encode_base64= False, app_id="AF003", context_vendor="com.example")
         self.assertEquals(t.standard_nv_pairs["tna"], "cloudfront")
         self.assertEquals(t.standard_nv_pairs["aid"], "AF003")
         self.assertEquals(t.config["encode_base64"], False)
+        self.assertEquals(t.config["context_vendor"], "com.example")
 
     """
     Testing URI generator

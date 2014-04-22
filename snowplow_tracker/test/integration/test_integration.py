@@ -153,7 +153,7 @@ class IntegrationTest(unittest.TestCase):
             self.assertEquals("walrus$tms in dict is not a tms", str(e))
 
     def test_integration_standard_nv_pairs(self):
-        t = tracker.Tracker("localhost", "cf", app_id="angry-birds-android")
+        t = tracker.Tracker("localhost", "cf", app_id="angry-birds-android", context_vendor="com.example")
         t.set_platform("mob")
         t.set_user_id("user12345")
         t.set_screen_resolution(100, 200)
@@ -161,8 +161,10 @@ class IntegrationTest(unittest.TestCase):
         t.set_timezone("Europe London")
         t.set_lang("en")
         with HTTMock(pass_response_content):
-            t.track_page_view("localhost", "local host", None)
-            expected_fields = {"tna": "cf", "evn": "com.snowplowanalytics", "res": "100x200", "lang": "en", "aid": "angry-birds-android", "cd": "24", "tz": "Europe+London", "p": "mob", "tv": "py-" + _version.__version__}
+            t.track_page_view("localhost", "local host", None, {'user': {'user_type': 'tester'}})
+            expected_fields = {"tna": "cf", "evn": "com.snowplowanalytics", "res": "100x200",
+                               "lang": "en", "aid": "angry-birds-android", "cd": "24", "tz": "Europe+London",
+                               "p": "mob", "tv": "py-" + _version.__version__, "cv": "com.example"}
             for key in expected_fields:
                 self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 

@@ -51,7 +51,7 @@ class Tracker:
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
     def __init__(self, collector_uri, 
-                 namespace=None, app_id=None, encode_base64=DEFAULT_ENCODE_BASE64, contracts=True):
+                 namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, contracts=True):
         """
         Constructor
         """
@@ -61,7 +61,8 @@ class Tracker:
         self.collector_uri = self.as_collector_uri(collector_uri)
 
         self.config = {
-            "encode_base64":    encode_base64
+            "encode_base64":    encode_base64,
+            "context_vendor": context_vendor
         }
 
         self.standard_nv_pairs = {
@@ -195,6 +196,8 @@ class Tracker:
             :rtype:                  tuple(bool, int | str)
         """
         pb.add_dict(self.standard_nv_pairs)
+        if "co" in pb.context or "cx" in pb.context:
+            pb.add("cv", self.config["context_vendor"])
         return self.http_get(pb)
 
     @contract

@@ -145,7 +145,7 @@ class Payload:
             :type   type_when_not_encoded:  str
         """
 
-        if type(dict_) == "dict" and dict_ != {}:
+        if dict_ is not None and dict_ != {}:
 
             json_dict = json.dumps(dict_)
 
