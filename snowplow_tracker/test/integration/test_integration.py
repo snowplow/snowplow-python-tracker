@@ -114,15 +114,15 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_unstruct_event_non_base64(self):
         t = tracker.Tracker("localhost", encode_base64=False)
         with HTTMock(pass_response_content):
-            t.track_unstruct_event("viewed_product", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)})
-            expected_fields = {"e": "ue", "ue_na": "viewed_product"}
+            t.track_unstruct_event("com.example_company", "viewed_product", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)})
+            expected_fields = {"e": "ue", "evn": "com.example_company", "ue_na": "viewed_product"}
             for key in expected_fields:
                 self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_unstruct_event_base64(self):
         t = tracker.Tracker("localhost")
         with HTTMock(pass_response_content):
-            t.track_unstruct_event("viewed_product", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)})
+            t.track_unstruct_event("com.example_company", "viewed_product", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)})
             expected_fields = {"e": "ue", "ue_na": "viewed_product"}
             for key in expected_fields:
                 self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
@@ -130,7 +130,7 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_unstruct_event_non_base64_error(self):
         t = tracker.Tracker("localhost", encode_base64=False)
         try:
-            t.track_unstruct_event("viewed_product",
+            t.track_unstruct_event("com.example_company", "viewed_product",
                                {
                                    "product_id": "ASO01043",
                                    "price$flt": 49,                 # ERROR
@@ -143,7 +143,7 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_unstruct_event_base64_error(self):
         t = tracker.Tracker("localhost")
         try:
-            t.track_unstruct_event("viewed_product",
+            t.track_unstruct_event("com.example_company", "viewed_product",
                                          {
                                               "product_id": "ASO01043",
                                               "price$flt": 49.95,

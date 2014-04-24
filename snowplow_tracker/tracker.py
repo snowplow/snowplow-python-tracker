@@ -341,7 +341,7 @@ class Tracker:
         screen_view_properties = {"name": name}
         if id_ is not None:
             screen_view_properties["id"] = id_
-        return self.track_unstruct_event("screen_view", screen_view_properties, DEFAULT_VENDOR, context, tstamp)
+        return self.track_unstruct_event(DEFAULT_VENDOR, "screen_view", screen_view_properties, context, tstamp)
 
     @contract
     def track_struct_event(self, category, action, label=None, property_=None, value=None,
@@ -376,17 +376,17 @@ class Tracker:
         return self.track(pb)
 
     @contract
-    def track_unstruct_event(self, event_name, dict_, event_vendor=None, context=None, tstamp=None):
+    def track_unstruct_event(self, event_vendor, event_name, dict_, context=None, tstamp=None):
         """
+            :param  event_vendor:    The author of the event
+            :type   event_vendor:    non_empty_string        
             :param  event_name:      The name of the event
             :type   event_name:      non_empty_string
             :param  dict_:           The properties of the event
             :type   dict_:           dict(str:*)
-            :param  event_vendor:    The author of the event
-            :type   event_vendor:    string_or_none
-            :param  context:        Custom context for the event
-            :type   context:        dict(str:*) | None
-            :rtype:                 tuple(bool, int | str)
+            :param  context:         Custom context for the event
+            :type   context:         dict(str:*) | None
+            :rtype:                  tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
 

@@ -10,6 +10,7 @@ Added classifiers to setup.py (#48)
 Added support for custom context to all track() methods (#38)
 Updated Tracker constructor to use map of optional args (#37)
 Updated so a transaction and its items have the same txnid and dtm (#25)
+Moved event vendor argument to before event name and made it mandatory (#68)
 
 Version 0.2.0 (2014-04-15)
 --------------------------
