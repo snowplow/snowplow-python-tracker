@@ -27,6 +27,6 @@ Fixed versions in requirements.txt (#47)
 Added platform and tracker version to payload (#50)
 Changed tracker version prefix from "python-" to "py-" (#51)
 
-Version 0.1.0 (2014-28-03)
+Version 0.1.0 (2014-03-28)
 --------------------------
 Initial release
