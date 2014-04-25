@@ -1,4 +1,4 @@
-Version 0.3.0 (2014-xx-xx)
+Version 0.3.0 (2014-04-25)
 --------------------------
 Added custom context vendor configuration option (#67)
 Changed the return value of the tracking methods to a tuple (#65)
