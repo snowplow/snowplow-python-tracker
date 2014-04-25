@@ -62,9 +62,9 @@ class Payload:
             :param  tstamp:         Timestamp value
         """
         if tstamp is None:
-            tstamp = time.time()
-        if tstamp and isinstance(tstamp, (int, float)):
-            value = int(tstamp * 1000)
+            value = int(time.time() * 1000)
+        elif tstamp and isinstance(tstamp, (int, float)):
+            value = int(tstamp)
         else:
             value = tstamp
         self.context["dtm"] = value
@@ -102,11 +102,9 @@ class Payload:
             :type   dict_:      dict(str:*)
             :param  encode_base64:      If the payload is base64 encoded
             :type   encode_base64:      bool
-            :param  type_when_encoded:  Name of the field when encode_base64
-                                        is set
+            :param  type_when_encoded:  Name of the field when encode_base64 is set
             :type   type_when_encoded:  str
-            :param  type_when_not_encoded:  Name of the field when
-                                            encode_base64 is not set
+            :param  type_when_not_encoded:  Name of the field when encode_base64 is not set
             :type   type_when_not_encoded:  str
         """
         def raise_error(f, type_):
@@ -131,6 +129,30 @@ class Payload:
             self.add(type_when_encoded, base64.urlsafe_b64encode(json_dict.encode("ascii")))
         else:
             self.add(type_when_not_encoded, json_dict)
+
+    @contract
+    def add_json(self, dict_, encode_base64, type_when_encoded, type_when_not_encoded):
+        """
+            Add an encoded or unencoded JSON to the payload
+
+            :param  dict_:                  Custom context for the event
+            :type   dict_:                  dict(str:*) | None
+            :param  encode_base64:          If the payload is base64 encoded
+            :type   encode_base64:          bool
+            :param  type_when_encoded:      Name of the field when encode_base64 is set
+            :type   type_when_encoded:      str
+            :param  type_when_not_encoded:  Name of the field when encode_base64 is not set
+            :type   type_when_not_encoded:  str
+        """
+
+        if dict_ is not None and dict_ != {}:
+
+            json_dict = json.dumps(dict_)
+
+            if encode_base64:
+                self.add(type_when_encoded, base64.urlsafe_b64encode(json_dict.encode("ascii")))
+            else:
+                self.add(type_when_not_encoded, json_dict)
 
     def get(self):
         """

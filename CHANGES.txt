@@ -1,3 +1,17 @@
+Version 0.3.0 (2014-xx-xx)
+--------------------------
+Added custom context vendor configuration option (#67)
+Changed the return value of the tracking methods to a tuple (#65)
+Added coveralls code coverage button (#64)
+Added currency parameter to ecommerce tracking methods (#62)
+Added config option to disable contracts (#61)
+Added event_vendor as argument to track_unstruct_event (#54)
+Added classifiers to setup.py (#48)
+Added support for custom context to all track() methods (#38)
+Updated Tracker constructor to use map of optional args (#37)
+Updated so a transaction and its items have the same txnid and dtm (#25)
+Moved event vendor argument to before event name and made it mandatory (#68)
+
 Version 0.2.0 (2014-04-15)
 --------------------------
 Fixed Pycontracts dependency (#63)
@@ -14,6 +28,6 @@ Fixed versions in requirements.txt (#47)
 Added platform and tracker version to payload (#50)
 Changed tracker version prefix from "python-" to "py-" (#51)
 
-Version 0.1.0 (2014-28-03)
+Version 0.1.0 (2014-03-28)
 --------------------------
 Initial release

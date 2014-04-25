@@ -6,6 +6,9 @@ Python Analytics for Snowplow
     :target: https://travis-ci.org/snowplow/snowplow-python-tracker
 .. image:: https://badge.fury.io/py/snowplow-tracker.png
     :target: http://badge.fury.io/py/snowplow-tracker
+.. image:: https://coveralls.io/repos/snowplow/snowplow-python-tracker/badge.png
+    :target: https://coveralls.io/r/snowplow/snowplow-python-tracker
+
 
 Overview
 ########

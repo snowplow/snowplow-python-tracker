@@ -20,9 +20,9 @@
 """
 
 import requests
+import time
 from snowplow_tracker import payload, _version
-from contracts import contract, new_contract
-
+from contracts import contract, new_contract, disable_all
 
 """
 Constants & config
@@ -33,12 +33,14 @@ DEFAULT_ENCODE_BASE64 = True
 DEFAULT_PLATFORM = "pc"
 SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
 DEFAULT_VENDOR = "com.snowplowanalytics"
+HTTP_ERRORS = {"host not found",
+               "No address associated with name",
+               "No address associated with hostname"}
 
 
 """
 Tracker class
 """
-
 
 class Tracker:
 
@@ -48,20 +50,26 @@ class Tracker:
                  and len(s) > 0) or s is None)
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
-    def __init__(self, collector_uri, namespace=""):
+    def __init__(self, collector_uri, 
+                 namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, contracts=True):
         """
         Constructor
         """
+        if not contracts:
+            disable_all()
+
         self.collector_uri = self.as_collector_uri(collector_uri)
 
         self.config = {
-            "encode_base64":    DEFAULT_ENCODE_BASE64
+            "encode_base64":    encode_base64,
+            "context_vendor": context_vendor
         }
 
         self.standard_nv_pairs = {
             "p": DEFAULT_PLATFORM,
             "tv": VERSION,
-            "tna": namespace
+            "tna": namespace,
+            "aid": app_id
         }
 
     @contract
@@ -87,31 +95,21 @@ class Tracker:
 
             :param  payload:        Generated dict track()
             :type   payload:        payload
+            :rtype:                 tuple(bool, int | str)
         """
 
         r = requests.get(self.collector_uri, params=payload.context)
         code = r.status_code
-        if code < 0 or code > 600:
-            return "".join(["Unrecognised status code [", str(code), "]"])
-        elif code >= 400 and code < 500:
-            return "".join(["HTTP status code [", str(code),
-                            "] is a client error"])
-        elif code >= 500:
-            return "".join(["HTTP status code [", str(code),
-                            "] is a server error"])
-        return r.url
+        if code in HTTP_ERRORS:
+            return (False, "Host [" + r.url + "] not found (possible connectivity error)")
+        elif code < 0 or code >= 400:
+            return (False, code)
+        else:
+            return (True, code)
 
     """
     Setter methods
     """
-
-    @contract
-    def set_base64_to(self, value):
-        """
-            :param  value:          Boolean value
-            :type   value:          bool
-        """
-        self.config["encode_base64"] = value
 
     @contract
     def set_platform(self, value):
@@ -131,14 +129,6 @@ class Tracker:
             :type   user_id:        non_empty_string
         """
         self.standard_nv_pairs["uid"] = user_id
-
-    @contract
-    def set_app_id(self, app_id):
-        """
-            :param  app_id:         App ID
-            :type   app_id:         str
-        """
-        self.standard_nv_pairs["aid"] = app_id
 
     @contract
     def set_screen_resolution(self, width, height):
@@ -193,23 +183,22 @@ class Tracker:
     """
 
     @contract
-    def track(self, pb, snowplow_schema=True):
+    def track(self, pb):
         """
             Called by all tracking events to add the standard name-value pairs
             to the Payload object irrespective of the tracked event.
 
             :param  pb:              Payload builder
             :type   pb:              payload
-            :param  snowplow_schema: Whether the event schema is authored by Snowplow
-            :type   snowplow_schema: bool
+            :rtype:                  tuple(bool, int | str)
         """
         pb.add_dict(self.standard_nv_pairs)
-        if snowplow_schema:
-            pb.add("evn", DEFAULT_VENDOR)
+        if "co" in pb.context or "cx" in pb.context:
+            pb.add("cv", self.config["context_vendor"])
         return self.http_get(pb)
 
     @contract
-    def track_page_view(self, page_url, page_title=None, referrer=None, tstamp=None):
+    def track_page_view(self, page_url, page_title=None, referrer=None, context=None, tstamp=None):
         """
             :param  page_url:       URL of the viewed page
             :type   page_url:       non_empty_string
@@ -217,89 +206,146 @@ class Tracker:
             :type   page_title:     string_or_none
             :param  referrer:       Referrer of the page
             :type   referrer:       string_or_none
+            :param  context:        Custom context for the event
+            :type   context:        dict(str:*) | None
+            :rtype:                 tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "pv")           # pv: page view
         pb.add("url", page_url)
         pb.add("page", page_title)
         pb.add("refr", referrer)
+        pb.add("evn", DEFAULT_VENDOR)
+        pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.track(pb)
 
     @contract
-    def track_ecommerce_transaction(self, order_id, tr_total_value,
-                                    tr_affiliation=None, tr_tax_value=None, tr_shipping=None,
-                                    tr_city=None, tr_state=None, tr_country=None,
-                                    tstamp=None):
+    def track_ecommerce_transaction_item(self, order_id, sku, price, quantity,
+                                         name=None, category=None, currency=None,
+                                         context=None,
+                                         tstamp=None, tid=None):
         """
-            :param  order_id:       ID of the eCommerce transaction
-            :type   order_id:       non_empty_string
-            :param  tr_total_value: Total transaction value
-            :type   tr_total_value: int | float
-            :param  tr_affiliation: Transaction affiliation
-            :type   tr_affiliation: string_or_none
-            :param  tr_tax_value:   Transaction tax value
-            :type   tr_tax_value:   int | float | None
-            :param  tr_shipping:    Delivery cost charged
-            :type   tr_shipping:    int | float | None
-            :param  tr_city:        Delivery address city
-            :type   tr_city:        string_or_none
-            :param  tr_state:       Delivery address state
-            :type   tr_state:       string_or_none
-            :param  tr_country:     Delivery address country
-            :type   tr_country:     string_or_none
-        """
-        pb = payload.Payload(tstamp)
-        pb.add("e", "tr")
-        pb.add("tr_id", order_id)
-        pb.add("tr_af", tr_affiliation)
-        pb.add("tr_tt", tr_total_value)
-        pb.add("tr_tx", tr_tax_value)
-        pb.add("tr_sh", tr_shipping)
-        pb.add("tr_ci", tr_city)
-        pb.add("tr_st", tr_state)
-        pb.add("tr_co", tr_country)
-        return self.track(pb)
+            This is an internal method called by track_ecommerce_transaction.
+            It is not for public use.
 
-    @contract
-    def track_ecommerce_transaction_item(self, ti_id, ti_sku, ti_price, ti_quantity,
-                                         ti_name=None, ti_category=None,
-                                         tstamp=None):
-        """
-            :param  ti_id:          Order ID
-            :type   ti_id:          non_empty_string
-            :param  ti_sku:         Item SKU
-            :type   ti_sku:         non_empty_string
-            :param  ti_price:       Item price
-            :type   ti_price:       int | float
-            :param  ti_quantity:    Item quantity
-            :type   ti_quantity:    int
-            :param  ti_name:        Item name
-            :type   ti_name:        string_or_none
-            :param  ti_category:    Item category
-            :type   ti_category:    string_or_none
+            :param  order_id:    Order ID
+            :type   order_id:    non_empty_string
+            :param  sku:         Item SKU
+            :type   sku:         non_empty_string
+            :param  price:       Item price
+            :type   price:       int | float
+            :param  quantity:    Item quantity
+            :type   quantity:    int
+            :param  name:        Item name
+            :type   name:        string_or_none
+            :param  category:    Item category
+            :type   category:    string_or_none
+            :param  currency:    The currency the price is expressed in
+            :type   currency:    string_or_none
+            :param  context:        Custom context for the event
+            :type   context:        dict(str:*) | None
+            :rtype:                 tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "ti")
-        pb.add("ti_id", ti_id)
-        pb.add("ti_sk", ti_sku)
-        pb.add("ti_nm", ti_name)
-        pb.add("ti_ca", ti_category)
-        pb.add("ti_pr", ti_price)
-        pb.add("ti_qu", ti_quantity)
+        pb.add("ti_id", order_id)
+        pb.add("ti_sk", sku)
+        pb.add("ti_nm", name)
+        pb.add("ti_ca", category)
+        pb.add("ti_pr", price)
+        pb.add("ti_qu", quantity)
+        pb.add("ti_cu", currency)
+        pb.add("evn", DEFAULT_VENDOR)
+        pb.add("tid", tid)
+        pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.track(pb)
 
     @contract
-    def track_screen_view(self, name, id_=None, tstamp=None):
+    def track_ecommerce_transaction(self, order_id, total_value,
+                          affiliation=None, tax_value=None, shipping=None,
+                          city=None, state=None, country=None,  currency=None,
+                          items=None,
+                          context=None, tstamp=None):
+        """
+            :param  order_id:       ID of the eCommerce transaction
+            :type   order_id:       non_empty_string
+            :param  total_value: Total transaction value
+            :type   total_value: int | float
+            :param  affiliation: Transaction affiliation
+            :type   affiliation: string_or_none
+            :param  tax_value:   Transaction tax value
+            :type   tax_value:   int | float | None
+            :param  shipping:    Delivery cost charged
+            :type   shipping:    int | float | None
+            :param  city:        Delivery address city
+            :type   city:        string_or_none
+            :param  state:       Delivery address state
+            :type   state:       string_or_none
+            :param  country:     Delivery address country
+            :type   country:     string_or_none
+            :param  currency:    The currency the price is expressed in
+            :type   currency:    string_or_none
+            :param  items:          The items in the transaction
+            :type   items:          list(dict(str:*))
+            :param  context:        Custom context for the event
+            :type   context:        dict(str:*) | None
+            :rtype:                 dict(str: tuple(bool, int | str) | list(tuple(bool, int | str)))
+        """
+        if tstamp is None:
+            tstamp = time.time()
+        if tstamp and isinstance(tstamp, (int, float)):
+            tstamp = int(tstamp * 1000)
+
+        tid = payload.Payload.set_transaction_id()
+
+        pb = payload.Payload(tstamp)
+        pb.add("e", "tr")
+        pb.add("tr_id", order_id)
+        pb.add("tr_tt", total_value)
+        pb.add("tr_af", affiliation)
+        pb.add("tr_tx", tax_value)
+        pb.add("tr_sh", shipping)
+        pb.add("tr_ci", city)
+        pb.add("tr_st", state)
+        pb.add("tr_co", country)
+        pb.add("tr_cu", currency)
+        pb.add("evn", DEFAULT_VENDOR)
+        pb.add("tid", tid)
+        pb.add("dtm", tstamp)
+        pb.add_json(context, self.config["encode_base64"], "cx", "co")
+
+        transaction_result = self.track(pb)
+
+        item_results = []
+
+        for item in items:
+            item["tstamp"] = str(tstamp)
+            item["tid"] = tid
+            item["order_id"] = order_id
+            item["currency"] = currency
+            item_results.append(self.track_ecommerce_transaction_item(**item))
+        
+        return {"transaction_result": transaction_result, "item_results": item_results}
+    
+    @contract
+    def track_screen_view(self, name, id_=None, context=None, tstamp=None):
         """
             :param  name:           The name of the screen view event
             :type   name:           non_empty_string
             :param  id_:            Screen view ID
             :type   id_:            string_or_none
+            :param  context:        Custom context for the event
+            :type   context:        dict(str:*) | None
+            :rtype:                 tuple(bool, int | str)
         """
-        return self.track_unstruct_event("screen_view", {"name": name, "id": id_}, tstamp, True)
+        screen_view_properties = {"name": name}
+        if id_ is not None:
+            screen_view_properties["id"] = id_
+        return self.track_unstruct_event(DEFAULT_VENDOR, "screen_view", screen_view_properties, context, tstamp)
 
     @contract
     def track_struct_event(self, category, action, label=None, property_=None, value=None,
+                           context=None,
                            tstamp=None):
         """
             :param  category:       Category of the event
@@ -314,6 +360,9 @@ class Tracker:
             :type   property_:      string_or_none
             :param  value:          A value associated with the user action
             :type   value:          int | float | None
+            :param  context:        Custom context for the event
+            :type   context:        dict(str:*) | None
+            :rtype:                 tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "se")
@@ -322,21 +371,28 @@ class Tracker:
         pb.add("se_la", label)
         pb.add("se_pr", property_)
         pb.add("se_va", value)
+        pb.add("evn", DEFAULT_VENDOR)
+        pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.track(pb)
 
     @contract
-    def track_unstruct_event(self, event_name, dict_, tstamp=None, snowplow_schema=False):
+    def track_unstruct_event(self, event_vendor, event_name, dict_, context=None, tstamp=None):
         """
+            :param  event_vendor:    The author of the event
+            :type   event_vendor:    non_empty_string        
             :param  event_name:      The name of the event
             :type   event_name:      non_empty_string
             :param  dict_:           The properties of the event
             :type   dict_:           dict(str:*)
-            :param  snowplow_schema: Whether the event schema is authored by Snowplow
-            :type   snowplow_schema: bool
+            :param  context:         Custom context for the event
+            :type   context:         dict(str:*) | None
+            :rtype:                  tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
 
         pb.add("e", "ue")
         pb.add("ue_na", event_name)
         pb.add_unstruct(dict_, self.config["encode_base64"], "ue_px", "ue_pr")
-        return self.track(pb, snowplow_schema)
+        pb.add("evn", event_vendor)
+        pb.add_json(context, self.config["encode_base64"], "cx", "co")
+        return self.track(pb)

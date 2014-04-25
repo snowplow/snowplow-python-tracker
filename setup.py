@@ -60,6 +60,13 @@ setup(
     description='Snowplow event tracker for Python. Add analytics to your Python and Django apps, webapps and games',
     long_description=open('README.rst').read(),
 
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python"
+    ],
+
     install_requires = [
         "requests",
         "pycontracts",

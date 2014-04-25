@@ -77,16 +77,16 @@ class TestPayload(unittest.TestCase):
     @freeze_time("1970-01-01 00:00:01")
     def test_get_timestamp(self):
         p = payload.Payload()
-        self.assertTrue(p.context["dtm"] == 1000)   # 1970-01-01 00:00:01 in ms
+        self.assertEquals(p.context["dtm"], 1000)   # 1970-01-01 00:00:01 in ms
 
-    def test_set_timestamp(self):
+    def test_set_timestamp_2(self):
         p = payload.Payload()
         p.set_timestamp(0)
         self.assertEquals(p.context["dtm"], 0)
 
     def test_set_timestamp(self):
         p = payload.Payload()
-        p.set_timestamp(12345654321)
+        p.set_timestamp(12345654321000)
         self.assertEquals(p.context["dtm"], 12345654321000)
 
     def test_add_unstruct_1(self):
