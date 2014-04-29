@@ -33,20 +33,21 @@ class Consumer(object):
 
 class BufferedConsumer(object):
 
-	def __init__(self, endpoint, max_length=DEFAULT_MAX_LENGTH):
+    def __init__(self, endpoint, max_length=DEFAULT_MAX_LENGTH):
 
-		self.endpoint = 'http://127.0.0.1:8900'
-		self.max_length = max_length
-		self.queue = []
+        self.endpoint = endpoint
+        self.max_length = max_length
+        self.queue = []
 
-	def input(self, payload):
+    def input(self, payload):
 
-		self.queue.append(payload.context)
-		if len(self.queue) >= DEFAULT_MAX_LENGTH:
-			self.flush()
+        print(len(self.queue))
+        self.queue.append(payload.context)
+        if len(self.queue) >= self.max_length:
+            self.flush()
 
-	def flush(self):
-		
-		batch = json.dumps(self.queue)
-		r = requests.post(self.endpoint, data=batch)
-
+    def flush(self):
+        
+        batch = json.dumps(self.queue)
+        self.queue = []
+        r = requests.post(self.endpoint, data=batch);
