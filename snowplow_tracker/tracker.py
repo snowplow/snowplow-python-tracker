@@ -21,9 +21,9 @@
 
 import requests
 import time
-from snowplow_tracker import payload, _version
+from celery.contrib.methods import task
+from snowplow_tracker import payload, _version, consumer
 from contracts import contract, new_contract, disable_all
-import consumer
 
 """
 Constants & config
@@ -34,9 +34,6 @@ DEFAULT_ENCODE_BASE64 = True
 DEFAULT_PLATFORM = "pc"
 SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
 DEFAULT_VENDOR = "com.snowplowanalytics"
-HTTP_ERRORS = {"host not found",
-               "No address associated with name",
-               "No address associated with hostname"}
 
 
 """
@@ -53,7 +50,7 @@ class Tracker:
 
     def __init__(self, collector_uri, 
                  namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, contracts=True,
-                 protocol="http-get", out_queue=None):
+                 protocol="http-get", out_queue=None, celery=False):
         """
         Constructor
         """
@@ -71,7 +68,8 @@ class Tracker:
         self.config = {
             "encode_base64":    encode_base64,
             "context_vendor": context_vendor,
-            "out_queue": out_queue
+            "out_queue": out_queue,
+            "celery": celery
         }
 
         self.standard_nv_pairs = {
@@ -167,8 +165,21 @@ class Tracker:
     Tracking methods
     """
 
+
+    @task
     @contract
     def track(self, pb):
+        """
+            Send the payload to an out_queue
+
+            :param  pb:              Payload builder
+            :type   pb:              payload
+            #:rtype:                  tuple(bool, int | str)
+        """
+        return self.config["out_queue"].input(pb)
+
+    @contract
+    def complete_payload(self, pb):
         """
             Called by all tracking events to add the standard name-value pairs
             to the Payload object irrespective of the tracked event.
@@ -181,7 +192,10 @@ class Tracker:
         if "co" in pb.context or "cx" in pb.context:
             pb.add("cv", self.config["context_vendor"])
 
-        self.config["out_queue"].input(pb)
+        if self.config["celery"]:
+            return self.track.delay(pb)
+        else:
+            return self.track(pb)
 
     @contract
     def track_page_view(self, page_url, page_title=None, referrer=None, context=None, tstamp=None):
@@ -203,7 +217,7 @@ class Tracker:
         pb.add("refr", referrer)
         pb.add("evn", DEFAULT_VENDOR)
         pb.add_json(context, self.config["encode_base64"], "cx", "co")
-        return self.track(pb)
+        return self.complete_payload(pb)
 
     @contract
     def track_ecommerce_transaction_item(self, order_id, sku, price, quantity,
@@ -244,7 +258,7 @@ class Tracker:
         pb.add("evn", DEFAULT_VENDOR)
         pb.add("tid", tid)
         pb.add_json(context, self.config["encode_base64"], "cx", "co")
-        return self.track(pb)
+        return self.complete_payload(pb)
 
     @contract
     def track_ecommerce_transaction(self, order_id, total_value,
@@ -300,7 +314,7 @@ class Tracker:
         pb.add("dtm", tstamp)
         pb.add_json(context, self.config["encode_base64"], "cx", "co")
 
-        transaction_result = self.track(pb)
+        transaction_result = self.complete_payload(pb)
 
         item_results = []
 
@@ -359,7 +373,7 @@ class Tracker:
         pb.add("se_va", value)
         pb.add("evn", DEFAULT_VENDOR)
         pb.add_json(context, self.config["encode_base64"], "cx", "co")
-        return self.track(pb)
+        return self.complete_payload(pb)
 
     @contract
     def track_unstruct_event(self, event_vendor, event_name, dict_, context=None, tstamp=None):
@@ -381,7 +395,7 @@ class Tracker:
         pb.add_unstruct(dict_, self.config["encode_base64"], "ue_px", "ue_pr")
         pb.add("evn", event_vendor)
         pb.add_json(context, self.config["encode_base64"], "cx", "co")
-        return self.track(pb)
+        return self.complete_payload(pb)
 
     def flush(self):
         """
