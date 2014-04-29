@@ -1,3 +1,12 @@
+Version 0.3.0 (2014-05-xx)
+--------------------------
+Improved test coverage up to 50% (73) (TODO)
+Added ability to specify port for collector (#72) (TODO)
+Added POST support to tracker (#70)
+Added Redis-based queue (#45) (TODO)
+Added Buffered Consumer (#44) (TODO)
+Changed user_id to be set on a per-event basis (#39) (TODO)
+
 Version 0.3.0 (2014-04-25)
 --------------------------
 Added custom context vendor configuration option (#67)

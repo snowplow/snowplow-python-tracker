@@ -23,6 +23,7 @@ import requests
 import time
 from snowplow_tracker import payload, _version
 from contracts import contract, new_contract, disable_all
+import consumer
 
 """
 Constants & config
@@ -51,7 +52,8 @@ class Tracker:
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
     def __init__(self, collector_uri, 
-                 namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, contracts=True):
+                 namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, contracts=True,
+                 protocol="http-get", out_queue=None):
         """
         Constructor
         """
@@ -60,9 +62,16 @@ class Tracker:
 
         self.collector_uri = self.as_collector_uri(collector_uri)
 
+        if out_queue is None:
+            if protocol == "http-post":
+                out_queue = consumer.BufferedConsumer(collector_uri)
+            else:
+                out_queue = consumer.Consumer(self.collector_uri)
+
         self.config = {
             "encode_base64":    encode_base64,
-            "context_vendor": context_vendor
+            "context_vendor": context_vendor,
+            "out_queue": out_queue
         }
 
         self.standard_nv_pairs = {
@@ -82,30 +91,6 @@ class Tracker:
             :rtype:              str
         """
         return "".join(["http://", host, "/i"])
-
-    """
-    Fire a GET request
-    """
-
-    @contract
-    def http_get(self, payload):
-        """
-            Send a GET request to the collector URI (generated from the
-            new_tracker methods) and return the relevant error message if any.
-
-            :param  payload:        Generated dict track()
-            :type   payload:        payload
-            :rtype:                 tuple(bool, int | str)
-        """
-
-        r = requests.get(self.collector_uri, params=payload.context)
-        code = r.status_code
-        if code in HTTP_ERRORS:
-            return (False, "Host [" + r.url + "] not found (possible connectivity error)")
-        elif code < 0 or code >= 400:
-            return (False, code)
-        else:
-            return (True, code)
 
     """
     Setter methods
@@ -190,12 +175,13 @@ class Tracker:
 
             :param  pb:              Payload builder
             :type   pb:              payload
-            :rtype:                  tuple(bool, int | str)
+            #:rtype:                  tuple(bool, int | str)
         """
         pb.add_dict(self.standard_nv_pairs)
         if "co" in pb.context or "cx" in pb.context:
             pb.add("cv", self.config["context_vendor"])
-        return self.http_get(pb)
+
+        self.config["out_queue"].input(pb)
 
     @contract
     def track_page_view(self, page_url, page_title=None, referrer=None, context=None, tstamp=None):
@@ -208,7 +194,7 @@ class Tracker:
             :type   referrer:       string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
-            :rtype:                 tuple(bool, int | str)
+            #:rtype:                 tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "pv")           # pv: page view
@@ -244,7 +230,7 @@ class Tracker:
             :type   currency:    string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
-            :rtype:                 tuple(bool, int | str)
+            #:rtype:                 tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "ti")
@@ -289,7 +275,7 @@ class Tracker:
             :type   items:          list(dict(str:*))
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
-            :rtype:                 dict(str: tuple(bool, int | str) | list(tuple(bool, int | str)))
+            #:rtype:                 dict(str: tuple(bool, int | str) | list(tuple(bool, int | str)))
         """
         if tstamp is None:
             tstamp = time.time()
@@ -336,7 +322,7 @@ class Tracker:
             :type   id_:            string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
-            :rtype:                 tuple(bool, int | str)
+            #:rtype:                 tuple(bool, int | str)
         """
         screen_view_properties = {"name": name}
         if id_ is not None:
@@ -362,7 +348,7 @@ class Tracker:
             :type   value:          int | float | None
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
-            :rtype:                 tuple(bool, int | str)
+            #:rtype:                 tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
         pb.add("e", "se")
@@ -386,7 +372,7 @@ class Tracker:
             :type   dict_:           dict(str:*)
             :param  context:         Custom context for the event
             :type   context:         dict(str:*) | None
-            :rtype:                  tuple(bool, int | str)
+            #:rtype:                  tuple(bool, int | str)
         """
         pb = payload.Payload(tstamp)
 
@@ -396,3 +382,9 @@ class Tracker:
         pb.add("evn", event_vendor)
         pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.track(pb)
+
+    def flush(self):
+        """
+            Flush the automatically created BufferedConsumer
+        """
+        self.config["out_queue"].flush()
