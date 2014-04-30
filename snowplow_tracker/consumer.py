@@ -31,6 +31,10 @@ HTTP_ERRORS = {"host not found",
 
 
 class Consumer(object):
+    """
+        The simplest consumer.
+        Sends HTTP GET requests directly to a collector.
+    """
 
     def __init__(self, endpoint):
         self.endpoint = endpoint
@@ -53,10 +57,13 @@ class Consumer(object):
         elif code < 0 or code >= 400:
             return (False, code)
         else:
-            return (True, code+99)
+            return (True, code)
 
 
 class AsyncConsumer(Consumer):
+    """
+        Like Consumer, but uses an asynchronous thread to send HTTP requests.
+    """
 
     def __init__(self, endpoint):
         super(AsyncConsumer, self).__init__(endpoint)
@@ -68,7 +75,11 @@ class AsyncConsumer(Consumer):
 
 
 class BufferedConsumer(object):
-
+    """
+        Holds event JSONs in an array.
+        When the array is large enough or the user calls the flush method,
+        sends the array to a collector with an HTTP POST request.
+    """
     def __init__(self, endpoint, max_length=DEFAULT_MAX_LENGTH):
 
         self.endpoint = endpoint
@@ -89,6 +100,9 @@ class BufferedConsumer(object):
 
 
 class AsyncBufferedConsumer(BufferedConsumer):
+    """
+        Like BufferedConsumer, but uses an asynchronous thread to flush events.
+    """
 
     def __init(self, endpoint, max_length=DEFAULT_MAX_LENGTH):
         super(AsyncBufferedConsumer, self).__init__(endpoint, max_length)
@@ -100,6 +114,10 @@ class AsyncBufferedConsumer(BufferedConsumer):
 
 
 class RedisConsumer(object):
+    """
+        Writes events to a Redis database.
+        Use snowplow_tracker/redis_worker.py to move the events from Redis to another consumer.
+    """
 
     def __init__(self, key, host="localhost", port=6379, db=9):
         self.rdb = redis.StrictRedis(host, port, db)

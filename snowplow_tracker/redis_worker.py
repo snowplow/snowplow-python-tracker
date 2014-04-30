@@ -1,5 +1,5 @@
 """
-    redis_worke.py
+    redis_worker.py
 
     Copyright (c) 2013-2014 Snowplow Analytics Ltd. All rights reserved.
 
@@ -31,6 +31,9 @@ DEFAULT_REDIS = redis.StrictRedis()
 DEFAULT_KEY = "snowplow"
 
 class RedisWorker(object):
+	"""
+		Asynchronously take events from redis and send them to a consumer
+	"""
 
     def __init__(self, _consumer, key=DEFAULT_KEY, dbr=DEFAULT_REDIS):
         self.key = key
@@ -39,9 +42,16 @@ class RedisWorker(object):
         self.pool = Pool(5)
 
     def send(self, payload):
+    	"""
+    		Send an event to a consumer
+    	"""
         self.consumer.input(payload)
 
     def pop_payload(self):
+    	"""
+    		Get a single event from Redis and send it
+    		If the Redis queue is empty, sleep to avoid making continual requests
+    	"""
         payload = self.dbr.lpop(self.key)
         if payload:
             self.pool.spawn(self.send, json.loads(payload))
@@ -49,6 +59,9 @@ class RedisWorker(object):
             gevent.sleep(5)
 
     def run(self):
+    	"""
+    		Run indefinitely
+    	"""
         self._shutdown = False
 
         while not self._shutdown:
@@ -56,4 +69,7 @@ class RedisWorker(object):
         self.pool.join(timeout=20)
 
     def request_shutdown(self):
+    	"""
+    		Halt the worker
+    	"""
         self._shutdown = True
