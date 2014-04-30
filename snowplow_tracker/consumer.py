@@ -1,29 +1,33 @@
+"""
+    consumer.py
+
+    Copyright (c) 2013-2014 Snowplow Analytics Ltd. All rights reserved.
+
+    This program is licensed to you under the Apache License Version 2.0,
+    and you may not use this file except in compliance with the Apache License
+    Version 2.0. You may obtain a copy of the Apache License Version 2.0 at
+    http://www.apache.org/licenses/LICENSE-2.0.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the Apache License Version 2.0 is distributed on
+    an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+    express or implied. See the Apache License Version 2.0 for the specific
+    language governing permissions and limitations there under.
+
+    Authors: Anuj More, Alex Dean, Fred Blundun
+    Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
+    License: Apache License Version 2.0
+"""
+
 import requests
 import json
 import threading
+import redis
 
 DEFAULT_MAX_LENGTH = 10
 HTTP_ERRORS = {"host not found",
                "No address associated with name",
                "No address associated with hostname"}
-
-class SendThread(threading.Thread):
-    def __init__(self, consumer, payload):
-        super(SendThread, self).__init__()
-        self.consumer = consumer
-        self.payload = payload
-
-    def run(self):
-        self.consumer.input(self.payload, False)
-
-
-class FlushThread(threading.Thread):
-    def __init__(self, consumer):
-        super(FlushThread, self).__init__()
-        self.consumer = consumer
-
-    def run(self):
-        self.consumer.flush(False)
 
 
 class Consumer(object):
@@ -42,14 +46,14 @@ class Consumer(object):
             :rtype:                 tuple(bool, int | str)
         """
 
-        r = requests.get(self.endpoint, params=payload.context)
+        r = requests.get(self.endpoint, params=payload)
         code = r.status_code
         if code in HTTP_ERRORS:
             return (False, "Host [" + r.url + "] not found (possible connectivity error)")
         elif code < 0 or code >= 400:
             return (False, code)
         else:
-            return (True, code)
+            return (True, code+99)
 
 
 class AsyncConsumer(Consumer):
@@ -57,13 +61,10 @@ class AsyncConsumer(Consumer):
     def __init__(self, endpoint):
         super(AsyncConsumer, self).__init__(endpoint)
 
-    def input(self, payload, async=True):
+    def input(self, payload):
 
-        if async:
-            self.sending_thread = SendThread(self, payload)
-            self.sending_thread.start()
-        else:
-            super(AsyncConsumer, self).input(payload)
+        t = threading.Thread(target=super(AsyncConsumer, self).input, args=[payload])
+        t.start()
 
 
 class BufferedConsumer(object):
@@ -76,7 +77,7 @@ class BufferedConsumer(object):
 
     def input(self, payload):
 
-        self.queue.append(payload.context)
+        self.queue.append(payload)
         if len(self.queue) >= self.max_length:
             self.flush()
 
@@ -92,9 +93,16 @@ class AsyncBufferedConsumer(BufferedConsumer):
     def __init(self, endpoint, max_length=DEFAULT_MAX_LENGTH):
         super(AsyncBufferedConsumer, self).__init__(endpoint, max_length)
 
-    def flush(self, async=True):
-        if async:
-            self.flushing_thread = FlushThread(self)
-            self.flushing_thread.start()            
-        else:
-            super(AsyncBufferedConsumer, self).flush()
+    def flush(self):
+
+        t = threading.Thread(target=super(AsyncBufferedConsumer, self).flush)
+        t.start()
+
+
+class RedisConsumer(object):
+
+    def __init__(self, key, host="localhost", port=6379, db=9):
+        self.rdb = redis.StrictRedis(host, port, db)
+
+    def input(self, payload):
+        self.rdb.rpush(key, json.dumps(payload))

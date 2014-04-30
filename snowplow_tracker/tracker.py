@@ -19,11 +19,12 @@
     License: Apache License Version 2.0
 """
 
-import requests
 import time
-from celery.contrib.methods import task
 from snowplow_tracker import payload, _version, consumer
 from contracts import contract, new_contract, disable_all
+import celery
+from celery.contrib.methods import task
+app = celery.Celery('tasks', broker='redis://guest@localhost//')
 
 """
 Constants & config
@@ -50,7 +51,7 @@ class Tracker:
 
     def __init__(self, collector_uri, 
                  namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, contracts=True,
-                 protocol="http-get", out_queue=None, celery=False):
+                 protocol="http-get", celery=False, async=False,out_queue=None):
         """
         Constructor
         """
@@ -61,9 +62,15 @@ class Tracker:
 
         if out_queue is None:
             if protocol == "http-post":
-                out_queue = consumer.BufferedConsumer(collector_uri)
+                if async:
+                    out_queue = consumer.AsyncBufferedConsumer(collector_uri)
+                else:
+                    out_queue = consumer.BufferedConsumer(collector_uri)
             else:
-                out_queue = consumer.Consumer(self.collector_uri)
+                if async:
+                    out_queue = consumer.AsyncConsumer(self.collector_uri)
+                else:
+                    out_queue = consumer.Consumer(self.collector_uri)
 
         self.config = {
             "encode_base64":    encode_base64,
@@ -165,7 +172,6 @@ class Tracker:
     Tracking methods
     """
 
-
     @task
     @contract
     def track(self, pb):
@@ -176,7 +182,7 @@ class Tracker:
             :type   pb:              payload
             #:rtype:                  tuple(bool, int | str)
         """
-        return self.config["out_queue"].input(pb)
+        return self.config["out_queue"].input(pb.context)
 
     @contract
     def complete_payload(self, pb):
