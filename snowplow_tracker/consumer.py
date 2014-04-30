@@ -1,10 +1,30 @@
 import requests
 import json
+import threading
 
 DEFAULT_MAX_LENGTH = 10
 HTTP_ERRORS = {"host not found",
                "No address associated with name",
                "No address associated with hostname"}
+
+class SendThread(threading.Thread):
+    def __init__(self, consumer, payload):
+        super(SendThread, self).__init__()
+        self.consumer = consumer
+        self.payload = payload
+
+    def run(self):
+        self.consumer.input(self.payload, False)
+
+
+class FlushThread(threading.Thread):
+    def __init__(self, consumer):
+        super(FlushThread, self).__init__()
+        self.consumer = consumer
+
+    def run(self):
+        self.consumer.flush(False)
+
 
 class Consumer(object):
 
@@ -31,6 +51,21 @@ class Consumer(object):
         else:
             return (True, code)
 
+
+class AsyncConsumer(Consumer):
+
+    def __init__(self, endpoint):
+        super(AsyncConsumer, self).__init__(endpoint)
+
+    def input(self, payload, async=True):
+
+        if async:
+            self.sending_thread = SendThread(self, payload)
+            self.sending_thread.start()
+        else:
+            super(AsyncConsumer, self).input(payload)
+
+
 class BufferedConsumer(object):
 
     def __init__(self, endpoint, max_length=DEFAULT_MAX_LENGTH):
@@ -41,7 +76,6 @@ class BufferedConsumer(object):
 
     def input(self, payload):
 
-        print(len(self.queue))
         self.queue.append(payload.context)
         if len(self.queue) >= self.max_length:
             self.flush()
@@ -51,3 +85,16 @@ class BufferedConsumer(object):
         batch = json.dumps(self.queue)
         self.queue = []
         r = requests.post(self.endpoint, data=batch);
+
+
+class AsyncBufferedConsumer(BufferedConsumer):
+
+    def __init(self, endpoint, max_length=DEFAULT_MAX_LENGTH):
+        super(AsyncBufferedConsumer, self).__init__(endpoint, max_length)
+
+    def flush(self, async=True):
+        if async:
+            self.flushing_thread = FlushThread(self)
+            self.flushing_thread.start()            
+        else:
+            super(AsyncBufferedConsumer, self).flush()

@@ -1,6 +1,9 @@
 Version 0.3.0 (2014-05-xx)
 --------------------------
-Add thread-based AsyncBufferedConsumer (#74) (TODO) 
+Added callbacks for flushing (#78) (TODO)
+Added Python-logging (#76) (TODO)
+Added Redis and gevent based async approach (#75) (TODO)
+Added thread-based AsyncBufferedConsumer (#74) (TODO) 
 Improved test coverage up to 50% (73) (TODO)
 Added ability to specify port for collector (#72) (TODO)
 Added POST support to tracker (#70)
