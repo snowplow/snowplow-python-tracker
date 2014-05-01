@@ -24,20 +24,20 @@ import logging
 from snowplow_tracker import payload, _version, consumer
 from contracts import contract, new_contract, disable_all
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 
 """
 Constants & config
 """
 
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
 VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
 DEFAULT_PLATFORM = "pc"
 SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
 DEFAULT_VENDOR = "com.snowplowanalytics"
-DEFAULT_BUFFER_SIZE = 20
 
 
 """
@@ -64,11 +64,9 @@ class Tracker:
         if not log:
             logger.setLevel(logging.CRITICAL)
 
-        self.config = {
-            "encode_base64":    encode_base64,
-            "context_vendor": context_vendor,
-            "out_queue": out_queue
-        }
+        self.out_queue = out_queue
+        self.encode_base64 = encode_base64
+        self.context_vendor = context_vendor
 
         self.standard_nv_pairs = {
             "p": DEFAULT_PLATFORM,
@@ -163,7 +161,7 @@ class Tracker:
             :type   pb:              payload
             #:rtype:                  tuple(bool, int | str)
         """
-        return self.config["out_queue"].input(pb.context)
+        return self.out_queue.input(pb.nv_pairs)
 
     @contract
     def complete_payload(self, pb):
@@ -176,8 +174,8 @@ class Tracker:
             #:rtype:                  tuple(bool, int | str)
         """
         pb.add_dict(self.standard_nv_pairs)
-        if "co" in pb.context or "cx" in pb.context:
-            pb.add("cv", self.config["context_vendor"])
+        if "co" in pb.nv_pairs or "cx" in pb.nv_pairs:
+            pb.add("cv", self.context_vendor)
 
         return self.track(pb)
 
@@ -200,7 +198,7 @@ class Tracker:
         pb.add("page", page_title)
         pb.add("refr", referrer)
         pb.add("evn", DEFAULT_VENDOR)
-        pb.add_json(context, self.config["encode_base64"], "cx", "co")
+        pb.add_json(context, self.encode_base64, "cx", "co")
         return self.complete_payload(pb)
 
     @contract
@@ -241,7 +239,7 @@ class Tracker:
         pb.add("ti_cu", currency)
         pb.add("evn", DEFAULT_VENDOR)
         pb.add("tid", tid)
-        pb.add_json(context, self.config["encode_base64"], "cx", "co")
+        pb.add_json(context, self.encode_base64, "cx", "co")
         return self.complete_payload(pb)
 
     @contract
@@ -296,7 +294,7 @@ class Tracker:
         pb.add("evn", DEFAULT_VENDOR)
         pb.add("tid", tid)
         pb.add("dtm", tstamp)
-        pb.add_json(context, self.config["encode_base64"], "cx", "co")
+        pb.add_json(context, self.encode_base64, "cx", "co")
 
         transaction_result = self.complete_payload(pb)
 
@@ -356,7 +354,7 @@ class Tracker:
         pb.add("se_pr", property_)
         pb.add("se_va", value)
         pb.add("evn", DEFAULT_VENDOR)
-        pb.add_json(context, self.config["encode_base64"], "cx", "co")
+        pb.add_json(context, self.encode_base64, "cx", "co")
         return self.complete_payload(pb)
 
     @contract
@@ -376,9 +374,9 @@ class Tracker:
 
         pb.add("e", "ue")
         pb.add("ue_na", event_name)
-        pb.add_unstruct(dict_, self.config["encode_base64"], "ue_px", "ue_pr")
+        pb.add_unstruct(dict_, self.encode_base64, "ue_px", "ue_pr")
         pb.add("evn", event_vendor)
-        pb.add_json(context, self.config["encode_base64"], "cx", "co")
+        pb.add_json(context, self.encode_base64, "cx", "co")
         return self.complete_payload(pb)
 
     def flush(self, async=True):
@@ -386,6 +384,7 @@ class Tracker:
             Flush the consumer
         """
         if async:
-            self.config["out_queue"].flush()
+            self.out_queue.flush()
         else:
-            self.config["out_queue"].sync_flush()
+            self.out_queue.sync_flush()
+

@@ -34,14 +34,14 @@ class Payload:
             Constructor
         """
 
-        self.context = {}
+        self.nv_pairs = {}
         # Set transaction for every event
-        self.context["tid"] = Payload.set_transaction_id()
+        self.nv_pairs["tid"] = Payload.set_transaction_id()
         # Set timestamp for every event
         self.set_timestamp(tstamp)
         if dict_ is not None:
             for f in dict_:
-                self.context[f] = dict_[f]
+                self.nv_pairs[f] = dict_[f]
 
     """
     Special payload creation functions
@@ -67,7 +67,7 @@ class Payload:
             value = int(tstamp)
         else:
             value = tstamp
-        self.context["dtm"] = value
+        self.nv_pairs["dtm"] = value
 
     """
     Payload creators
@@ -78,7 +78,7 @@ class Payload:
             Add a name value pair to the Payload object
         """
         if not (value == "" or value is None):
-            self.context[name] = value
+            self.nv_pairs[name] = value
 
     @contract
     def add_dict(self, dict_, base64=False):
@@ -158,4 +158,4 @@ class Payload:
         """
             Returns the context dictionary from the Payload object
         """
-        return self.context
+        return self.nv_pairs

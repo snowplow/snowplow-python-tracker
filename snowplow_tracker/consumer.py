@@ -22,26 +22,43 @@
 import requests
 import json
 import threading
-import celery
+from celery import Celery
 from celery.contrib.methods import task
 import redis
 import logging
 
-app = celery.Celery('tasks', broker='redis://guest@localhost//')
-
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 DEFAULT_MAX_LENGTH = 10
 HTTP_ERRORS = {"host not found",
                "No address associated with name",
                "No address associated with hostname"}
 
-class Consumer(object):
+def make_celery(app):
+    celery = Celery(app.import_name, broker=app.config["CELERY_BROKER_URL"])
+    celery.conf.update(app.config)
+    TaskBase = celery.Task
+    class ContextTask(TaskBase):
+        abstract = True
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return TaskBase.__call_(self, *args, **kwargs)
+    celery.Task = ContextTask
+    return celery
 
-    def __init__(self, endpoint, method="http-get", buffer_size=None):
+
+class Consumer(object):
+    """
+        Synchronously send Snowplow events to a Snowplow as_collector_uri
+        Supports both GET and POST requests
+    """
+
+    def __init__(self, endpoint, method="http-get", buffer_size=None, on_success=None, on_failure=None):
 
         self.endpoint = self.as_collector_uri(endpoint)
+
+        self.method = method
 
         if buffer_size is None:
             if method == "http-post":
@@ -51,7 +68,8 @@ class Consumer(object):
         self.buffer_size = buffer_size
         self.buffer = []
 
-        self.method = method
+        self.on_success = on_success
+        self.on_failure = on_failure
 
     def as_collector_uri(self, endpoint):
         return "http://" + endpoint + "/i"
@@ -63,36 +81,76 @@ class Consumer(object):
 
     @task
     def flush(self):
+
         if self.method == "http-post":
             data = json.dumps(self.buffer)
+            buffer_length = len(self.buffer)
             self.buffer = []
-            self.http_post(data)
+            status_code = self.http_post(data)
+            if status_code == 200 and self.on_success is not None:
+                self.on_success(buffer_length)
+            elif self.on_failure is not None:
+                self.on_failure(0, data)
 
         elif self.method == "http-get":
+            success_count = 0
+            unsent_requests = []
+
             while len(self.buffer) > 0:
                 payload = self.buffer.pop()
-                self.http_get(payload)
+                status_code = self.http_get(payload)
+                if status_code == 200:
+                    success_count += 1
+                else:
+                    unsent_requests.append(payload)
 
-    def http_post(self, data):
+            if len(unsent_requests) == 0 and self.on_success is not None:
+                self.on_success(success_count)
+            elif self.on_failure is not None:
+                self.on_failure(success_count, unsent_requests)
+
+        else:
+            logger.warn(self.method + " is not a recognised HTTP method")
+
+    def http_post(self, data, buffer_length):
+        logger.debug("Sending POST request...")
         r = requests.post(self.endpoint, data=data)
+        logger.debug("POST request finished with status code: " + str(r.status_code))
+        return r
 
     def http_get(self, payload):
+        logger.debug("Sending GET request...")
         r = requests.get(self.endpoint, params=payload)        
+        logger.debug("GET request finished with status code: " + str(r.status_code))
+        return r
 
     def sync_flush(self):
+        logger.debug("Starting synchronous flush...")
         Consumer.flush(self)
+        logger.debug("Finished synchrous flush")
 
 class AsyncConsumer(Consumer):
-
+    """
+        Uses threads to send HTTP requests asynchronously
+    """
     def flush(self):
-        threading.Thread(target=super(AsyncConsumer, self).flush).start()
+        logger.debug("Flushing thread running...")
+        t = threading.Thread(target=super(AsyncConsumer, self).flush)
+        t.start()
+
 
 class CeleryConsumer(Consumer):
-
+    """
+        Uses a Celery worker to send HTTP requests asynchronously
+    """
     def flush(self):
         super(CeleryConsumer, self).flush.delay()
 
+
 class RedisConsumer(object):
+    """
+        Sends Snowplow events to a Redis database
+    """
     def __init__(self, rdb=None, key="snowplow"):
         if rdb is None:
             rdb = redis.StrictRedis()
@@ -100,7 +158,12 @@ class RedisConsumer(object):
         self.key = key
 
     def input(self, payload):
+        logger.debug("Pushing event to Redis queue...")
         self.rdb.rpush(self.key, json.dumps(payload))
+        logger.debug("Finished sending event to Redis.")
 
     def flush(self):
+        pass
+
+    def sync_flush(self):
         pass
