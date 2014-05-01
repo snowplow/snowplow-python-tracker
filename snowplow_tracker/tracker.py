@@ -20,11 +20,13 @@
 """
 
 import time
+import logging
 from snowplow_tracker import payload, _version, consumer
 from contracts import contract, new_contract, disable_all
-import celery
-from celery.contrib.methods import task
-app = celery.Celery('tasks', broker='redis://guest@localhost//')
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 
 """
 Constants & config
@@ -35,6 +37,7 @@ DEFAULT_ENCODE_BASE64 = True
 DEFAULT_PLATFORM = "pc"
 SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
 DEFAULT_VENDOR = "com.snowplowanalytics"
+DEFAULT_BUFFER_SIZE = 20
 
 
 """
@@ -49,34 +52,22 @@ class Tracker:
                  and len(s) > 0) or s is None)
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
-    def __init__(self, collector_uri, 
-                 namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, contracts=True,
-                 protocol="http-get", celery=False, async=False,out_queue=None):
+    def __init__(self, out_queue, 
+                 namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, 
+                 contracts=True, log=True):
         """
         Constructor
         """
         if not contracts:
             disable_all()
 
-        self.collector_uri = self.as_collector_uri(collector_uri)
-
-        if out_queue is None:
-            if protocol == "http-post":
-                if async:
-                    out_queue = consumer.AsyncBufferedConsumer(collector_uri)
-                else:
-                    out_queue = consumer.BufferedConsumer(collector_uri)
-            else:
-                if async:
-                    out_queue = consumer.AsyncConsumer(self.collector_uri)
-                else:
-                    out_queue = consumer.Consumer(self.collector_uri)
+        if not log:
+            logger.setLevel(logging.CRITICAL)
 
         self.config = {
             "encode_base64":    encode_base64,
             "context_vendor": context_vendor,
-            "out_queue": out_queue,
-            "celery": celery
+            "out_queue": out_queue
         }
 
         self.standard_nv_pairs = {
@@ -86,16 +77,6 @@ class Tracker:
             "aid": app_id
         }
 
-    @contract
-    def as_collector_uri(self, host):
-        """
-            Method to create a URL
-
-            :param  host:        URL input by user
-            :type   host:        str
-            :rtype:              str
-        """
-        return "".join(["http://", host, "/i"])
 
     """
     Setter methods
@@ -168,15 +149,15 @@ class Tracker:
         """
         self.standard_nv_pairs["lang"] = lang
 
+
     """
     Tracking methods
     """
 
-    @task
     @contract
     def track(self, pb):
         """
-            Send the payload to an out_queue
+            Send the payload to a consumer
 
             :param  pb:              Payload builder
             :type   pb:              payload
@@ -198,10 +179,7 @@ class Tracker:
         if "co" in pb.context or "cx" in pb.context:
             pb.add("cv", self.config["context_vendor"])
 
-        if self.config["celery"]:
-            return self.track.delay(pb)
-        else:
-            return self.track(pb)
+        return self.track(pb)
 
     @contract
     def track_page_view(self, page_url, page_title=None, referrer=None, context=None, tstamp=None):
@@ -403,8 +381,11 @@ class Tracker:
         pb.add_json(context, self.config["encode_base64"], "cx", "co")
         return self.complete_payload(pb)
 
-    def flush(self):
+    def flush(self, async=True):
         """
-            Flush the automatically created BufferedConsumer
+            Flush the consumer
         """
-        self.config["out_queue"].flush()
+        if async:
+            self.config["out_queue"].flush()
+        else:
+            self.config["out_queue"].sync_flush()

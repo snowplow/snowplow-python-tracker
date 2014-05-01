@@ -35,13 +35,3 @@ class TestTracker(unittest.TestCase):
         self.assertEquals(t.standard_nv_pairs["aid"], "AF003")
         self.assertEquals(t.config["encode_base64"], False)
         self.assertEquals(t.config["context_vendor"], "com.example")
-
-    """
-    Testing URI generator
-    """
-
-    def test_collector_uri_construction(self):
-        host = "d3rkrsqld9gmqf.cloudfront.net"
-        output = Tracker(host).collector_uri
-        exp_output = "http://d3rkrsqld9gmqf.cloudfront.net/i"
-        self.assertEquals(output, exp_output)

@@ -22,105 +22,85 @@
 import requests
 import json
 import threading
+import celery
+from celery.contrib.methods import task
 import redis
+import logging
+
+app = celery.Celery('tasks', broker='redis://guest@localhost//')
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 DEFAULT_MAX_LENGTH = 10
 HTTP_ERRORS = {"host not found",
                "No address associated with name",
                "No address associated with hostname"}
 
-
 class Consumer(object):
-    """
-        The simplest consumer.
-        Sends HTTP GET requests directly to a collector.
-    """
 
-    def __init__(self, endpoint):
-        self.endpoint = endpoint
+    def __init__(self, endpoint, method="http-get", buffer_size=None):
 
-    def input(self, payload):
+        self.endpoint = self.as_collector_uri(endpoint)
 
-        """
-            Send a GET request to the collector URI (generated from the
-            new_tracker methods) and return the relevant error message if any.
+        if buffer_size is None:
+            if method == "http-post":
+                buffer_size = DEFAULT_MAX_LENGTH
+            else:
+                buffer_size = 1
+        self.buffer_size = buffer_size
+        self.buffer = []
 
-            :param  payload:        Generated dict track()
-            :type   payload:        payload
-            :rtype:                 tuple(bool, int | str)
-        """
+        self.method = method
 
-        r = requests.get(self.endpoint, params=payload)
-        code = r.status_code
-        if code in HTTP_ERRORS:
-            return (False, "Host [" + r.url + "] not found (possible connectivity error)")
-        elif code < 0 or code >= 400:
-            return (False, code)
-        else:
-            return (True, code)
-
-
-class AsyncConsumer(Consumer):
-    """
-        Like Consumer, but uses an asynchronous thread to send HTTP requests.
-    """
-
-    def __init__(self, endpoint):
-        super(AsyncConsumer, self).__init__(endpoint)
+    def as_collector_uri(self, endpoint):
+        return "http://" + endpoint + "/i"
 
     def input(self, payload):
-
-        t = threading.Thread(target=super(AsyncConsumer, self).input, args=[payload])
-        t.start()
-
-
-class BufferedConsumer(object):
-    """
-        Holds event JSONs in an array.
-        When the array is large enough or the user calls the flush method,
-        sends the array to a collector with an HTTP POST request.
-    """
-    def __init__(self, endpoint, max_length=DEFAULT_MAX_LENGTH):
-
-        self.endpoint = endpoint
-        self.max_length = max_length
-        self.queue = []
-
-    def input(self, payload):
-
-        self.queue.append(payload)
-        if len(self.queue) >= self.max_length:
+        self.buffer.append(payload)
+        if len(self.buffer) >= self.buffer_size:
             self.flush()
 
+    @task
     def flush(self):
-        
-        batch = json.dumps(self.queue)
-        self.queue = []
-        r = requests.post(self.endpoint, data=batch);
+        if self.method == "http-post":
+            data = json.dumps(self.buffer)
+            self.buffer = []
+            self.http_post(data)
 
+        elif self.method == "http-get":
+            while len(self.buffer) > 0:
+                payload = self.buffer.pop()
+                self.http_get(payload)
 
-class AsyncBufferedConsumer(BufferedConsumer):
-    """
-        Like BufferedConsumer, but uses an asynchronous thread to flush events.
-    """
+    def http_post(self, data):
+        r = requests.post(self.endpoint, data=data)
 
-    def __init(self, endpoint, max_length=DEFAULT_MAX_LENGTH):
-        super(AsyncBufferedConsumer, self).__init__(endpoint, max_length)
+    def http_get(self, payload):
+        r = requests.get(self.endpoint, params=payload)        
+
+    def sync_flush(self):
+        Consumer.flush(self)
+
+class AsyncConsumer(Consumer):
 
     def flush(self):
+        threading.Thread(target=super(AsyncConsumer, self).flush).start()
 
-        t = threading.Thread(target=super(AsyncBufferedConsumer, self).flush)
-        t.start()
+class CeleryConsumer(Consumer):
 
+    def flush(self):
+        super(CeleryConsumer, self).flush.delay()
 
 class RedisConsumer(object):
-    """
-        Writes events to a Redis database.
-        Use snowplow_tracker/redis_worker.py to move the events from Redis to another consumer.
-    """
-
-    def __init__(self, key, host="localhost", port=6379, db=9):
-        self.rdb = redis.StrictRedis(host, port, db)
+    def __init__(self, rdb=None, key="snowplow"):
+        if rdb is None:
+            rdb = redis.StrictRedis()
+        self.rdb = rdb
+        self.key = key
 
     def input(self, payload):
-        self.rdb.rpush(key, json.dumps(payload))
+        self.rdb.rpush(self.key, json.dumps(payload))
+
+    def flush(self):
+        pass
