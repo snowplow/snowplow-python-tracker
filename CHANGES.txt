@@ -1,15 +1,15 @@
 Version 0.4.0 (2014-05-xx)
 --------------------------
-Added callbacks for flushing (#78)
-Added Python-logging (#76)
-Added Redis and gevent based async approach (#75) (TODO)
-Added thread-based AsyncBufferedConsumer (#74) (TODO) 
-Improved test coverage up to 50% (73) (TODO)
+Added callbacks for flushing
+Added Python-logging
+Added Redis and gevent based async approach (#75)
+Added thread-based AsyncBufferedConsumer (#74)
+Improved test coverage up to 50% (73)
 Added ability to specify port for collector (#72) (TODO)
 Added POST support to tracker (#70)
-Added Redis-based queue (#45) (TODO)
-Added Buffered Consumer (#44) (TODO)
-Changed user_id to be set on a per-event basis (#39) (TODO)
+Added Redis-based queue (#45)
+Added Buffered Consumer (#44)
+Changed user_id to be set on a per-event basis (#39)
 
 Version 0.3.0 (2014-04-25)
 --------------------------

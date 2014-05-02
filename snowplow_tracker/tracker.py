@@ -36,8 +36,6 @@ logger.setLevel(logging.DEBUG)
 
 VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
-DEFAULT_PLATFORM = "pc"
-SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
 DEFAULT_VENDOR = "com.snowplowanalytics"
 
 
@@ -55,7 +53,7 @@ class Tracker:
 
     new_contract("tracker", lambda s: isinstance(s, Tracker))
 
-    def __init__(self, out_queue, 
+    def __init__(self, out_queue, subject=None,
                  namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, 
                  contracts=True, log=True):
         """
@@ -68,11 +66,11 @@ class Tracker:
             logger.setLevel(logging.CRITICAL)
 
         self.out_queue = out_queue
+        self.subject=subject        
         self.encode_base64 = encode_base64
         self.context_vendor = context_vendor
 
         self.standard_nv_pairs = {
-            "p": DEFAULT_PLATFORM,
             "tv": VERSION,
             "tna": namespace,
             "aid": app_id
@@ -104,91 +102,6 @@ class Tracker:
         elif isinstance(tstamp, (int, float)):
             return int(tstamp)
 
-    """
-    Setter methods
-    """
-
-    @contract
-    def set_platform(self, value):
-        """
-            :param  value:          One of ["pc", "tv", "mob", "cnsl", "iot"]
-            :type   value:          str
-            :rtype:                 tracker
-        """
-        if value in SUPPORTED_PLATFORMS:
-            self.standard_nv_pairs["p"] = value
-        else:
-            raise RuntimeError(value + " is not a supported platform")
-        return self
-
-    @contract
-    def set_user_id(self, user_id):
-        """
-            :param  user_id:        User ID
-            :type   user_id:        non_empty_string
-            :rtype:                 tracker
-        """
-        self.standard_nv_pairs["uid"] = user_id
-        return self
-
-    @contract
-    def set_screen_resolution(self, width, height):
-        """
-            :param  width:          Width of the screen
-            :param  height:         Height of the screen
-            :type   width:          int,>0
-            :type   height:         int,>0
-            :rtype:                 tracker
-        """
-        self.standard_nv_pairs["res"] = "".join([str(width), "x", str(height)])
-        return self
-
-    @contract
-    def set_viewport(self, width, height):
-        """
-            :param  width:          Width of the viewport
-            :param  height:         Height of the viewport
-            :type   width:          int,>0
-            :type   height:         int,>0
-            :rtype:                 tracker
-        """
-        self.standard_nv_pairs["vp"] = "".join([str(width), "x", str(height)])
-        return self
-
-    @contract
-    def set_color_depth(self, depth):
-        """
-            :param  depth:          Depth of the color on the screen
-            :type   depth:          int
-            :rtype:                 tracker
-        """
-        self.standard_nv_pairs["cd"] = depth
-        return self
-
-    @contract
-    def set_timezone(self, timezone):
-        """
-            Set timezone for the Tracker object.
-
-            :param  timezone:       Timezone as a string
-            :type   timezone:       non_empty_string
-            :rtype:                 tracker
-        """
-        self.standard_nv_pairs["tz"] = timezone
-        return self
-
-    @contract
-    def set_lang(self, lang):
-        """
-            Set language.
-
-            :param  lang:           Language the application is set to
-            :type   lang:           non_empty_string
-            :rtype:                 tracker
-        """
-        self.standard_nv_pairs["lang"] = lang
-        return self
-
 
     """
     Tracking methods
@@ -201,7 +114,7 @@ class Tracker:
 
             :param  pb:              Payload builder
             :type   pb:              payload
-            #:rtype:                  tuple(bool, int | str)
+            :rtype:                  tracker | int
         """
         result = self.out_queue.input(pb.nv_pairs)
         if result is not None:
@@ -217,11 +130,13 @@ class Tracker:
 
             :param  pb:              Payload builder
             :type   pb:              payload
-            #:rtype:                  tuple(bool, int | str)
+            :rtype:                  tracker | int
         """
         pb.add_dict(self.standard_nv_pairs)
         if "co" in pb.nv_pairs or "cx" in pb.nv_pairs:
             pb.add("cv", self.context_vendor)
+
+        pb.add_dict(self.subject.standard_nv_pairs)
 
         return self.track(pb)
 
@@ -458,3 +373,9 @@ class Tracker:
             return self.out_queue.flush()
         else:
             return self.out_queue.sync_flush()
+
+    def set_subject(self, subject):
+        """
+            Set the subject of the events fired by the tracker
+        """
+        self.subject = subject
