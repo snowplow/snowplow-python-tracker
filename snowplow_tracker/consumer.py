@@ -85,7 +85,7 @@ class Consumer(object):
             data = json.dumps(self.buffer)
             buffer_length = len(self.buffer)
             self.buffer = []
-            status_code = self.http_post(data)
+            status_code = self.http_post(data).status_code
             if status_code == 200 and self.on_success is not None:
                 self.on_success(buffer_length)
             elif self.on_failure is not None:
@@ -97,12 +97,12 @@ class Consumer(object):
 
             while len(self.buffer) > 0:
                 payload = self.buffer.pop()
-                status_code = self.http_get(payload)
+                status_code = self.http_get(payload).status_code
                 if status_code == 200:
                     success_count += 1
                 else:
                     unsent_requests.append(payload)
-
+            logger.debug(str(len(unsent_requests)) + '\n')
             if len(unsent_requests) == 0 and self.on_success is not None:
                 self.on_success(success_count)
             elif self.on_failure is not None:
@@ -111,7 +111,7 @@ class Consumer(object):
         else:
             logger.warn(self.method + " is not a recognised HTTP method")
 
-    def http_post(self, data, buffer_length):
+    def http_post(self, data):
         logger.debug("Sending POST request...")
         r = requests.post(self.endpoint, data=data)
         logger.debug("POST request finished with status code: " + str(r.status_code))

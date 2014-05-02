@@ -98,7 +98,11 @@ class Payload:
         json_dict = json.dumps(dict_)
 
         if encode_base64:
-            self.add(type_when_encoded, base64.urlsafe_b64encode(json_dict.encode("ascii")))
+                encoded_dict = base64.urlsafe_b64encode(json_dict.encode("ascii"))
+                if not isinstance(encoded_dict, str):
+                    encoded_dict = encoded_dict.decode("utf-8")
+                self.add(type_when_encoded, encoded_dict)                
+
         else:
             self.add(type_when_not_encoded, json_dict)
 
@@ -122,7 +126,11 @@ class Payload:
             json_dict = json.dumps(dict_)
 
             if encode_base64:
-                self.add(type_when_encoded, base64.urlsafe_b64encode(json_dict.encode("ascii")))
+                encoded_dict = base64.urlsafe_b64encode(json_dict.encode("ascii"))
+                if not isinstance(encoded_dict, str):
+                    encoded_dict = encoded_dict.decode("utf-8")
+                self.add(type_when_encoded, encoded_dict)                
+
             else:
                 self.add(type_when_not_encoded, json_dict)
 
