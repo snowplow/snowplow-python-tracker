@@ -271,6 +271,7 @@ class Tracker:
         pb.add("ti_cu", currency)
         pb.add("evn", DEFAULT_VENDOR)
         pb.add("tid", tid)
+        pb.add("dtm", tstamp)
         pb.add_json(context, self.encode_base64, "cx", "co")
 
         return self.complete_payload(pb)
@@ -322,7 +323,7 @@ class Tracker:
         tid = Tracker.get_transaction_id()
         pb.add("tid", tid)
         dtm = Tracker.get_timestamp(tstamp)
-        pb.add("dtm", tstamp)
+        pb.add("dtm", dtm)
         pb.add_json(context, self.encode_base64, "cx", "co")
 
         transaction_result = self.complete_payload(pb)
