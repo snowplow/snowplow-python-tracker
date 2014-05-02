@@ -32,9 +32,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 DEFAULT_MAX_LENGTH = 10
-HTTP_ERRORS = {"host not found",
-               "No address associated with name",
-               "No address associated with hostname"}
 
 try:
     # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
@@ -55,7 +52,7 @@ class Consumer(object):
 
     def __init__(self, endpoint, method="http-get", buffer_size=None, on_success=None, on_failure=None):
 
-        self.endpoint = self.as_collector_uri(endpoint)
+        self.endpoint = Consumer.as_collector_uri(endpoint)
 
         self.method = method
 
@@ -70,16 +67,24 @@ class Consumer(object):
         self.on_success = on_success
         self.on_failure = on_failure
 
-    def as_collector_uri(self, endpoint):
+    @staticmethod
+    def as_collector_uri(endpoint):
         return "http://" + endpoint + "/i"
 
     def input(self, payload):
+        """
+            Adds an event to the buffer.
+            If the maximum size has been reached, flushes the buffer.
+        """
         self.buffer.append(payload)
         if len(self.buffer) >= self.buffer_size:
-            self.flush()
+            return self.flush()
 
     @task(name="Flush")
     def flush(self):
+        """
+            Sends all events in the buffer to the collector.
+        """
 
         if self.method == "http-post":
             data = json.dumps(self.buffer)
@@ -90,6 +95,7 @@ class Consumer(object):
                 self.on_success(buffer_length)
             elif self.on_failure is not None:
                 self.on_failure(0, data)
+            return status_code
 
         elif self.method == "http-get":
             success_count = 0
@@ -102,14 +108,16 @@ class Consumer(object):
                     success_count += 1
                 else:
                     unsent_requests.append(payload)
-            logger.debug(str(len(unsent_requests)) + '\n')
+
             if len(unsent_requests) == 0 and self.on_success is not None:
                 self.on_success(success_count)
             elif self.on_failure is not None:
                 self.on_failure(success_count, unsent_requests)
 
+            return status_code
+
         else:
-            logger.warn(self.method + " is not a recognised HTTP method")
+            logger.warn(self.method + ' is not a recognised HTTP method. Use "http-get" or "http-post".')
 
     def http_post(self, data):
         logger.debug("Sending POST request...")
@@ -124,9 +132,14 @@ class Consumer(object):
         return r
 
     def sync_flush(self):
+        """
+            Calls the flush method of the base Consumer class.
+            This is guaranteed to be blocking, not asynchronous.
+        """
         logger.debug("Starting synchronous flush...")
-        Consumer.flush(self)
+        result = Consumer.flush(self)
         logger.debug("Finished synchrous flush")
+        return result
 
 class AsyncConsumer(Consumer):
     """
@@ -162,7 +175,7 @@ class RedisConsumer(object):
         logger.debug("Finished sending event to Redis.")
 
     def flush(self):
-        pass
+        logger.warn("The RedisConsumer class does not need to be flushed")
 
     def sync_flush(self):
-        pass
+        self.flush()

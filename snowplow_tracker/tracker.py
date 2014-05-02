@@ -53,6 +53,8 @@ class Tracker:
                  and len(s) > 0) or s is None)
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
+    new_contract("tracker", lambda s: isinstance(s, Tracker))
+
     def __init__(self, out_queue, 
                  namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, 
                  contracts=True, log=True):
@@ -111,19 +113,23 @@ class Tracker:
         """
             :param  value:          One of ["pc", "tv", "mob", "cnsl", "iot"]
             :type   value:          str
+            :rtype:                 tracker
         """
         if value in SUPPORTED_PLATFORMS:
             self.standard_nv_pairs["p"] = value
         else:
             raise RuntimeError(value + " is not a supported platform")
+        return self
 
     @contract
     def set_user_id(self, user_id):
         """
             :param  user_id:        User ID
             :type   user_id:        non_empty_string
+            :rtype:                 tracker
         """
         self.standard_nv_pairs["uid"] = user_id
+        return self
 
     @contract
     def set_screen_resolution(self, width, height):
@@ -132,8 +138,10 @@ class Tracker:
             :param  height:         Height of the screen
             :type   width:          int,>0
             :type   height:         int,>0
+            :rtype:                 tracker
         """
         self.standard_nv_pairs["res"] = "".join([str(width), "x", str(height)])
+        return self
 
     @contract
     def set_viewport(self, width, height):
@@ -142,16 +150,20 @@ class Tracker:
             :param  height:         Height of the viewport
             :type   width:          int,>0
             :type   height:         int,>0
+            :rtype:                 tracker
         """
         self.standard_nv_pairs["vp"] = "".join([str(width), "x", str(height)])
+        return self
 
     @contract
     def set_color_depth(self, depth):
         """
             :param  depth:          Depth of the color on the screen
             :type   depth:          int
+            :rtype:                 tracker
         """
         self.standard_nv_pairs["cd"] = depth
+        return self
 
     @contract
     def set_timezone(self, timezone):
@@ -160,8 +172,10 @@ class Tracker:
 
             :param  timezone:       Timezone as a string
             :type   timezone:       non_empty_string
+            :rtype:                 tracker
         """
         self.standard_nv_pairs["tz"] = timezone
+        return self
 
     @contract
     def set_lang(self, lang):
@@ -170,8 +184,10 @@ class Tracker:
 
             :param  lang:           Language the application is set to
             :type   lang:           non_empty_string
+            :rtype:                 tracker
         """
         self.standard_nv_pairs["lang"] = lang
+        return self
 
 
     """
@@ -187,7 +203,11 @@ class Tracker:
             :type   pb:              payload
             #:rtype:                  tuple(bool, int | str)
         """
-        return self.out_queue.input(pb.nv_pairs)
+        result = self.out_queue.input(pb.nv_pairs)
+        if result is not None:
+            return result
+        else:
+            return self
 
     @contract
     def complete_payload(self, pb):
@@ -216,7 +236,7 @@ class Tracker:
             :type   referrer:       string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
-            #:rtype:                 tuple(bool, int | str)
+            :rtype:                 tracker | int
         """
         pb = payload.Payload()
         pb.add("e", "pv")           # pv: page view
@@ -258,7 +278,7 @@ class Tracker:
             :type   currency:    string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
-            #:rtype:                 tuple(bool, int | str)
+            :rtype:                 tracker | int
         """
         pb = payload.Payload()
         pb.add("e", "ti")
@@ -305,7 +325,7 @@ class Tracker:
             :type   items:          list(dict(str:*))
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
-            #:rtype:                 dict(str: tuple(bool, int | str) | list(tuple(bool, int | str)))
+            :rtype:                 tracker | dict(str:*)
         """
         pb = payload.Payload()
         pb.add("e", "tr")
@@ -337,7 +357,11 @@ class Tracker:
             item["currency"] = currency
             item_results.append(self.track_ecommerce_transaction_item(**item))
         
-        return {"transaction_result": transaction_result, "item_results": item_results}
+        if not isinstance(transaction_result, Tracker):
+            return {"transaction_result": transaction_result, "item_results": item_results}
+        else:
+            return self
+
     
     @contract
     def track_screen_view(self, name, id_=None, context=None, tstamp=None):
@@ -348,7 +372,7 @@ class Tracker:
             :type   id_:            string_or_none
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
-            #:rtype:                 tuple(bool, int | str)
+            :rtype:                 tracker | int
         """
         screen_view_properties = {"name": name}
         if id_ is not None:
@@ -374,7 +398,7 @@ class Tracker:
             :type   value:          int | float | None
             :param  context:        Custom context for the event
             :type   context:        dict(str:*) | None
-            #:rtype:                 tuple(bool, int | str)
+            :rtype:                 tracker | int
         """
         pb = payload.Payload()
         pb.add("e", "se")
@@ -404,7 +428,7 @@ class Tracker:
             :type   dict_:           dict(str:*)
             :param  context:         Custom context for the event
             :type   context:         dict(str:*) | None
-            #:rtype:                  tuple(bool, int | str)
+            :rtype:                  tracker | int
         """
         pb = payload.Payload()
 
@@ -421,11 +445,16 @@ class Tracker:
 
         return self.complete_payload(pb)
 
+    @contract
     def flush(self, async=True):
         """
             Flush the consumer
+
+            :param  async:  Whether the flush is done asynchronously
+            :type   async:  bool
+            :rtype:         tracker | int
         """
         if async:
-            self.out_queue.flush()
+            return self.out_queue.flush()
         else:
-            self.out_queue.sync_flush()
+            return self.out_queue.sync_flush()
