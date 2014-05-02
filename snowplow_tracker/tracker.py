@@ -429,4 +429,3 @@ class Tracker:
             self.out_queue.flush()
         else:
             self.out_queue.sync_flush()
-

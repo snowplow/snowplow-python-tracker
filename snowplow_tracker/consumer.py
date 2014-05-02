@@ -22,6 +22,7 @@
 import requests
 import json
 import threading
+import celery
 from celery import Celery
 from celery.contrib.methods import task
 import redis
@@ -35,17 +36,15 @@ HTTP_ERRORS = {"host not found",
                "No address associated with name",
                "No address associated with hostname"}
 
-def make_celery(app):
-    celery = Celery(app.import_name, broker=app.config["CELERY_BROKER_URL"])
-    celery.conf.update(app.config)
-    TaskBase = celery.Task
-    class ContextTask(TaskBase):
-        abstract = True
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return TaskBase.__call_(self, *args, **kwargs)
-    celery.Task = ContextTask
-    return celery
+try:
+    # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
+    import snowplow_celery_config
+    app = Celery()
+    app.config_from_object(snowplow_celery_config)
+
+except ImportError:
+    # Otherwise configure Celery with default settings
+    app = Celery("Snowplow", broker="redis://guest@localhost//")
 
 
 class Consumer(object):
@@ -79,7 +78,7 @@ class Consumer(object):
         if len(self.buffer) >= self.buffer_size:
             self.flush()
 
-    @task
+    @task(name="Flush")
     def flush(self):
 
         if self.method == "http-post":
