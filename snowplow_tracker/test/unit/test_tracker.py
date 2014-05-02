@@ -21,6 +21,7 @@
 
 
 import unittest
+from freezegun import freeze_time
 from snowplow_tracker.tracker import Tracker
 
 
@@ -35,3 +36,20 @@ class TestTracker(unittest.TestCase):
         self.assertEquals(t.standard_nv_pairs["aid"], "AF003")
         self.assertEquals(t.encode_base64, False)
         self.assertEquals(t.context_vendor, "com.example")
+
+    def test_get_transaction_id(self):
+        tid = Tracker.get_transaction_id()
+        self.assertTrue(tid >= 100000 and tid <= 999999)
+
+    @freeze_time("1970-01-01 00:00:01")
+    def test_get_timestamp(self):
+        dtm = Tracker.get_timestamp()
+        self.assertEquals(dtm, 1000)   # 1970-01-01 00:00:01 in ms
+
+    def test_set_timestamp_1(self):
+        dtm = Tracker.get_timestamp(1399021242030)
+        self.assertEquals(dtm, 1399021242030)
+
+    def test_set_timestamp_2(self):
+        dtm = Tracker.get_timestamp(1399021242240.0303)
+        self.assertEquals(dtm, 1399021242240)

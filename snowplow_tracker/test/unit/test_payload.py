@@ -22,7 +22,6 @@
 
 import unittest
 import time
-from freezegun import freeze_time
 from snowplow_tracker import payload
 
 
@@ -52,7 +51,7 @@ class TestPayload(unittest.TestCase):
         self.assertTrue(is_subset({}, p.nv_pairs))
 
     def test_object_generation_2(self):
-        p = payload.Payload(None, {"test1": "result1", "test2": "result2", })
+        p = payload.Payload({"test1": "result1", "test2": "result2", })
         output = {"test1": "result1", "test2": "result2"}
         self.assertTrue(is_subset(output, p.nv_pairs))
 
@@ -64,30 +63,10 @@ class TestPayload(unittest.TestCase):
         self.assertTrue(is_subset(output, p.nv_pairs))
 
     def test_add_dict(self):
-        p = payload.Payload(None, {"n1": "v1", "n2": "v2", })
+        p = payload.Payload({"n1": "v1", "n2": "v2", })
         p.add_dict({"name4": 4, "name3": 3})            # Order doesn't matter
         output = {"n1": "v1", "n2": "v2", "name3": 3, "name4": 4}
         self.assertTrue(is_subset(output, p.nv_pairs))
-
-    def test_get_transaction_id(self):
-        p = payload.Payload()
-        self.assertTrue(p.nv_pairs["tid"] >= 100000 and
-                        p.nv_pairs["tid"] <= 999999)
-
-    @freeze_time("1970-01-01 00:00:01")
-    def test_get_timestamp(self):
-        p = payload.Payload()
-        self.assertEquals(p.nv_pairs["dtm"], 1000)   # 1970-01-01 00:00:01 in ms
-
-    def test_set_timestamp_2(self):
-        p = payload.Payload()
-        p.set_timestamp(0)
-        self.assertEquals(p.nv_pairs["dtm"], 0)
-
-    def test_set_timestamp(self):
-        p = payload.Payload()
-        p.set_timestamp(12345654321000)
-        self.assertEquals(p.nv_pairs["dtm"], 12345654321000)
 
     def test_add_unstruct_1(self):
         p = payload.Payload()

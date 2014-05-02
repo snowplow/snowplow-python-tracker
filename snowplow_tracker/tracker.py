@@ -20,6 +20,7 @@
 """
 
 import time
+import random
 import logging
 from snowplow_tracker import payload, _version, consumer
 from contracts import contract, new_contract, disable_all
@@ -75,6 +76,31 @@ class Tracker:
             "aid": app_id
         }
 
+
+    @staticmethod
+    @contract
+    def get_transaction_id():
+        """
+            Set transaction ID for the payload once during the lifetime of the
+            event.
+
+            :rtype:           int
+        """
+        tid = random.randrange(100000, 999999)
+        return tid
+
+    @staticmethod
+    @contract
+    def get_timestamp(tstamp=None):
+        """
+            :param tstamp:    User-input timestamp or None
+            :type  tstamp:    int | float | None
+            :rtype:           int
+        """
+        if tstamp is None:
+            return int(time.time() * 1000)
+        elif isinstance(tstamp, (int, float)):
+            return int(tstamp)
 
     """
     Setter methods
@@ -192,13 +218,19 @@ class Tracker:
             :type   context:        dict(str:*) | None
             #:rtype:                 tuple(bool, int | str)
         """
-        pb = payload.Payload(tstamp)
+        pb = payload.Payload()
         pb.add("e", "pv")           # pv: page view
         pb.add("url", page_url)
         pb.add("page", page_title)
         pb.add("refr", referrer)
         pb.add("evn", DEFAULT_VENDOR)
+
+        tid = Tracker.get_transaction_id()
+        pb.add("tid", tid)
+        dtm = Tracker.get_timestamp(tstamp)
+        pb.add("dtm", tstamp)        
         pb.add_json(context, self.encode_base64, "cx", "co")
+
         return self.complete_payload(pb)
 
     @contract
@@ -228,7 +260,7 @@ class Tracker:
             :type   context:        dict(str:*) | None
             #:rtype:                 tuple(bool, int | str)
         """
-        pb = payload.Payload(tstamp)
+        pb = payload.Payload()
         pb.add("e", "ti")
         pb.add("ti_id", order_id)
         pb.add("ti_sk", sku)
@@ -240,6 +272,7 @@ class Tracker:
         pb.add("evn", DEFAULT_VENDOR)
         pb.add("tid", tid)
         pb.add_json(context, self.encode_base64, "cx", "co")
+
         return self.complete_payload(pb)
 
     @contract
@@ -273,14 +306,7 @@ class Tracker:
             :type   context:        dict(str:*) | None
             #:rtype:                 dict(str: tuple(bool, int | str) | list(tuple(bool, int | str)))
         """
-        if tstamp is None:
-            tstamp = time.time()
-        if tstamp and isinstance(tstamp, (int, float)):
-            tstamp = int(tstamp * 1000)
-
-        tid = payload.Payload.set_transaction_id()
-
-        pb = payload.Payload(tstamp)
+        pb = payload.Payload()
         pb.add("e", "tr")
         pb.add("tr_id", order_id)
         pb.add("tr_tt", total_value)
@@ -292,7 +318,10 @@ class Tracker:
         pb.add("tr_co", country)
         pb.add("tr_cu", currency)
         pb.add("evn", DEFAULT_VENDOR)
+
+        tid = Tracker.get_transaction_id()
         pb.add("tid", tid)
+        dtm = Tracker.get_timestamp(tstamp)
         pb.add("dtm", tstamp)
         pb.add_json(context, self.encode_base64, "cx", "co")
 
@@ -301,7 +330,7 @@ class Tracker:
         item_results = []
 
         for item in items:
-            item["tstamp"] = str(tstamp)
+            item["tstamp"] = dtm
             item["tid"] = tid
             item["order_id"] = order_id
             item["currency"] = currency
@@ -346,7 +375,7 @@ class Tracker:
             :type   context:        dict(str:*) | None
             #:rtype:                 tuple(bool, int | str)
         """
-        pb = payload.Payload(tstamp)
+        pb = payload.Payload()
         pb.add("e", "se")
         pb.add("se_ca", category)
         pb.add("se_ac", action)
@@ -354,7 +383,13 @@ class Tracker:
         pb.add("se_pr", property_)
         pb.add("se_va", value)
         pb.add("evn", DEFAULT_VENDOR)
+
+        tid = Tracker.get_transaction_id()
+        pb.add("tid", tid)
+        dtm = Tracker.get_timestamp(tstamp)
+        pb.add("dtm", tstamp)
         pb.add_json(context, self.encode_base64, "cx", "co")
+
         return self.complete_payload(pb)
 
     @contract
@@ -370,13 +405,19 @@ class Tracker:
             :type   context:         dict(str:*) | None
             #:rtype:                  tuple(bool, int | str)
         """
-        pb = payload.Payload(tstamp)
+        pb = payload.Payload()
 
         pb.add("e", "ue")
         pb.add("ue_na", event_name)
         pb.add_unstruct(dict_, self.encode_base64, "ue_px", "ue_pr")
         pb.add("evn", event_vendor)
+
+        dtm = Tracker.get_timestamp(tstamp)
+        pb.add("dtm", tstamp)
+        tid = Tracker.get_transaction_id()
+        pb.add("tid", tid)
         pb.add_json(context, self.encode_base64, "cx", "co")
+
         return self.complete_payload(pb)
 
     def flush(self, async=True):

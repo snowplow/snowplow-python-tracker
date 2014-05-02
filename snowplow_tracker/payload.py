@@ -29,45 +29,17 @@ from contracts import contract
 
 class Payload:
 
-    def __init__(self, tstamp=None, dict_=None):
+    def __init__(self, dict_=None):
         """
             Constructor
         """
 
         self.nv_pairs = {}
-        # Set transaction for every event
-        self.nv_pairs["tid"] = Payload.set_transaction_id()
-        # Set timestamp for every event
-        self.set_timestamp(tstamp)
+
         if dict_ is not None:
             for f in dict_:
                 self.nv_pairs[f] = dict_[f]
 
-    """
-    Special payload creation functions
-    """
-    @staticmethod
-    def set_transaction_id():
-        """
-            Set transaction ID for the payload once during the lifetime of the
-            event.
-        """
-        tid = random.randrange(100000, 999999)
-        return tid
-
-    def set_timestamp(self, tstamp=None):
-        """
-            Set timestamp and allow rewriting it multiple times.
-
-            :param  tstamp:         Timestamp value
-        """
-        if tstamp is None:
-            value = int(time.time() * 1000)
-        elif tstamp and isinstance(tstamp, (int, float)):
-            value = int(tstamp)
-        else:
-            value = tstamp
-        self.nv_pairs["dtm"] = value
 
     """
     Payload creators
