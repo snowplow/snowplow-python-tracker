@@ -149,11 +149,19 @@ class IntegrationTest(unittest.TestCase):
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
-    def test_integration_redis(self):
+    def test_integration_redis_default(self):
         r = redis.StrictRedis()
-        t = tracker.Tracker(consumer.RedisConsumer(rdb=r), default_subject)
+        t = tracker.Tracker(consumer.RedisConsumer(), default_subject)
         t.track_page_view("http://www.example.com")
         event_string = r.rpop("snowplow")
+        event_dict = json.loads(event_string.decode("utf-8"))
+        self.assertEquals(event_dict["e"], "pv")
+
+    def test_integration_redis_custom(self):
+        r = redis.StrictRedis(db=1)
+        t = tracker.Tracker(consumer.RedisConsumer(rdb=r, key="custom_key"), default_subject)
+        t.track_page_view("http://www.example.com")
+        event_string = r.rpop("custom_key")
         event_dict = json.loads(event_string.decode("utf-8"))
         self.assertEquals(event_dict["e"], "pv")
 
