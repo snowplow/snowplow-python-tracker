@@ -67,10 +67,10 @@ class Consumer(object):
             :type  method:      method
             :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
             :type  buffer_size: string | None
-            :param on_success:  Callback executed after every request in a flush is successful.
+            :param on_success:  Callback executed after every HTTP request in a flush has status code 200
                                 Gets passed the number of events flushed.
             :type  on_success:  function | None
-            :param on_failure:  Callback executed after not every event in a flush is successful.
+            :param on_failure:  Callback executed if at least one HTTP request in a flush has status code 200
                                 Gets passed two arguments:
                                 1) The number of events which were successfully sent
                                 2) If method is "http-post": The unsent data in string form;
