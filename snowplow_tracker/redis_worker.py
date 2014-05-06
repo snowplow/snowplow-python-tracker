@@ -58,7 +58,7 @@ class RedisWorker(object):
         """
         payload = self.dbr.lpop(self.key)
         if payload:
-            self.pool.spawn(self.send, json.loads(payload))
+            self.pool.spawn(self.send, json.loads(payload.decode("utf-8")))
         else:
             gevent.sleep(5)
 
@@ -72,7 +72,7 @@ class RedisWorker(object):
             self.pop_payload()
         self.pool.join(timeout=20)
 
-    def request_shutdown(self):
+    def request_shutdown(self, *args):
         """
             Halt the worker
         """
