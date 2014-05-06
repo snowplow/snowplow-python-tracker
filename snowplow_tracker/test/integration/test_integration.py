@@ -22,6 +22,8 @@
 import unittest
 import time
 import re
+import redis
+import json
 from snowplow_tracker import tracker, _version, consumer, subject
 from httmock import all_requests, HTTMock
 
@@ -147,7 +149,26 @@ class IntegrationTest(unittest.TestCase):
             for key in expected_fields:
                 self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
-    def test_integration_request_failure(self):
-        t = tracker.Tracker(consumer.Consumer("drnv83ldfo4ed.cloudfront.net"), default_subject)
+    def test_integration_redis(self):
+        t = tracker.Tracker(consumer.RedisConsumer(), default_subject)
+        t.track_page_view("http://www.example.com")
+        r = redis.StrictRedis()
+        event_string = r.rpop("snowplow")
+        event_dict = json.loads(event_string.decode("utf-8"))
+        self.assertEquals(event_dict["e"], "pv")
+
+    def test_integration_success_callback(self):
+        callback_queue = []
+        callback_consumer = consumer.Consumer("localhost", on_success=lambda x: callback_queue.append(x))
+        t = tracker.Tracker(callback_consumer, default_subject)
+        with HTTMock(pass_response_content):
+            t.track_page_view("http://www.example.com")
+            self.assertEquals(callback_queue[0], 1)
+
+    def test_integration_failure_callback(self):
+        callback_queue = []
+        callback_consumer = consumer.Consumer("localhost", on_failure=lambda x, y: callback_queue.append(x))
+        t = tracker.Tracker(callback_consumer, default_subject)
         with HTTMock(fail_response_content):
-            tracking_return_value = t.track_page_view("Title page")
+            t.track_page_view("http://www.example.com")
+            self.assertEquals(callback_queue[0], 0)
