@@ -61,7 +61,7 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker(default_consumer, default_subject)
         with HTTMock(pass_response_content):
             t.track_page_view("http://savethearctic.org", "Save The Arctic", None)
-            self.assertEquals(from_querystring("page", querystrings[-1]),"Save+The+Arctic")
+        self.assertEquals(from_querystring("page", querystrings[-1]),"Save+The+Arctic")
 
     def test_integration_ecommerce_transaction_item(self):
         t = tracker.Tracker(default_consumer, default_subject)

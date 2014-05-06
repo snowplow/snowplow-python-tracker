@@ -27,11 +27,19 @@ from celery import Celery
 from celery.contrib.methods import task
 import redis
 import logging
+from contracts import contract, new_contract
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 DEFAULT_MAX_LENGTH = 10
+
+new_contract("method", lambda x: x == "http-get" or x == "http-post")
+
+new_contract("function", lambda x: hasattr(x, "__call__"))
+
+new_contract("redis", lambda x: isinstance(x, (redis.Redis, redis.StrictRedis)))
+
 
 try:
     # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
@@ -50,8 +58,25 @@ class Consumer(object):
         Supports both GET and POST requests
     """
 
+    @contract
     def __init__(self, endpoint, method="http-get", buffer_size=None, on_success=None, on_failure=None):
-
+        """
+            :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
+            :type  endpoint:    string
+            :param method:      The HTTP request method
+            :type  method:      method
+            :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
+            :type  buffer_size: string | None
+            :param on_success:  Callback executed after every request in a flush is successful.
+                                Gets passed the number of events flushed.
+            :type  on_success:  function | None
+            :param on_failure:  Callback executed after not every event in a flush is successful.
+                                Gets passed two arguments:
+                                1) The number of events which were successfully sent
+                                2) If method is "http-post": The unsent data in string form;
+                                   If method is "http-get":  An array of dictionaries corresponding to the unsent events' payloads
+            :type  on_failure:  function | None            
+        """
         self.endpoint = Consumer.as_collector_uri(endpoint)
 
         self.method = method
@@ -68,13 +93,23 @@ class Consumer(object):
         self.on_failure = on_failure
 
     @staticmethod
+    @contract
     def as_collector_uri(endpoint):
+        """
+            :param endpoint:  The raw endpoint provided by the user
+            :type  endpoint:  string
+            :rtype:           string
+        """
         return "http://" + endpoint + "/i"
 
+    @contract
     def input(self, payload):
         """
             Adds an event to the buffer.
             If the maximum size has been reached, flushes the buffer.
+
+            :param payload:   The name-value pairs for the event
+            :type  payload:   dict(str:*)
         """
         self.buffer.append(payload)
         if len(self.buffer) >= self.buffer_size:
@@ -85,7 +120,6 @@ class Consumer(object):
         """
             Sends all events in the buffer to the collector.
         """
-
         if self.method == "http-post":
             data = json.dumps(self.buffer)
             buffer_length = len(self.buffer)
@@ -120,13 +154,23 @@ class Consumer(object):
         else:
             logger.warn(self.method + ' is not a recognised HTTP method. Use "http-get" or "http-post".')
 
+    @contract
     def http_post(self, data):
+        """
+            :param data:  The array of JSONs to be sent
+            :type  data:  string
+        """
         logger.debug("Sending POST request...")
         r = requests.post(self.endpoint, data=data)
         logger.debug("POST request finished with status code: " + str(r.status_code))
         return r
 
+    @contract
     def http_get(self, payload):
+        """
+            :param payload:  The event properties
+            :type  payload:  dict(str:*)
+        """
         logger.debug("Sending GET request...")
         r = requests.get(self.endpoint, params=payload)        
         logger.debug("GET request finished with status code: " + str(r.status_code))
@@ -164,13 +208,24 @@ class RedisConsumer(object):
     """
         Sends Snowplow events to a Redis database
     """
+    @contract
     def __init__(self, rdb=None, key="snowplow"):
+        """
+            :param rdb:  Optional custom Redis database
+            :type  rdb:  redis | None
+            :param key:  The Redis key for the list of events
+            :type  key:  string
+        """
         if rdb is None:
             rdb = redis.StrictRedis()
         self.rdb = rdb
         self.key = key
 
     def input(self, payload):
+        """
+            :param payload:  The event properties
+            :type  payload:  dict(str:*)
+        """
         logger.debug("Pushing event to Redis queue...")
         self.rdb.rpush(self.key, json.dumps(payload))
         logger.debug("Finished sending event to Redis.")

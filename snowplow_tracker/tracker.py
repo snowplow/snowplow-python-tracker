@@ -22,7 +22,7 @@
 import time
 import random
 import logging
-from snowplow_tracker import payload, _version, consumer
+from snowplow_tracker import payload, _version
 from contracts import contract, new_contract, disable_all
 
 
