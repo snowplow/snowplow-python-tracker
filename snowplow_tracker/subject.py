@@ -28,7 +28,9 @@ DEFAULT_PLATFORM = "pc"
 
 class Subject(object):
     """
-        Class for an event subject
+        Class for an event subject, where we view events as of the form
+
+        (Subject) -> (Verb) -> (Object)
     """
     def __init__(self):
 

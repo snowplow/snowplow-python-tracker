@@ -100,6 +100,7 @@ class Consumer(object):
         elif self.method == "http-get":
             success_count = 0
             unsent_requests = []
+            status_code = None
 
             while len(self.buffer) > 0:
                 payload = self.buffer.pop()

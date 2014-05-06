@@ -1,7 +1,7 @@
 Version 0.4.0 (2014-05-xx)
 --------------------------
-Added callbacks for flushing
-Added Python-logging
+Added callbacks for flushing (#78)
+Added Python-logging (#76)
 Added Redis and gevent based async approach (#75)
 Added thread-based AsyncBufferedConsumer (#74)
 Improved test coverage up to 50% (#73)

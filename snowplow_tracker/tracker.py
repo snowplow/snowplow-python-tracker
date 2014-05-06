@@ -53,11 +53,27 @@ class Tracker:
 
     new_contract("tracker", lambda s: isinstance(s, Tracker))
 
+    new_contract("consumer", lambda s: hasattr(s, "input"))
+
+    @contract
     def __init__(self, out_queue, subject=None,
                  namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, 
                  contracts=True, log=True):
         """
-        Constructor
+            :param out_queue:        Consumer to which events will be sent
+            :type  out_queue:        consumer
+            :param namespace:        Identifier for the Tracker instance
+            :type  namespace:        string_or_none
+            :param app_id:           Application ID
+            :type  app_id:           string_or_none            
+            :param context_vendor:   Reversed domain name of the company which defined the custom contexts
+            :type  context_vendor:   string_or_none
+            :param encode_base64:    Whether JSONs in the payload should be base-64 encoded
+            :type  encode_base64:    bool
+            :param contracts:        Whether to enable contracts
+            :type  contracts:        bool
+            :param log:              Whether to enable Python logging
+            :type  log:              bool
         """
         if not contracts:
             disable_all()

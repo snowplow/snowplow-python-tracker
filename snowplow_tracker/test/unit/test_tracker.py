@@ -23,6 +23,7 @@
 import unittest
 from freezegun import freeze_time
 from snowplow_tracker.tracker import Tracker
+from snowplow_tracker.consumer import Consumer
 
 
 class TestTracker(unittest.TestCase):
@@ -31,7 +32,7 @@ class TestTracker(unittest.TestCase):
         pass
 
     def test_initialisation(self):
-        t = Tracker(None, namespace="cloudfront", encode_base64= False, app_id="AF003", context_vendor="com.example")
+        t = Tracker(Consumer("d3rkrsqld9gmqf.cloudfront.net"), namespace="cloudfront", encode_base64= False, app_id="AF003", context_vendor="com.example")
         self.assertEquals(t.standard_nv_pairs["tna"], "cloudfront")
         self.assertEquals(t.standard_nv_pairs["aid"], "AF003")
         self.assertEquals(t.encode_base64, False)

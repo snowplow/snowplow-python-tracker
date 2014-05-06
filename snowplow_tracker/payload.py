@@ -42,7 +42,7 @@ class Payload:
 
 
     """
-    Payload creators
+    Methods to add to the payload
     """
 
     def add(self, name, value):
