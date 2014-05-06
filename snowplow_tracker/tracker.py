@@ -349,7 +349,7 @@ class Tracker:
 
         pb.add("e", "ue")
         pb.add("ue_na", event_name)
-        pb.add_unstruct(dict_, self.encode_base64, "ue_px", "ue_pr")
+        pb.add_json(dict_, self.encode_base64, "ue_px", "ue_pr")
         pb.add("evn", event_vendor)
 
         dtm = Tracker.get_timestamp(tstamp)

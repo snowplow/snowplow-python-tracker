@@ -64,49 +64,6 @@ class Payload:
             self.add(f, dict_[f])
 
     @contract
-    def add_unstruct(self, dict_, encode_base64,
-                     type_when_encoded, type_when_not_encoded):
-        """
-            Add an encoded or unencoded JSON to the payload after verifying
-            the contents of the dict
-
-            :param  dict_:      Dictionary of the payload to be generated
-            :type   dict_:      dict(str:*)
-            :param  encode_base64:      If the payload is base64 encoded
-            :type   encode_base64:      bool
-            :param  type_when_encoded:  Name of the field when encode_base64 is set
-            :type   type_when_encoded:  str
-            :param  type_when_not_encoded:  Name of the field when encode_base64 is not set
-            :type   type_when_not_encoded:  str
-        """
-        def raise_error(f, type_):
-            raise RuntimeError("".join([f, " in dict is not a ", type_]))
-
-        types = ["int", "flt", "geo", "dt", "ts", "tms"]
-
-        for f in dict_:
-            parts = f.split("$")
-            if parts[-1] in types:
-                type_ = parts[-1]
-                if ((type_ == "int" and not isinstance(dict_[f], int)) or
-                    (type_ == "flt" and not isinstance(dict_[f], float)) or
-                    (type_ == "geo" and not isinstance(dict_[f], tuple)) or
-                    (type_ == "dt" and not isinstance(dict_[f], int)) or
-                    (type_ == "ts" and not isinstance(dict_[f], int)) or
-                    (type_ == "tms" and not isinstance(dict_[f], int))):
-                    raise_error(f, type_)
-        json_dict = json.dumps(dict_)
-
-        if encode_base64:
-                encoded_dict = base64.urlsafe_b64encode(json_dict.encode("ascii"))
-                if not isinstance(encoded_dict, str):
-                    encoded_dict = encoded_dict.decode("utf-8")
-                self.add(type_when_encoded, encoded_dict)                
-
-        else:
-            self.add(type_when_not_encoded, json_dict)
-
-    @contract
     def add_json(self, dict_, encode_base64, type_when_encoded, type_when_not_encoded):
         """
             Add an encoded or unencoded JSON to the payload

@@ -131,31 +131,6 @@ class IntegrationTest(unittest.TestCase):
             for key in expected_fields:
                 self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
-    def test_integration_unstruct_event_non_base64_error(self):
-        t = tracker.Tracker(default_consumer, default_subject, encode_base64=False)
-        try:
-            t.track_unstruct_event("com.example_company", "viewed_product",
-                               {
-                                   "product_id": "ASO01043",
-                                   "price$flt": 49,                 # ERROR
-                                   "walrus$tms": int(time.time() * 1000),
-                               })
-        except RuntimeError as e:
-            self.assertEquals("price$flt in dict is not a flt", str(e))
-
-
-    def test_integration_unstruct_event_base64_error(self):
-        t = tracker.Tracker(default_consumer, default_subject)
-        try:
-            t.track_unstruct_event("com.example_company", "viewed_product",
-                                         {
-                                              "product_id": "ASO01043",
-                                              "price$flt": 49.95,
-                                              "walrus$tms": "hello",           # ERROR
-                                         })
-        except RuntimeError as e:
-            self.assertEquals("walrus$tms in dict is not a tms", str(e))
-
     def test_integration_standard_nv_pairs(self):
         t = tracker.Tracker(default_consumer, default_subject, "cf", app_id="angry-birds-android", context_vendor="com.example")
         default_subject.set_platform("mob")

@@ -67,23 +67,3 @@ class TestPayload(unittest.TestCase):
         p.add_dict({"name4": 4, "name3": 3})            # Order doesn't matter
         output = {"n1": "v1", "n2": "v2", "name3": 3, "name4": 4}
         self.assertTrue(is_subset(output, p.nv_pairs))
-
-    def test_add_unstruct_1(self):
-        p = payload.Payload()
-        try:
-            p.add_unstruct({"product_id": "ASO01043",
-                        "price$flt": 33,                 # ERROR
-                        "walrus$tms": int(time.time() * 1000),
-                       }, False, "ue_px", "ue_pe")
-        except RuntimeError as e:
-            self.assertEquals("price$flt in dict is not a flt", str(e))
-
-    def test_add_unstruct_2(self):
-        p = payload.Payload()
-        try:
-            p.add_unstruct({"product_id": "ASO01043",
-                        "price$flt": 33.3,
-                        "walrus$tms": "hello world!",   # ERROR
-                       }, True, "ue_px", "ue_pe")
-        except RuntimeError as e:
-            self.assertEquals("walrus$tms in dict is not a tms", str(e))
