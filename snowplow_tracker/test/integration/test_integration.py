@@ -68,8 +68,8 @@ class IntegrationTest(unittest.TestCase):
         with HTTMock(pass_response_content):
             t.track_ecommerce_transaction_item("12345", "pbz0025", 7.99, 2, "black-tarot", "tarot", currency="GBP")
             expected_fields = {"ti_ca": "tarot", "ti_id": "12345", "ti_qu": "2", "ti_sk": "pbz0025", "e": "ti", "ti_nm": "black-tarot", "ti_pr": "7.99", "ti_cu": "GBP"}
-            for key in expected_fields:
-                self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        for key in expected_fields:
+            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_ecommerce_transaction(self):
         t = tracker.Tracker(default_consumer, default_subject)
@@ -86,55 +86,55 @@ class IntegrationTest(unittest.TestCase):
                     "quantity": 1  
                 }])
 
-            expected_fields = {"e": "tr", "tr_id": "6a8078be", "tr_tt": "35", "tr_ci": "London", "tr_cu": "GBP"}
-            for key in expected_fields:
-                self.assertEquals(from_querystring(key, querystrings[-3]), expected_fields[key])
+        expected_fields = {"e": "tr", "tr_id": "6a8078be", "tr_tt": "35", "tr_ci": "London", "tr_cu": "GBP"}
+        for key in expected_fields:
+            self.assertEquals(from_querystring(key, querystrings[-3]), expected_fields[key])
 
-            expected_fields = {"e": "ti",  "ti_id": "6a8078be", "ti_sk": "pbz0026", "ti_pr": "20", "ti_cu": "GBP"}
-            for key in expected_fields:
-                self.assertEquals(from_querystring(key, querystrings[-2]), expected_fields[key])
+        expected_fields = {"e": "ti",  "ti_id": "6a8078be", "ti_sk": "pbz0026", "ti_pr": "20", "ti_cu": "GBP"}
+        for key in expected_fields:
+            self.assertEquals(from_querystring(key, querystrings[-2]), expected_fields[key])
 
-            expected_fields = {"e": "ti",  "ti_id": "6a8078be", "ti_sk": "pbz0038", "ti_pr": "15", "ti_cu": "GBP"}
-            for key in expected_fields:
-                self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        expected_fields = {"e": "ti",  "ti_id": "6a8078be", "ti_sk": "pbz0038", "ti_pr": "15", "ti_cu": "GBP"}
+        for key in expected_fields:
+            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
-            for key in ["dtm", "tid"]:
-                self.assertEquals(from_querystring(key, querystrings[-3]), from_querystring(key, querystrings[-2]))
+        for key in ["dtm", "tid"]:
+            self.assertEquals(from_querystring(key, querystrings[-3]), from_querystring(key, querystrings[-2]))
 
     def test_integration_screen_view(self):
         t = tracker.Tracker(default_consumer, default_subject)
         with HTTMock(pass_response_content):
             t.track_screen_view("Game HUD 2", "Hello!")
-            expected_fields = {"e": "ue", "ue_na": "screen_view", "evn": "com.snowplowanalytics"}
-            for key in expected_fields:          
-                self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        expected_fields = {"e": "ue", "ue_na": "screen_view", "evn": "com.snowplowanalytics"}
+        for key in expected_fields:          
+            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_struct_event(self):
         t = tracker.Tracker(default_consumer, default_subject)
         with HTTMock(pass_response_content):
             t.track_struct_event("Ecomm", "add-to-basket", "dog-skateboarding-video", "hd", 13.99)
-            expected_fields = {"se_ca": "Ecomm", "se_pr": "hd", "se_la": "dog-skateboarding-video", "se_va": "13.99", "se_ac": "add-to-basket", "e": "se"}
-            for key in expected_fields:
-                self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        expected_fields = {"se_ca": "Ecomm", "se_pr": "hd", "se_la": "dog-skateboarding-video", "se_va": "13.99", "se_ac": "add-to-basket", "e": "se"}
+        for key in expected_fields:
+            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_unstruct_event_non_base64(self):
         t = tracker.Tracker(default_consumer, default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
             t.track_unstruct_event("com.example_company", "viewed_product", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)})
-            expected_fields = {"e": "ue", "evn": "com.example_company", "ue_na": "viewed_product"}
-            for key in expected_fields:
-                self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        expected_fields = {"e": "ue", "evn": "com.example_company", "ue_na": "viewed_product"}
+        for key in expected_fields:
+            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_unstruct_event_base64(self):
         t = tracker.Tracker(default_consumer, default_subject)
         with HTTMock(pass_response_content):
             t.track_unstruct_event("com.example_company", "viewed_product", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)})
-            expected_fields = {"e": "ue", "ue_na": "viewed_product"}
-            for key in expected_fields:
-                self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        expected_fields = {"e": "ue", "ue_na": "viewed_product"}
+        for key in expected_fields:
+            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_standard_nv_pairs(self):
-        t = tracker.Tracker(default_consumer, default_subject, "cf", app_id="angry-birds-android", context_vendor="com.example")
+        t = tracker.Tracker(consumer.Consumer("localhost"), default_subject, "cf", app_id="angry-birds-android", context_vendor="com.example")
         default_subject.set_platform("mob")
         default_subject.set_user_id("user12345")
         default_subject.set_screen_resolution(100, 200)
@@ -143,16 +143,16 @@ class IntegrationTest(unittest.TestCase):
         default_subject.set_lang("en")
         with HTTMock(pass_response_content):
             t.track_page_view("localhost", "local host", None, {'user': {'user_type': 'tester'}})
-            expected_fields = {"tna": "cf", "evn": "com.snowplowanalytics", "res": "100x200",
-                               "lang": "en", "aid": "angry-birds-android", "cd": "24", "tz": "Europe+London",
-                               "p": "mob", "tv": "py-" + _version.__version__, "cv": "com.example"}
-            for key in expected_fields:
-                self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        expected_fields = {"tna": "cf", "evn": "com.snowplowanalytics", "res": "100x200",
+                           "lang": "en", "aid": "angry-birds-android", "cd": "24", "tz": "Europe+London",
+                           "p": "mob", "tv": "py-" + _version.__version__, "cv": "com.example"}
+        for key in expected_fields:
+            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_redis(self):
-        t = tracker.Tracker(consumer.RedisConsumer(), default_subject)
-        t.track_page_view("http://www.example.com")
         r = redis.StrictRedis()
+        t = tracker.Tracker(consumer.RedisConsumer(rdb=r), default_subject)
+        t.track_page_view("http://www.example.com")
         event_string = r.rpop("snowplow")
         event_dict = json.loads(event_string.decode("utf-8"))
         self.assertEquals(event_dict["e"], "pv")
@@ -163,7 +163,7 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker(callback_consumer, default_subject)
         with HTTMock(pass_response_content):
             t.track_page_view("http://www.example.com")
-            self.assertEquals(callback_queue[0], 1)
+        self.assertEquals(callback_queue[0], 1)
 
     def test_integration_failure_callback(self):
         callback_queue = []
@@ -171,4 +171,4 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker(callback_consumer, default_subject)
         with HTTMock(fail_response_content):
             t.track_page_view("http://www.example.com")
-            self.assertEquals(callback_queue[0], 0)
+        self.assertEquals(callback_queue[0], 0)
