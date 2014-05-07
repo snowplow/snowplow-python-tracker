@@ -109,7 +109,7 @@ class Consumer(object):
             If the maximum size has been reached, flushes the buffer.
 
             :param payload:   The name-value pairs for the event
-            :type  payload:   dict(str:*)
+            :type  payload:   dict(string:*)
         """
         self.buffer.append(payload)
         if len(self.buffer) >= self.buffer_size:
@@ -169,7 +169,7 @@ class Consumer(object):
     def http_get(self, payload):
         """
             :param payload:  The event properties
-            :type  payload:  dict(str:*)
+            :type  payload:  dict(string:*)
         """
         logger.debug("Sending GET request...")
         r = requests.get(self.endpoint, params=payload)        
@@ -224,7 +224,7 @@ class RedisConsumer(object):
     def input(self, payload):
         """
             :param payload:  The event properties
-            :type  payload:  dict(str:*)
+            :type  payload:  dict(string:*)
         """
         logger.debug("Pushing event to Redis queue...")
         self.rdb.rpush(self.key, json.dumps(payload))
