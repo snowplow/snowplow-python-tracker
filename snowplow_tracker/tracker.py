@@ -21,18 +21,13 @@
 
 import time
 import random
-import logging
 from snowplow_tracker import payload, _version, subject
-from contracts import contract, new_contract, disable_all
-
+from contracts import contract, new_contract
 
 
 """
 Constants & config
 """
-
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
 
 VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
@@ -57,8 +52,7 @@ class Tracker:
 
     @contract
     def __init__(self, out_queue, _subject=None,
-                 namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, 
-                 log=True):
+                 namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64):
         """
             :param out_queue:        Consumer to which events will be sent
             :type  out_queue:        consumer
@@ -72,12 +66,7 @@ class Tracker:
             :type  context_vendor:   string_or_none
             :param encode_base64:    Whether JSONs in the payload should be base-64 encoded
             :type  encode_base64:    bool
-            :param log:              Whether to enable Python logging
-            :type  log:              bool
         """
-        if not log:
-            logger.setLevel(logging.CRITICAL)
-
         if _subject is None:
             _subject = subject.Subject()
 

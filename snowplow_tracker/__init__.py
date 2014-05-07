@@ -1,5 +1,5 @@
 from snowplow_tracker._version import __version__
 from snowplow_tracker.subject import Subject
-from snowplow_tracker.consumer import Consumer, AsyncConsumer, CeleryConsumer, RedisConsumer
+from snowplow_tracker.consumer import logger, Consumer, AsyncConsumer, CeleryConsumer, RedisConsumer
 from snowplow_tracker.tracker import Tracker
-from contracts import disable_all, enable_all
+from contracts import disable_all as disable_contracts, enable_all as enable_contracts
