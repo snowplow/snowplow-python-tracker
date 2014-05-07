@@ -83,6 +83,9 @@ class Tracker:
         if not log:
             logger.setLevel(logging.CRITICAL)
 
+        if _subject is None:
+            _subject = subject.Subject()
+
         self.out_queue = out_queue
         self.subject = _subject        
         self.encode_base64 = encode_base64
