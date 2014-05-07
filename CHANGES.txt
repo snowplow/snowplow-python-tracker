@@ -1,11 +1,12 @@
 Version 0.4.0 (2014-05-xx)
 --------------------------
+Added https support for tracker (#81)
 Added callbacks for flushing (#78)
 Added Python-logging (#76)
 Added Redis and gevent based async approach (#75)
 Added thread-based AsyncBufferedConsumer (#74)
 Improved test coverage up to 50% (#73)
-Added ability to specify port for collector (#72) (TODO)
+Added ability to specify port for collector (#72)
 Added POST support to tracker (#70)
 Added Redis-based queue (#45)
 Added Buffered Consumer (#44)

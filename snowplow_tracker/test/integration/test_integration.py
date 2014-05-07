@@ -29,7 +29,7 @@ from httmock import all_requests, HTTMock
 
 querystrings = [""]
 
-default_consumer = consumer.Consumer("localhost")
+default_consumer = consumer.Consumer("localhost", protocol="http", port=80)
 
 default_subject = subject.Subject()
 

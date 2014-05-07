@@ -34,12 +34,13 @@ logger.setLevel(logging.DEBUG)
 
 DEFAULT_MAX_LENGTH = 10
 
-new_contract("method", lambda x: x == "http-get" or x == "http-post")
+new_contract("protocol", lambda x: x == "http" or x == "https")
+
+new_contract("method", lambda x: x == "get" or x == "post")
 
 new_contract("function", lambda x: hasattr(x, "__call__"))
 
 new_contract("redis", lambda x: isinstance(x, (redis.Redis, redis.StrictRedis)))
-
 
 try:
     # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
@@ -59,10 +60,14 @@ class Consumer(object):
     """
 
     @contract
-    def __init__(self, endpoint, method="http-get", buffer_size=None, on_success=None, on_failure=None):
+    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, on_success=None, on_failure=None):
         """
             :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
             :type  endpoint:    string
+            :param protocol:    The protocol to use - http or https. Defaults to http.
+            :type  protocol:    protocol
+            :param port:        The collector port to connect to
+            :type  port:        int | None
             :param method:      The HTTP request method
             :type  method:      method
             :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
@@ -73,16 +78,16 @@ class Consumer(object):
             :param on_failure:  Callback executed if at least one HTTP request in a flush has status code 200
                                 Gets passed two arguments:
                                 1) The number of events which were successfully sent
-                                2) If method is "http-post": The unsent data in string form;
-                                   If method is "http-get":  An array of dictionaries corresponding to the unsent events' payloads
+                                2) If method is "post": The unsent data in string form;
+                                   If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
             :type  on_failure:  function | None            
         """
-        self.endpoint = Consumer.as_collector_uri(endpoint)
+        self.endpoint = Consumer.as_collector_uri(endpoint, protocol, port)
 
         self.method = method
 
         if buffer_size is None:
-            if method == "http-post":
+            if method == "post":
                 buffer_size = DEFAULT_MAX_LENGTH
             else:
                 buffer_size = 1
@@ -94,13 +99,20 @@ class Consumer(object):
 
     @staticmethod
     @contract
-    def as_collector_uri(endpoint):
+    def as_collector_uri(endpoint, protocol="http", port=None):
         """
             :param endpoint:  The raw endpoint provided by the user
             :type  endpoint:  string
+            :param protocol:  The protocol to use - http or https
+            :type  protocol:  protocol            
+            :param port:      The collector port to connect to
+            :type  port:      int | None            
             :rtype:           string
         """
-        return "http://" + endpoint + "/i"
+        if port is None:
+            return protocol + "://" + endpoint + "/i"
+        else:
+            return protocol + "://" + endpoint + ":" + str(port) + "/i"
 
     @contract
     def input(self, payload):
@@ -120,7 +132,7 @@ class Consumer(object):
         """
             Sends all events in the buffer to the collector.
         """
-        if self.method == "http-post":
+        if self.method == "post":
             data = json.dumps(self.buffer)
             buffer_length = len(self.buffer)
             self.buffer = []
@@ -131,7 +143,7 @@ class Consumer(object):
                 self.on_failure(0, data)
             return status_code
 
-        elif self.method == "http-get":
+        elif self.method == "get":
             success_count = 0
             unsent_requests = []
             status_code = None
@@ -147,14 +159,14 @@ class Consumer(object):
             if len(unsent_requests) == 0:
                 if self.on_success is not None:
                     self.on_success(success_count)
-                    
+
             elif self.on_failure is not None:
                 self.on_failure(success_count, unsent_requests)
 
             return status_code
 
         else:
-            logger.warn(self.method + ' is not a recognised HTTP method. Use "http-get" or "http-post".')
+            logger.warn(self.method + ' is not a recognised HTTP method. Use "get" or "post".')
 
     @contract
     def http_post(self, data):
