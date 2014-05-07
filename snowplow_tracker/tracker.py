@@ -366,7 +366,7 @@ class Tracker:
         return self.complete_payload(pb)
 
     @contract
-    def flush(self, async=True):
+    def flush(self, async=False):
         """
             Flush the consumer
 
@@ -375,7 +375,8 @@ class Tracker:
             :rtype:         tracker | int
         """
         if async:
-            return self.out_queue.flush()
+            self.out_queue.flush()
+            return self
         else:
             return self.out_queue.sync_flush()
 

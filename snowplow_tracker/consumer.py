@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 DEFAULT_MAX_LENGTH = 10
+THREAD_TIMEOUT = 10
 
 new_contract("protocol", lambda x: x == "http" or x == "https")
 
@@ -71,7 +72,7 @@ class Consumer(object):
             :param method:      The HTTP request method
             :type  method:      method
             :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
-            :type  buffer_size: string | None
+            :type  buffer_size: int | None
             :param on_success:  Callback executed after every HTTP request in a flush has status code 200
                                 Gets passed the number of events flushed.
             :type  on_success:  function | None
@@ -96,6 +97,8 @@ class Consumer(object):
 
         self.on_success = on_success
         self.on_failure = on_failure
+
+        self.threads = []
 
     @staticmethod
     @contract
@@ -197,16 +200,25 @@ class Consumer(object):
         """
         logger.debug("Starting synchronous flush...")
         result = Consumer.flush(self)
+        for t in self.threads:
+            t.join(THREAD_TIMEOUT)
         logger.debug("Finished synchrous flush")
         return result
+
 
 class AsyncConsumer(Consumer):
     """
         Uses threads to send HTTP requests asynchronously
     """
     def flush(self):
+        """
+            Removes all dead threads, then creates a new thread which
+            excecutes the flush method of the base Consumer class
+        """
+        self.threads = [t for t in self.threads if t.isAlive()]
         logger.debug("Flushing thread running...")
         t = threading.Thread(target=super(AsyncConsumer, self).flush)
+        self.threads.append(t)
         t.start()
 
 
