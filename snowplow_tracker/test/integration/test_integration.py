@@ -60,14 +60,16 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_page_view(self):
         t = tracker.Tracker(default_consumer, default_subject)
         with HTTMock(pass_response_content):
-            t.track_page_view("http://savethearctic.org", "Save The Arctic", None)
-        self.assertEquals(from_querystring("page", querystrings[-1]),"Save+The+Arctic")
+            t.track_page_view("http://savethearctic.org", "Save The Arctic", "http://referrer.com")
+        expected_fields = {"e": "pv", "page": "Save+The+Arctic", "url": "http%3A%2F%2Fsavethearctic.org", "refr": "http%3A%2F%2Freferrer.com"}
+        for key in expected_fields:
+            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])            
 
     def test_integration_ecommerce_transaction_item(self):
         t = tracker.Tracker(default_consumer, default_subject)
         with HTTMock(pass_response_content):
             t.track_ecommerce_transaction_item("12345", "pbz0025", 7.99, 2, "black-tarot", "tarot", currency="GBP")
-            expected_fields = {"ti_ca": "tarot", "ti_id": "12345", "ti_qu": "2", "ti_sk": "pbz0025", "e": "ti", "ti_nm": "black-tarot", "ti_pr": "7.99", "ti_cu": "GBP"}
+        expected_fields = {"ti_ca": "tarot", "ti_id": "12345", "ti_qu": "2", "ti_sk": "pbz0025", "e": "ti", "ti_nm": "black-tarot", "ti_pr": "7.99", "ti_cu": "GBP"}
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
