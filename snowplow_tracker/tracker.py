@@ -58,7 +58,7 @@ class Tracker:
     @contract
     def __init__(self, out_queue, _subject=None,
                  namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, 
-                 contracts=True):
+                 log=True):
         """
             :param out_queue:        Consumer to which events will be sent
             :type  out_queue:        consumer
@@ -72,11 +72,11 @@ class Tracker:
             :type  context_vendor:   string_or_none
             :param encode_base64:    Whether JSONs in the payload should be base-64 encoded
             :type  encode_base64:    bool
-            :param contracts:        Whether to enable contracts
-            :type  contracts:        bool
+            :param log:              Whether to enable Python logging
+            :type  log:              bool
         """
-        if not contracts:
-            disable_all()
+        if not log:
+            logger.setLevel(logging.CRITICAL)
 
         if _subject is None:
             _subject = subject.Subject()
