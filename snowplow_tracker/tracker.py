@@ -22,7 +22,7 @@
 import time
 import random
 import logging
-from snowplow_tracker import payload, _version
+from snowplow_tracker import payload, _version, subject
 from contracts import contract, new_contract, disable_all
 
 
@@ -56,12 +56,14 @@ class Tracker:
     new_contract("consumer", lambda s: hasattr(s, "input"))
 
     @contract
-    def __init__(self, out_queue, subject=None,
+    def __init__(self, out_queue, _subject=None,
                  namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, 
                  contracts=True, log=True):
         """
             :param out_queue:        Consumer to which events will be sent
             :type  out_queue:        consumer
+            :param _subject:         Subject to be tracked
+            :type  _subject:         subject | None
             :param namespace:        Identifier for the Tracker instance
             :type  namespace:        string_or_none
             :param app_id:           Application ID
@@ -82,7 +84,7 @@ class Tracker:
             logger.setLevel(logging.CRITICAL)
 
         self.out_queue = out_queue
-        self.subject=subject        
+        self.subject = _subject        
         self.encode_base64 = encode_base64
         self.context_vendor = context_vendor
 
@@ -166,7 +168,7 @@ class Tracker:
             :param  referrer:       Referrer of the page
             :type   referrer:       string_or_none
             :param  context:        Custom context for the event
-            :type   context:        dict(str:*) | None
+            :type   context:        dict(string:*) | None
             :rtype:                 tracker | int
         """
         pb = payload.Payload()
@@ -208,7 +210,7 @@ class Tracker:
             :param  currency:    The currency the price is expressed in
             :type   currency:    string_or_none
             :param  context:        Custom context for the event
-            :type   context:        dict(str:*) | None
+            :type   context:        dict(string:*) | None
             :rtype:                 tracker | int
         """
         pb = payload.Payload()
@@ -255,8 +257,8 @@ class Tracker:
             :param  items:          The items in the transaction
             :type   items:          list(dict(str:*))
             :param  context:        Custom context for the event
-            :type   context:        dict(str:*) | None
-            :rtype:                 tracker | dict(str:*)
+            :type   context:        dict(string:*) | None
+            :rtype:                 tracker | dict(string:*)
         """
         pb = payload.Payload()
         pb.add("e", "tr")
@@ -302,7 +304,7 @@ class Tracker:
             :param  id_:            Screen view ID
             :type   id_:            string_or_none
             :param  context:        Custom context for the event
-            :type   context:        dict(str:*) | None
+            :type   context:        dict(string:*) | None
             :rtype:                 tracker | int
         """
         screen_view_properties = {"name": name}
@@ -328,7 +330,7 @@ class Tracker:
             :param  value:          A value associated with the user action
             :type   value:          int | float | None
             :param  context:        Custom context for the event
-            :type   context:        dict(str:*) | None
+            :type   context:        dict(string:*) | None
             :rtype:                 tracker | int
         """
         pb = payload.Payload()
@@ -356,9 +358,9 @@ class Tracker:
             :param  event_name:      The name of the event
             :type   event_name:      non_empty_string
             :param  dict_:           The properties of the event
-            :type   dict_:           dict(str:*)
+            :type   dict_:           dict(string:*)
             :param  context:         Custom context for the event
-            :type   context:         dict(str:*) | None
+            :type   context:         dict(string:*) | None
             :rtype:                  tracker | int
         """
         pb = payload.Payload()

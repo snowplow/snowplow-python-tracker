@@ -58,7 +58,7 @@ class Payload:
             Add a dict of name value pairs to the Payload object
 
             :param  dict_:          Dictionary to be added to the Payload
-            :type   dict_:          dict(*:*)
+            :type   dict_:          dict(string:*)
         """
         for f in dict_:
             self.add(f, dict_[f])
@@ -69,13 +69,13 @@ class Payload:
             Add an encoded or unencoded JSON to the payload
 
             :param  dict_:                  Custom context for the event
-            :type   dict_:                  dict(str:*) | None
+            :type   dict_:                  dict(string:*) | None
             :param  encode_base64:          If the payload is base64 encoded
             :type   encode_base64:          bool
             :param  type_when_encoded:      Name of the field when encode_base64 is set
-            :type   type_when_encoded:      str
+            :type   type_when_encoded:      string
             :param  type_when_not_encoded:  Name of the field when encode_base64 is not set
-            :type   type_when_not_encoded:  str
+            :type   type_when_not_encoded:  string
         """
 
         if dict_ is not None and dict_ != {}:

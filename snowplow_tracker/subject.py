@@ -40,7 +40,7 @@ class Subject(object):
     def set_platform(self, value):
         """
             :param  value:          One of ["pc", "tv", "mob", "cnsl", "iot"]
-            :type   value:          str
+            :type   value:          string
             :rtype:                 subject
         """
         if value in SUPPORTED_PLATFORMS:
@@ -53,7 +53,7 @@ class Subject(object):
     def set_user_id(self, user_id):
         """
             :param  user_id:        User ID
-            :type   user_id:        non_empty_string
+            :type   user_id:        string
             :rtype:                 subject
         """
         self.standard_nv_pairs["uid"] = user_id
@@ -97,7 +97,7 @@ class Subject(object):
     def set_timezone(self, timezone):
         """
             :param  timezone:       Timezone as a string
-            :type   timezone:       non_empty_string
+            :type   timezone:       string
             :rtype:                 subject
         """
         self.standard_nv_pairs["tz"] = timezone
@@ -109,7 +109,7 @@ class Subject(object):
             Set language.
 
             :param  lang:           Language the application is set to
-            :type   lang:           non_empty_string
+            :type   lang:           string
             :rtype:                 subject
         """
         self.standard_nv_pairs["lang"] = lang
