@@ -137,13 +137,14 @@ class IntegrationTest(unittest.TestCase):
 
     def test_integration_standard_nv_pairs(self):
         s = subject.Subject()
-        t = tracker.Tracker(consumer.Consumer("localhost"), s, "cf", app_id="angry-birds-android", context_vendor="com.example")
         s.set_platform("mob")
         s.set_user_id("user12345")
         s.set_screen_resolution(100, 200)
         s.set_color_depth(24)
         s.set_timezone("Europe London")
         s.set_lang("en")
+        
+        t = tracker.Tracker(consumer.Consumer("localhost"), s, "cf", app_id="angry-birds-android", context_vendor="com.example")
         with HTTMock(pass_response_content):
             t.track_page_view("localhost", "local host", None, {'user': {'user_type': 'tester'}})
         expected_fields = {"tna": "cf", "evn": "com.snowplowanalytics", "res": "100x200",
