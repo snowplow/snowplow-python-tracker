@@ -227,6 +227,9 @@ class CeleryConsumer(Consumer):
         Uses a Celery worker to send HTTP requests asynchronously
     """
     def flush(self):
+        """
+            Schedules a flush task
+        """
         super(CeleryConsumer, self).flush.delay()
 
 
@@ -247,6 +250,7 @@ class RedisConsumer(object):
         self.rdb = rdb
         self.key = key
 
+    @contract
     def input(self, payload):
         """
             :param payload:  The event properties

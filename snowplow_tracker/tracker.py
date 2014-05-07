@@ -370,7 +370,7 @@ class Tracker:
         """
             Flush the consumer
 
-            :param  async:  Whether the flush is done asynchronously
+            :param  async:  Whether the flush is done asynchronously. Default is False
             :type   async:  bool
             :rtype:         tracker | int
         """
@@ -380,8 +380,14 @@ class Tracker:
         else:
             return self.out_queue.sync_flush()
 
-    def set_subject(self, subject):
+    @contract
+    def set_subject(self, _subject):
         """
             Set the subject of the events fired by the tracker
+
+            :param _subject: Subject to be tracked
+            :type  _subject: subject | None
+            :rtype:          tracker
         """
-        self.subject = subject
+        self.subject = _subject
+        return self
