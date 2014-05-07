@@ -144,8 +144,10 @@ class Consumer(object):
                 else:
                     unsent_requests.append(payload)
 
-            if len(unsent_requests) == 0 and self.on_success is not None:
-                self.on_success(success_count)
+            if len(unsent_requests) == 0:
+                if self.on_success is not None:
+                    self.on_success(success_count)
+                    
             elif self.on_failure is not None:
                 self.on_failure(success_count, unsent_requests)
 

@@ -143,7 +143,7 @@ class IntegrationTest(unittest.TestCase):
         s.set_color_depth(24)
         s.set_timezone("Europe London")
         s.set_lang("en")
-        
+
         t = tracker.Tracker(consumer.Consumer("localhost"), s, "cf", app_id="angry-birds-android", context_vendor="com.example")
         with HTTMock(pass_response_content):
             t.track_page_view("localhost", "local host", None, {'user': {'user_type': 'tester'}})
@@ -170,17 +170,23 @@ class IntegrationTest(unittest.TestCase):
         self.assertEquals(event_dict["e"], "pv")
 
     def test_integration_success_callback(self):
-        callback_queue = []
-        callback_consumer = consumer.Consumer("localhost", on_success=lambda x: callback_queue.append(x))
+        callback_success_queue = []
+        callback_failure_queue = []
+        callback_consumer = consumer.Consumer("localhost", on_success=lambda x: callback_success_queue.append(x),
+                                                           on_failure=lambda x, y:callback_failure_queue.append(x))
         t = tracker.Tracker(callback_consumer, default_subject)
         with HTTMock(pass_response_content):
             t.track_page_view("http://www.example.com")
-        self.assertEquals(callback_queue[0], 1)
+        self.assertEquals(callback_success_queue[0], 1)
+        self.assertEquals(callback_failure_queue, [])
 
     def test_integration_failure_callback(self):
-        callback_queue = []
-        callback_consumer = consumer.Consumer("localhost", on_failure=lambda x, y: callback_queue.append(x))
+        callback_success_queue = []
+        callback_failure_queue = []
+        callback_consumer = consumer.Consumer("localhost", on_success=lambda x: callback_success_queue.append(x),
+                                                           on_failure=lambda x, y:callback_failure_queue.append(x))
         t = tracker.Tracker(callback_consumer, default_subject)
         with HTTMock(fail_response_content):
             t.track_page_view("http://www.example.com")
-        self.assertEquals(callback_queue[0], 0)
+        self.assertEquals(callback_success_queue, [])
+        self.assertEquals(callback_failure_queue[0], 0)
