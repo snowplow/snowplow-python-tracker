@@ -134,13 +134,14 @@ class IntegrationTest(unittest.TestCase):
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_standard_nv_pairs(self):
-        t = tracker.Tracker(consumer.Consumer("localhost"), default_subject, "cf", app_id="angry-birds-android", context_vendor="com.example")
-        default_subject.set_platform("mob")
-        default_subject.set_user_id("user12345")
-        default_subject.set_screen_resolution(100, 200)
-        default_subject.set_color_depth(24)
-        default_subject.set_timezone("Europe London")
-        default_subject.set_lang("en")
+        s = subject.Subject()
+        t = tracker.Tracker(consumer.Consumer("localhost"), s, "cf", app_id="angry-birds-android", context_vendor="com.example")
+        s.set_platform("mob")
+        s.set_user_id("user12345")
+        s.set_screen_resolution(100, 200)
+        s.set_color_depth(24)
+        s.set_timezone("Europe London")
+        s.set_lang("en")
         with HTTMock(pass_response_content):
             t.track_page_view("localhost", "local host", None, {'user': {'user_type': 'tester'}})
         expected_fields = {"tna": "cf", "evn": "com.snowplowanalytics", "res": "100x200",
