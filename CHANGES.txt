@@ -1,5 +1,6 @@
 Version 0.4.0 (2014-05-xx)
 --------------------------
+Gave separate events within an ecommerce transaction different transaction IDs (#89) 
 Added https support for tracker (#81)
 Added callbacks for flushing (#78)
 Added Python-logging (#76)

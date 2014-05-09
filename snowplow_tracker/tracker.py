@@ -137,6 +137,7 @@ class Tracker:
             :type   pb:              payload
             :rtype:                  tracker | int
         """
+        pb.add("tid", Tracker.get_transaction_id())
         pb.add_dict(self.standard_nv_pairs)
         if "co" in pb.nv_pairs or "cx" in pb.nv_pairs:
             pb.add("cv", self.context_vendor)
@@ -165,8 +166,6 @@ class Tracker:
         pb.add("refr", referrer)
         pb.add("evn", DEFAULT_VENDOR)
 
-        tid = Tracker.get_transaction_id()
-        pb.add("tid", tid)
         dtm = Tracker.get_timestamp(tstamp)
         pb.add("dtm", tstamp)        
         pb.add_json(context, self.encode_base64, "cx", "co")
@@ -177,7 +176,7 @@ class Tracker:
     def track_ecommerce_transaction_item(self, order_id, sku, price, quantity,
                                          name=None, category=None, currency=None,
                                          context=None,
-                                         tstamp=None, tid=None):
+                                         tstamp=None):
         """
             This is an internal method called by track_ecommerce_transaction.
             It is not for public use.
@@ -210,7 +209,6 @@ class Tracker:
         pb.add("ti_qu", quantity)
         pb.add("ti_cu", currency)
         pb.add("evn", DEFAULT_VENDOR)
-        pb.add("tid", tid)
         pb.add("dtm", tstamp)
         pb.add_json(context, self.encode_base64, "cx", "co")
 
@@ -260,8 +258,6 @@ class Tracker:
         pb.add("tr_cu", currency)
         pb.add("evn", DEFAULT_VENDOR)
 
-        tid = Tracker.get_transaction_id()
-        pb.add("tid", tid)
         dtm = Tracker.get_timestamp(tstamp)
         pb.add("dtm", dtm)
         pb.add_json(context, self.encode_base64, "cx", "co")
@@ -272,7 +268,6 @@ class Tracker:
 
         for item in items:
             item["tstamp"] = dtm
-            item["tid"] = tid
             item["order_id"] = order_id
             item["currency"] = currency
             item_results.append(self.track_ecommerce_transaction_item(**item))
@@ -329,8 +324,6 @@ class Tracker:
         pb.add("se_va", value)
         pb.add("evn", DEFAULT_VENDOR)
 
-        tid = Tracker.get_transaction_id()
-        pb.add("tid", tid)
         dtm = Tracker.get_timestamp(tstamp)
         pb.add("dtm", tstamp)
         pb.add_json(context, self.encode_base64, "cx", "co")
@@ -359,8 +352,6 @@ class Tracker:
 
         dtm = Tracker.get_timestamp(tstamp)
         pb.add("dtm", tstamp)
-        tid = Tracker.get_transaction_id()
-        pb.add("tid", tid)
         pb.add_json(context, self.encode_base64, "cx", "co")
 
         return self.complete_payload(pb)

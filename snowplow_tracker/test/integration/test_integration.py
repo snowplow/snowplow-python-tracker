@@ -100,8 +100,7 @@ class IntegrationTest(unittest.TestCase):
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
-        for key in ["dtm", "tid"]:
-            self.assertEquals(from_querystring(key, querystrings[-3]), from_querystring(key, querystrings[-2]))
+        self.assertEquals(from_querystring("dtm", querystrings[-3]), from_querystring("dtm", querystrings[-2]))
 
     def test_integration_screen_view(self):
         t = tracker.Tracker(default_consumer, default_subject)
