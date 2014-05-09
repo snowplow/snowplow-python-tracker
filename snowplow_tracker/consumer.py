@@ -34,6 +34,7 @@ logger.setLevel(logging.DEBUG)
 
 DEFAULT_MAX_LENGTH = 10
 THREAD_TIMEOUT = 10
+TRACKER_PROTOCOL_SCHEMA = "com.snowplowanalytics/tracker_protocol/1.0.0"
 
 new_contract("protocol", lambda x: x == "http" or x == "https")
 
@@ -126,7 +127,11 @@ class Consumer(object):
             :param payload:   The name-value pairs for the event
             :type  payload:   dict(string:*)
         """
-        self.buffer.append(payload)
+        if self.method == "post":
+            self.buffer.append({"schema": TRACKER_PROTOCOL_SCHEMA, "data": payload})
+        else:
+            self.buffer.append(payload)
+
         if len(self.buffer) >= self.buffer_size:
             return self.flush()
 
