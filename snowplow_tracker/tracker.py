@@ -32,6 +32,7 @@ Constants & config
 VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
 DEFAULT_VENDOR = "com.snowplowanalytics"
+CONTEXT_SCHEMA = "com.snowplowanalytics/contexts/1.0.0"
 
 
 """
@@ -128,19 +129,26 @@ class Tracker:
             return self
 
     @contract
-    def complete_payload(self, pb):
+    def complete_payload(self, pb, context, tstamp):
         """
             Called by all tracking events to add the standard name-value pairs
             to the Payload object irrespective of the tracked event.
 
             :param  pb:              Payload builder
             :type   pb:              payload
+            :param  context:         Custom context for the event
+            :type   context:         list(dict(string:*)) | None
+            :param  tstamp:          Optional user-provided timestamp for the event
+            :type   tstamp:          int | float | None
             :rtype:                  tracker | int
         """
         pb.add("tid", Tracker.get_transaction_id())
+        pb.add("dtm", Tracker.get_timestamp(tstamp))
+        if context is not None:
+            context_envelope = {"schema": CONTEXT_SCHEMA, "data": context}
+            pb.add_json(context_envelope, self.encode_base64, "cx", "co")
+
         pb.add_dict(self.standard_nv_pairs)
-        if "co" in pb.nv_pairs or "cx" in pb.nv_pairs:
-            pb.add("cv", self.context_vendor)
 
         pb.add_dict(self.subject.standard_nv_pairs)
 
@@ -156,7 +164,7 @@ class Tracker:
             :param  referrer:       Referrer of the page
             :type   referrer:       string_or_none
             :param  context:        Custom context for the event
-            :type   context:        dict(string:*) | None
+            :type   context:        list(dict(string:*)) | None
             :rtype:                 tracker | int
         """
         pb = payload.Payload()
@@ -166,11 +174,7 @@ class Tracker:
         pb.add("refr", referrer)
         pb.add("evn", DEFAULT_VENDOR)
 
-        dtm = Tracker.get_timestamp(tstamp)
-        pb.add("dtm", tstamp)        
-        pb.add_json(context, self.encode_base64, "cx", "co")
-
-        return self.complete_payload(pb)
+        return self.complete_payload(pb, context, tstamp)
 
     @contract
     def track_ecommerce_transaction_item(self, order_id, sku, price, quantity,
@@ -195,9 +199,9 @@ class Tracker:
             :type   category:    string_or_none
             :param  currency:    The currency the price is expressed in
             :type   currency:    string_or_none
-            :param  context:        Custom context for the event
-            :type   context:        dict(string:*) | None
-            :rtype:                 tracker | int
+            :param  context:     Custom context for the event
+            :type   context:     list(dict(string:*)) | None
+            :rtype:              tracker | int
         """
         pb = payload.Payload()
         pb.add("e", "ti")
@@ -209,10 +213,8 @@ class Tracker:
         pb.add("ti_qu", quantity)
         pb.add("ti_cu", currency)
         pb.add("evn", DEFAULT_VENDOR)
-        pb.add("dtm", tstamp)
-        pb.add_json(context, self.encode_base64, "cx", "co")
 
-        return self.complete_payload(pb)
+        return self.complete_payload(pb, context, tstamp)
 
     @contract
     def track_ecommerce_transaction(self, order_id, total_value,
@@ -242,7 +244,7 @@ class Tracker:
             :param  items:          The items in the transaction
             :type   items:          list(dict(str:*))
             :param  context:        Custom context for the event
-            :type   context:        dict(string:*) | None
+            :type   context:        list(dict(string:*)) | None
             :rtype:                 tracker | dict(string:*)
         """
         pb = payload.Payload()
@@ -258,16 +260,14 @@ class Tracker:
         pb.add("tr_cu", currency)
         pb.add("evn", DEFAULT_VENDOR)
 
-        dtm = Tracker.get_timestamp(tstamp)
-        pb.add("dtm", dtm)
-        pb.add_json(context, self.encode_base64, "cx", "co")
+        tstamp = Tracker.get_timestamp(tstamp)
 
-        transaction_result = self.complete_payload(pb)
+        transaction_result = self.complete_payload(pb, context, tstamp)
 
         item_results = []
 
         for item in items:
-            item["tstamp"] = dtm
+            item["tstamp"] = tstamp
             item["order_id"] = order_id
             item["currency"] = currency
             item_results.append(self.track_ecommerce_transaction_item(**item))
@@ -276,7 +276,6 @@ class Tracker:
             return {"transaction_result": transaction_result, "item_results": item_results}
         else:
             return self
-
     
     @contract
     def track_screen_view(self, name, id_=None, context=None, tstamp=None):
@@ -286,7 +285,7 @@ class Tracker:
             :param  id_:            Screen view ID
             :type   id_:            string_or_none
             :param  context:        Custom context for the event
-            :type   context:        dict(string:*) | None
+            :type   context:        list(dict(string:*)) | None
             :rtype:                 tracker | int
         """
         screen_view_properties = {"name": name}
@@ -312,7 +311,7 @@ class Tracker:
             :param  value:          A value associated with the user action
             :type   value:          int | float | None
             :param  context:        Custom context for the event
-            :type   context:        dict(string:*) | None
+            :type   context:        list(dict(string:*)) | None
             :rtype:                 tracker | int
         """
         pb = payload.Payload()
@@ -324,11 +323,7 @@ class Tracker:
         pb.add("se_va", value)
         pb.add("evn", DEFAULT_VENDOR)
 
-        dtm = Tracker.get_timestamp(tstamp)
-        pb.add("dtm", tstamp)
-        pb.add_json(context, self.encode_base64, "cx", "co")
-
-        return self.complete_payload(pb)
+        return self.complete_payload(pb, context, tstamp)
 
     @contract
     def track_unstruct_event(self, event_vendor, event_name, dict_, context=None, tstamp=None):
@@ -340,7 +335,7 @@ class Tracker:
             :param  dict_:           The properties of the event
             :type   dict_:           dict(string:*)
             :param  context:         Custom context for the event
-            :type   context:         dict(string:*) | None
+            :type   context:         list(dict(string:*)) | None
             :rtype:                  tracker | int
         """
         pb = payload.Payload()
@@ -350,11 +345,7 @@ class Tracker:
         pb.add_json(dict_, self.encode_base64, "ue_px", "ue_pr")
         pb.add("evn", event_vendor)
 
-        dtm = Tracker.get_timestamp(tstamp)
-        pb.add("dtm", tstamp)
-        pb.add_json(context, self.encode_base64, "cx", "co")
-
-        return self.complete_payload(pb)
+        return self.complete_payload(pb, context, tstamp)
 
     @contract
     def flush(self, async=False):

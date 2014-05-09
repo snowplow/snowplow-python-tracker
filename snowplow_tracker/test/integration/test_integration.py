@@ -143,12 +143,12 @@ class IntegrationTest(unittest.TestCase):
         s.set_timezone("Europe London")
         s.set_lang("en")
 
-        t = tracker.Tracker(consumer.Consumer("localhost"), s, "cf", app_id="angry-birds-android", context_vendor="com.example")
+        t = tracker.Tracker(consumer.Consumer("localhost"), s, "cf", app_id="angry-birds-android")
         with HTTMock(pass_response_content):
-            t.track_page_view("localhost", "local host", None, {'user': {'user_type': 'tester'}})
+            t.track_page_view("localhost", "local host", None, [{"schema": "com.example/user/2.0.3", "data": {"user_type": "tester"}}])
         expected_fields = {"tna": "cf", "evn": "com.snowplowanalytics", "res": "100x200",
                            "lang": "en", "aid": "angry-birds-android", "cd": "24", "tz": "Europe+London",
-                           "p": "mob", "tv": "py-" + _version.__version__, "cv": "com.example"}
+                           "p": "mob", "tv": "py-" + _version.__version__}
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
