@@ -147,7 +147,7 @@ class IntegrationTest(unittest.TestCase):
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
         envelope_string = from_querystring("ue_px", querystrings[-1])
-        envelope = json.loads((base64.urlsafe_b64decode(envelope_string)).decode("utf-8"))
+        envelope = json.loads((base64.urlsafe_b64decode(bytearray(envelope_string, 'utf-8'))).decode("utf-8"))
         self.assertEquals(envelope, {
             "schema": "com.snowplowanalytics/unstruct_event/json/1-0-0",
             "data": {"schema": "com.acme/viewed_product/json/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}}
@@ -169,7 +169,7 @@ class IntegrationTest(unittest.TestCase):
         with HTTMock(pass_response_content):
             t.track_page_view("localhost", "local host", None, [{"schema": "com.example/user/json/2-0-3", "data": {"user_type": "tester"}}])
         envelope_string = from_querystring("cx", querystrings[-1])
-        envelope = json.loads((base64.urlsafe_b64decode(envelope_string)).decode("utf-8"))
+        envelope = json.loads((base64.urlsafe_b64decode(bytearray(envelope_string, 'utf-8'))).decode("utf-8"))
         self.assertEquals(envelope, {
             "schema": "com.snowplowanalytics/contexts/json/1-0-0",
             "data":[{"schema": "com.example/user/json/2-0-3", "data": {"user_type": "tester"}}]
