@@ -31,9 +31,10 @@ Constants & config
 
 VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
-DEFAULT_VENDOR = "com.snowplowanalytics"
-CONTEXT_SCHEMA = "com.snowplowanalytics/contexts/1.0.0"
-UNSTRUCT_EVENT_SCHEMA = "com.snowplowanalytics/unstruct_event/1.0.0"
+SNOWPLOW_VENDOR = "com.snowplowanalytics"
+SCHEMA_TAG = "json"
+CONTEXT_SCHEMA = "com.snowplowanalytics/contexts/%s/1-0-0" % SCHEMA_TAG
+UNSTRUCT_EVENT_SCHEMA = "com.snowplowanalytics/unstruct_event/%s/1-0-0" % SCHEMA_TAG
 
 
 """
@@ -54,7 +55,7 @@ class Tracker:
 
     @contract
     def __init__(self, out_queue, _subject=None,
-                 namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64):
+                 namespace=None, app_id=None, encode_base64=DEFAULT_ENCODE_BASE64):
         """
             :param out_queue:        Consumer to which events will be sent
             :type  out_queue:        consumer
@@ -64,8 +65,6 @@ class Tracker:
             :type  namespace:        string_or_none
             :param app_id:           Application ID
             :type  app_id:           string_or_none            
-            :param context_vendor:   Reversed domain name of the company which defined the custom contexts
-            :type  context_vendor:   string_or_none
             :param encode_base64:    Whether JSONs in the payload should be base-64 encoded
             :type  encode_base64:    bool
         """
@@ -73,9 +72,8 @@ class Tracker:
             _subject = subject.Subject()
 
         self.out_queue = out_queue
-        self.subject = _subject        
+        self.subject = _subject
         self.encode_base64 = encode_base64
-        self.context_vendor = context_vendor
 
         self.standard_nv_pairs = {
             "tv": VERSION,
@@ -173,7 +171,6 @@ class Tracker:
         pb.add("url", page_url)
         pb.add("page", page_title)
         pb.add("refr", referrer)
-        pb.add("evn", DEFAULT_VENDOR)
 
         return self.complete_payload(pb, context, tstamp)
 
@@ -213,7 +210,6 @@ class Tracker:
         pb.add("ti_pr", price)
         pb.add("ti_qu", quantity)
         pb.add("ti_cu", currency)
-        pb.add("evn", DEFAULT_VENDOR)
 
         return self.complete_payload(pb, context, tstamp)
 
@@ -259,7 +255,6 @@ class Tracker:
         pb.add("tr_st", state)
         pb.add("tr_co", country)
         pb.add("tr_cu", currency)
-        pb.add("evn", DEFAULT_VENDOR)
 
         tstamp = Tracker.get_timestamp(tstamp)
 
@@ -294,7 +289,7 @@ class Tracker:
             screen_view_properties["id"] = id_
 
         event_json = {
-            "schema": DEFAULT_VENDOR + "/screen_view/json/1-0-0",
+            "schema": SNOWPLOW_VENDOR + "/screen_view/%s/1-0-0" % SCHEMA_TAG,
             "data": screen_view_properties
         }
         return self.track_unstruct_event(event_json, context, tstamp)
@@ -327,7 +322,6 @@ class Tracker:
         pb.add("se_la", label)
         pb.add("se_pr", property_)
         pb.add("se_va", value)
-        pb.add("evn", DEFAULT_VENDOR)
 
         return self.complete_payload(pb, context, tstamp)
 

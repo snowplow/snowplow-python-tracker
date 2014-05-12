@@ -24,8 +24,15 @@ import time
 import re
 import redis
 import json
+import base64
 from snowplow_tracker import tracker, _version, consumer, subject
 from httmock import all_requests, HTTMock
+
+try:
+    from urllib.parse import unquote_plus  # Python 3
+
+except ImportError:
+    from urllib import unquote_plus        # Python 2
 
 querystrings = [""]
 
@@ -121,18 +128,52 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_unstruct_event_non_base64(self):
         t = tracker.Tracker(default_consumer, default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
-            t.track_unstruct_event({"schema": "com.acme/viewed_product/json/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)}})
+            t.track_unstruct_event({"schema": "com.acme/viewed_product/json/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}})
         expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        envelope_string = from_querystring("ue_pr", querystrings[-1])
+        envelope = json.loads(unquote_plus(envelope_string))
+        self.assertEquals(envelope, {
+            "schema": "com.snowplowanalytics/unstruct_event/json/1-0-0",
+            "data": {"schema": "com.acme/viewed_product/json/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}}
+        })
 
     def test_integration_unstruct_event_base64(self):
-        t = tracker.Tracker(default_consumer, default_subject)
+        t = tracker.Tracker(default_consumer, default_subject, encode_base64=True)
         with HTTMock(pass_response_content):
-            t.track_unstruct_event({"schema": "com.acme/viewed_product/json/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)}})
+            t.track_unstruct_event({"schema": "com.acme/viewed_product/json/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}})
         expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        envelope_string = from_querystring("ue_px", querystrings[-1])
+        envelope = json.loads((base64.urlsafe_b64decode(envelope_string)).decode("utf-8"))
+        self.assertEquals(envelope, {
+            "schema": "com.snowplowanalytics/unstruct_event/json/1-0-0",
+            "data": {"schema": "com.acme/viewed_product/json/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}}
+        })
+
+    def test_integration_context_non_base64(self):
+        t = tracker.Tracker(default_consumer, default_subject, encode_base64=False)
+        with HTTMock(pass_response_content):
+            t.track_page_view("localhost", "local host", None, [{"schema": "com.example/user/json/2-0-3", "data": {"user_type": "tester"}}])
+        envelope_string = from_querystring("co", querystrings[-1])
+        envelope = json.loads(unquote_plus(envelope_string))
+        self.assertEquals(envelope, {
+            "schema": "com.snowplowanalytics/contexts/json/1-0-0",
+            "data":[{"schema": "com.example/user/json/2-0-3", "data": {"user_type": "tester"}}]
+        })
+
+    def test_integration_context_base64(self):
+        t = tracker.Tracker(default_consumer, default_subject, encode_base64=True)
+        with HTTMock(pass_response_content):
+            t.track_page_view("localhost", "local host", None, [{"schema": "com.example/user/json/2-0-3", "data": {"user_type": "tester"}}])
+        envelope_string = from_querystring("cx", querystrings[-1])
+        envelope = json.loads((base64.urlsafe_b64decode(envelope_string)).decode("utf-8"))
+        self.assertEquals(envelope, {
+            "schema": "com.snowplowanalytics/contexts/json/1-0-0",
+            "data":[{"schema": "com.example/user/json/2-0-3", "data": {"user_type": "tester"}}]
+        })
 
     def test_integration_standard_nv_pairs(self):
         s = subject.Subject()
@@ -146,7 +187,7 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker(consumer.Consumer("localhost"), s, "cf", app_id="angry-birds-android")
         with HTTMock(pass_response_content):
             t.track_page_view("localhost", "local host")
-        expected_fields = {"tna": "cf", "evn": "com.snowplowanalytics", "res": "100x200",
+        expected_fields = {"tna": "cf", "res": "100x200",
                            "lang": "en", "aid": "angry-birds-android", "cd": "24", "tz": "Europe+London",
                            "p": "mob", "tv": "py-" + _version.__version__}
         for key in expected_fields:
