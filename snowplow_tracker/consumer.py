@@ -34,7 +34,7 @@ logger.setLevel(logging.DEBUG)
 
 DEFAULT_MAX_LENGTH = 10
 THREAD_TIMEOUT = 10
-TRACKER_PROTOCOL_SCHEMA = "com.snowplowanalytics/tracker_protocol/1.0.0"
+TRACKER_PROTOCOL_SCHEMA = "com.snowplowanalytics/tracker_protocol/json/1-0-0"
 
 new_contract("protocol", lambda x: x == "http" or x == "https")
 

@@ -106,7 +106,7 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker(default_consumer, default_subject)
         with HTTMock(pass_response_content):
             t.track_screen_view("Game HUD 2", "Hello!")
-        expected_fields = {"e": "ue", "ue_na": "screen_view", "evn": "com.snowplowanalytics"}
+        expected_fields = {"e": "ue"}
         for key in expected_fields:          
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
@@ -121,16 +121,16 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_unstruct_event_non_base64(self):
         t = tracker.Tracker(default_consumer, default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
-            t.track_unstruct_event("com.example_company", "viewed_product", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)})
-        expected_fields = {"e": "ue", "evn": "com.example_company", "ue_na": "viewed_product"}
+            t.track_unstruct_event({"schema": "com.acme/viewed_product/json/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)}})
+        expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_unstruct_event_base64(self):
         t = tracker.Tracker(default_consumer, default_subject)
         with HTTMock(pass_response_content):
-            t.track_unstruct_event("com.example_company", "viewed_product", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)})
-        expected_fields = {"e": "ue", "ue_na": "viewed_product"}
+            t.track_unstruct_event({"schema": "com.acme/viewed_product/json/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": int(time.time() * 1000)}})
+        expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
@@ -145,7 +145,7 @@ class IntegrationTest(unittest.TestCase):
 
         t = tracker.Tracker(consumer.Consumer("localhost"), s, "cf", app_id="angry-birds-android")
         with HTTMock(pass_response_content):
-            t.track_page_view("localhost", "local host", None, [{"schema": "com.example/user/2.0.3", "data": {"user_type": "tester"}}])
+            t.track_page_view("localhost", "local host")
         expected_fields = {"tna": "cf", "evn": "com.snowplowanalytics", "res": "100x200",
                            "lang": "en", "aid": "angry-birds-android", "cd": "24", "tz": "Europe+London",
                            "p": "mob", "tv": "py-" + _version.__version__}

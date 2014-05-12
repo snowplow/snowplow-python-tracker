@@ -33,6 +33,7 @@ VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
 DEFAULT_VENDOR = "com.snowplowanalytics"
 CONTEXT_SCHEMA = "com.snowplowanalytics/contexts/1.0.0"
+UNSTRUCT_EVENT_SCHEMA = "com.snowplowanalytics/unstruct_event/1.0.0"
 
 
 """
@@ -291,7 +292,12 @@ class Tracker:
         screen_view_properties = {"name": name}
         if id_ is not None:
             screen_view_properties["id"] = id_
-        return self.track_unstruct_event(DEFAULT_VENDOR, "screen_view", screen_view_properties, context, tstamp)
+
+        event_json = {
+            "schema": DEFAULT_VENDOR + "/screen_view/json/1-0-0",
+            "data": screen_view_properties
+        }
+        return self.track_unstruct_event(event_json, context, tstamp)
 
     @contract
     def track_struct_event(self, category, action, label=None, property_=None, value=None,
@@ -326,24 +332,24 @@ class Tracker:
         return self.complete_payload(pb, context, tstamp)
 
     @contract
-    def track_unstruct_event(self, event_vendor, event_name, dict_, context=None, tstamp=None):
+    def track_unstruct_event(self, event_json, context=None, tstamp=None):
         """
-            :param  event_vendor:    The author of the event
-            :type   event_vendor:    non_empty_string        
-            :param  event_name:      The name of the event
-            :type   event_name:      non_empty_string
-            :param  dict_:           The properties of the event
-            :type   dict_:           dict(string:*)
+            :param  event_json:      The properties of the event. Has two field:
+                                     A "data" field containing the event properties and
+                                     A "schema" field identifying the schema against which the data is validated
+
+            :type   event_json:      dict(string: string | dict)
             :param  context:         Custom context for the event
             :type   context:         list(dict(string:*)) | None
             :rtype:                  tracker | int
         """
+
+        envelope = {"schema": UNSTRUCT_EVENT_SCHEMA , "data": event_json}
+
         pb = payload.Payload()
 
         pb.add("e", "ue")
-        pb.add("ue_na", event_name)
-        pb.add_json(dict_, self.encode_base64, "ue_px", "ue_pr")
-        pb.add("evn", event_vendor)
+        pb.add_json(envelope, self.encode_base64, "ue_px", "ue_pr")
 
         return self.complete_payload(pb, context, tstamp)
 

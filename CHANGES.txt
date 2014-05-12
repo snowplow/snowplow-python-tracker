@@ -1,5 +1,6 @@
 Version 0.4.0 (2014-05-xx)
 --------------------------
+Made unstructured events vschema-compatible (#87)
 Made custom contexts vschema-compatible (#88)
 Gave separate events within an ecommerce transaction different transaction IDs (#89) 
 Added https support for tracker (#81)
