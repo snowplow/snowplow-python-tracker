@@ -34,7 +34,7 @@ logger.setLevel(logging.DEBUG)
 
 DEFAULT_MAX_LENGTH = 10
 THREAD_TIMEOUT = 10
-PAYLOAD_DATA_SCHEMA = "com.snowplowanalytics/payload_data/json/1-0-0"
+PAYLOAD_DATA_SCHEMA = "com.snowplowanalytics/payload_data/jsonschema/1-0-0"
 
 new_contract("protocol", lambda x: x == "http" or x == "https")
 

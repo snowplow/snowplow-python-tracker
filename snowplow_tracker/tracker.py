@@ -32,7 +32,7 @@ Constants & config
 VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
 SNOWPLOW_VENDOR = "com.snowplowanalytics"
-SCHEMA_TAG = "json"
+SCHEMA_TAG = "jsonschema"
 CONTEXT_SCHEMA = "com.snowplowanalytics/contexts/%s/1-0-0" % SCHEMA_TAG
 UNSTRUCT_EVENT_SCHEMA = "com.snowplowanalytics/unstruct_event/%s/1-0-0" % SCHEMA_TAG
 
