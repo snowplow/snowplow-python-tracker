@@ -51,14 +51,14 @@ class Tracker:
 
     new_contract("tracker", lambda s: isinstance(s, Tracker))
 
-    new_contract("consumer", lambda s: hasattr(s, "input"))
+    new_contract("emitter", lambda s: hasattr(s, "input"))
 
     @contract
     def __init__(self, out_queue, _subject=None,
                  namespace=None, app_id=None, encode_base64=DEFAULT_ENCODE_BASE64):
         """
-            :param out_queue:        Consumer to which events will be sent
-            :type  out_queue:        consumer
+            :param out_queue:        Emitter to which events will be sent
+            :type  out_queue:        emitter
             :param _subject:         Subject to be tracked
             :type  _subject:         subject | None
             :param namespace:        Identifier for the Tracker instance
@@ -115,7 +115,7 @@ class Tracker:
     @contract
     def track(self, pb):
         """
-            Send the payload to a consumer
+            Send the payload to a emitter
 
             :param  pb:              Payload builder
             :type   pb:              payload
@@ -350,7 +350,7 @@ class Tracker:
     @contract
     def flush(self, async=False):
         """
-            Flush the consumer
+            Flush the emitter
 
             :param  async:  Whether the flush is done asynchronously. Default is False
             :type   async:  bool

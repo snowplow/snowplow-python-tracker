@@ -1,5 +1,5 @@
 """
-    consumer.py
+    emitters.py
 
     Copyright (c) 2013-2014 Snowplow Analytics Ltd. All rights reserved.
 
@@ -55,7 +55,7 @@ except ImportError:
     app = Celery("Snowplow", broker="redis://guest@localhost//")
 
 
-class Consumer(object):
+class Emitter(object):
     """
         Synchronously send Snowplow events to a Snowplow as_collector_uri
         Supports both GET and POST requests
@@ -84,7 +84,7 @@ class Consumer(object):
                                    If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
             :type  on_failure:  function | None            
         """
-        self.endpoint = Consumer.as_collector_uri(endpoint, protocol, port)
+        self.endpoint = Emitter.as_collector_uri(endpoint, protocol, port)
 
         self.method = method
 
@@ -200,34 +200,34 @@ class Consumer(object):
 
     def sync_flush(self):
         """
-            Calls the flush method of the base Consumer class.
+            Calls the flush method of the base Emitter class.
             This is guaranteed to be blocking, not asynchronous.
         """
         logger.debug("Starting synchronous flush...")
-        result = Consumer.flush(self)
+        result = Emitter.flush(self)
         for t in self.threads:
             t.join(THREAD_TIMEOUT)
         logger.debug("Finished synchrous flush")
         return result
 
 
-class AsyncConsumer(Consumer):
+class AsyncEmitter(Emitter):
     """
         Uses threads to send HTTP requests asynchronously
     """
     def flush(self):
         """
             Removes all dead threads, then creates a new thread which
-            excecutes the flush method of the base Consumer class
+            excecutes the flush method of the base Emitter class
         """
         self.threads = [t for t in self.threads if t.isAlive()]
         logger.debug("Flushing thread running...")
-        t = threading.Thread(target=super(AsyncConsumer, self).flush)
+        t = threading.Thread(target=super(AsyncEmitter, self).flush)
         self.threads.append(t)
         t.start()
 
 
-class CeleryConsumer(Consumer):
+class CeleryEmitter(Emitter):
     """
         Uses a Celery worker to send HTTP requests asynchronously
     """
@@ -235,10 +235,10 @@ class CeleryConsumer(Consumer):
         """
             Schedules a flush task
         """
-        super(CeleryConsumer, self).flush.delay()
+        super(CeleryEmitter, self).flush.delay()
 
 
-class RedisConsumer(object):
+class RedisEmitter(object):
     """
         Sends Snowplow events to a Redis database
     """
@@ -266,7 +266,7 @@ class RedisConsumer(object):
         logger.debug("Finished sending event to Redis.")
 
     def flush(self):
-        logger.warn("The RedisConsumer class does not need to be flushed")
+        logger.warn("The RedisEmitter class does not need to be flushed")
 
     def sync_flush(self):
         self.flush()
