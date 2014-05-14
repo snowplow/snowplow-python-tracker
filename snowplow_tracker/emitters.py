@@ -127,10 +127,7 @@ class Emitter(object):
             :param payload:   The name-value pairs for the event
             :type  payload:   dict(string:*)
         """
-        if self.method == "post":
-            self.buffer.append({"schema": PAYLOAD_DATA_SCHEMA, "data": payload})
-        else:
-            self.buffer.append(payload)
+        self.buffer.append(payload)
 
         if len(self.buffer) >= self.buffer_size:
             return self.flush()
@@ -141,7 +138,10 @@ class Emitter(object):
             Sends all events in the buffer to the collector.
         """
         if self.method == "post":
-            data = json.dumps(self.buffer)
+            data = json.dumps({
+                "schema": PAYLOAD_DATA_SCHEMA,
+                "data": self.buffer
+            })
             buffer_length = len(self.buffer)
             self.buffer = []
             status_code = self.http_post(data).status_code
@@ -235,7 +235,7 @@ class CeleryEmitter(Emitter):
     """
     def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None):
         super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, None, None)
-        
+
     def flush(self):
         """
             Schedules a flush task
