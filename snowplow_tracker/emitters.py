@@ -229,8 +229,13 @@ class AsyncEmitter(Emitter):
 
 class CeleryEmitter(Emitter):
     """
-        Uses a Celery worker to send HTTP requests asynchronously
+        Uses a Celery worker to send HTTP requests asynchronously.
+        Works like the base Emitter class,
+        but on_success and on_failure callbacks cannot be set.
     """
+    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None):
+        super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, None, None)
+        
     def flush(self):
         """
             Schedules a flush task
