@@ -30,7 +30,7 @@ import logging
 from contracts import contract, new_contract
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 DEFAULT_MAX_LENGTH = 10
 THREAD_TIMEOUT = 10
@@ -100,6 +100,8 @@ class Emitter(object):
         self.on_failure = on_failure
 
         self.threads = []
+
+        logger.info("Emitter initialized with endpoint " + self.endpoint)
 
     @staticmethod
     @contract
@@ -184,7 +186,7 @@ class Emitter(object):
         """
         logger.debug("Sending POST request...")
         r = requests.post(self.endpoint, data=data)
-        logger.debug("POST request finished with status code: " + str(r.status_code))
+        logger.info("POST request finished with status code: " + str(r.status_code))
         return r
 
     @contract
@@ -195,7 +197,7 @@ class Emitter(object):
         """
         logger.debug("Sending GET request...")
         r = requests.get(self.endpoint, params=payload)        
-        logger.debug("GET request finished with status code: " + str(r.status_code))
+        logger.info("GET request finished with status code: " + str(r.status_code))
         return r
 
     def sync_flush(self):
@@ -241,6 +243,7 @@ class CeleryEmitter(Emitter):
             Schedules a flush task
         """
         super(CeleryEmitter, self).flush.delay()
+        logger.info("Scheduled a Celery task to flush the event queue")
 
 
 class RedisEmitter(object):
@@ -268,7 +271,7 @@ class RedisEmitter(object):
         """
         logger.debug("Pushing event to Redis queue...")
         self.rdb.rpush(self.key, json.dumps(payload))
-        logger.debug("Finished sending event to Redis.")
+        logger.info("Finished sending event to Redis.")
 
     def flush(self):
         logger.warn("The RedisEmitter class does not need to be flushed")

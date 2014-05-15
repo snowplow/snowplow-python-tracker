@@ -21,10 +21,12 @@
 
 from contracts import contract, new_contract
 
-new_contract("subject", lambda x: isinstance(x, Subject))
-
 SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
 DEFAULT_PLATFORM = "pc"
+
+new_contract("subject", lambda x: isinstance(x, Subject))
+
+new_contract("supported_platform", lambda x: x in SUPPORTED_PLATFORMS)
 
 class Subject(object):
     """
@@ -40,13 +42,10 @@ class Subject(object):
     def set_platform(self, value):
         """
             :param  value:          One of ["pc", "tv", "mob", "cnsl", "iot"]
-            :type   value:          string
+            :type   value:          supported_platform
             :rtype:                 subject
         """
-        if value in SUPPORTED_PLATFORMS:
-            self.standard_nv_pairs["p"] = value
-        else:
-            raise RuntimeError(value + " is not a supported platform")
+        self.standard_nv_pairs["p"] = value
         return self
 
     @contract

@@ -23,22 +23,22 @@
 import redis
 import gevent
 from gevent.pool import Pool
-from consumer import Consumer
 import json
 import signal
 
-DEFAULT_REDIS = redis.StrictRedis()
 DEFAULT_KEY = "snowplow"
 
 class RedisWorker(object):
     """
-        Asynchronously take events from redis and send them to a consumer
+        Asynchronously take events from redis and send them to an emitter
     """
 
-    def __init__(self, _consumer, key=DEFAULT_KEY, dbr=DEFAULT_REDIS):
-        self.consumer = _consumer
+    def __init__(self, emitter, rdb=None, key=DEFAULT_KEY):
+        self.emitter = emitter
         self.key = key
-        self.dbr = dbr
+        if rdb is None:
+            rdb = redis.StrictRedis()
+        self.rdb = rdb
         self.pool = Pool(5)
 
         signal.signal(signal.SIGTERM, self.request_shutdown)
@@ -47,16 +47,16 @@ class RedisWorker(object):
 
     def send(self, payload):
         """
-            Send an event to a consumer
+            Send an event to an emitter
         """
-        self.consumer.input(payload)
+        self.emitter.input(payload)
 
     def pop_payload(self):
         """
             Get a single event from Redis and send it
             If the Redis queue is empty, sleep to avoid making continual requests
         """
-        payload = self.dbr.lpop(self.key)
+        payload = self.rdb.lpop(self.key)
         if payload:
             self.pool.spawn(self.send, json.loads(payload.decode("utf-8")))
         else:

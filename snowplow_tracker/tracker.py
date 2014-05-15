@@ -54,11 +54,11 @@ class Tracker:
     new_contract("emitter", lambda s: hasattr(s, "input"))
 
     @contract
-    def __init__(self, out_queue, _subject=None,
+    def __init__(self, emitter, _subject=None,
                  namespace=None, app_id=None, encode_base64=DEFAULT_ENCODE_BASE64):
         """
-            :param out_queue:        Emitter to which events will be sent
-            :type  out_queue:        emitter
+            :param emitter:          Emitter to which events will be sent
+            :type  emitter:          emitter
             :param _subject:         Subject to be tracked
             :type  _subject:         subject | None
             :param namespace:        Identifier for the Tracker instance
@@ -71,7 +71,7 @@ class Tracker:
         if _subject is None:
             _subject = subject.Subject()
 
-        self.out_queue = out_queue
+        self.emitter = emitter
         self.subject = _subject
         self.encode_base64 = encode_base64
 
@@ -121,7 +121,7 @@ class Tracker:
             :type   pb:              payload
             :rtype:                  tracker | int
         """
-        result = self.out_queue.input(pb.nv_pairs)
+        result = self.emitter.input(pb.nv_pairs)
         if result is not None:
             return result
         else:
@@ -357,10 +357,10 @@ class Tracker:
             :rtype:         tracker | int
         """
         if async:
-            self.out_queue.flush()
+            self.emitter.flush()
             return self
         else:
-            return self.out_queue.sync_flush()
+            return self.emitter.sync_flush()
 
     @contract
     def set_subject(self, _subject):
