@@ -129,10 +129,10 @@ class Emitter(object):
             :param payload:   The name-value pairs for the event
             :type  payload:   dict(string:*)
         """
-        self.buffer.append(payload)
-
         if len(self.buffer) >= self.buffer_size:
             return self.flush()
+
+        self.buffer.append(payload)
 
     @task(name="Flush")
     def flush(self):
