@@ -146,7 +146,7 @@ class IntegrationTest(unittest.TestCase):
         expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
-        envelope_string = from_querystring("ue_px", querystrings[-1])
+        envelope_string = unquote_plus(from_querystring("ue_px", querystrings[-1]))
         envelope = json.loads((base64.urlsafe_b64decode(bytearray(envelope_string, "utf-8"))).decode("utf-8"))
         self.assertEquals(envelope, {
             "schema": "iglu://com.snowplowanalytics/unstruct_event/jsonschema/1-0-0",
@@ -163,18 +163,18 @@ class IntegrationTest(unittest.TestCase):
             "schema": "iglu://com.snowplowanalytics/contexts/jsonschema/1-0-0",
             "data":[{"schema": "iglu://com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}]
         })
-
+    
     def test_integration_context_base64(self):
         t = tracker.Tracker(default_emitter, default_subject, encode_base64=True)
         with HTTMock(pass_response_content):
             t.track_page_view("localhost", "local host", None, [{"schema": "iglu://com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}])
-        envelope_string = from_querystring("cx", querystrings[-1])
+        envelope_string = unquote_plus(from_querystring("cx", querystrings[-1]))
         envelope = json.loads((base64.urlsafe_b64decode(bytearray(envelope_string, "utf-8"))).decode("utf-8"))
         self.assertEquals(envelope, {
             "schema": "iglu://com.snowplowanalytics/contexts/jsonschema/1-0-0",
             "data":[{"schema": "iglu://com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}]
         })
-
+    
     def test_integration_standard_nv_pairs(self):
         s = subject.Subject()
         s.set_platform("mob")
