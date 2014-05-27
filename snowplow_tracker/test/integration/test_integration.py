@@ -135,7 +135,7 @@ class IntegrationTest(unittest.TestCase):
         envelope_string = from_querystring("ue_pr", querystrings[-1])
         envelope = json.loads(unquote_plus(envelope_string))
         self.assertEquals(envelope, {
-            "schema": "iglu://com.snowplowanalytics/unstruct_event/jsonschema/1-0-0",
+            "schema": "iglu://com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0",
             "data": {"schema": "iglu://com.acme/viewed_product/jsonschema/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}}
         })
 
@@ -149,7 +149,7 @@ class IntegrationTest(unittest.TestCase):
         envelope_string = unquote_plus(from_querystring("ue_px", querystrings[-1]))
         envelope = json.loads((base64.urlsafe_b64decode(bytearray(envelope_string, "utf-8"))).decode("utf-8"))
         self.assertEquals(envelope, {
-            "schema": "iglu://com.snowplowanalytics/unstruct_event/jsonschema/1-0-0",
+            "schema": "iglu://com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0",
             "data": {"schema": "iglu://com.acme/viewed_product/jsonschema/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}}
         })
 
@@ -160,7 +160,7 @@ class IntegrationTest(unittest.TestCase):
         envelope_string = from_querystring("co", querystrings[-1])
         envelope = json.loads(unquote_plus(envelope_string))
         self.assertEquals(envelope, {
-            "schema": "iglu://com.snowplowanalytics/contexts/jsonschema/1-0-0",
+            "schema": "iglu://com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0",
             "data":[{"schema": "iglu://com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}]
         })
     
@@ -171,7 +171,7 @@ class IntegrationTest(unittest.TestCase):
         envelope_string = unquote_plus(from_querystring("cx", querystrings[-1]))
         envelope = json.loads((base64.urlsafe_b64decode(bytearray(envelope_string, "utf-8"))).decode("utf-8"))
         self.assertEquals(envelope, {
-            "schema": "iglu://com.snowplowanalytics/contexts/jsonschema/1-0-0",
+            "schema": "iglu://com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0",
             "data":[{"schema": "iglu://com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}]
         })
     

@@ -31,10 +31,10 @@ Constants & config
 
 VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
-SNOWPLOW_VENDOR = "com.snowplowanalytics"
+BASE_SCHEMA_PATH = "iglu://com.snowplowanalytics.snowplow"
 SCHEMA_TAG = "jsonschema"
-CONTEXT_SCHEMA = "iglu://com.snowplowanalytics/contexts/%s/1-0-0" % SCHEMA_TAG
-UNSTRUCT_EVENT_SCHEMA = "iglu://com.snowplowanalytics/unstruct_event/%s/1-0-0" % SCHEMA_TAG
+CONTEXT_SCHEMA = "%s/contexts/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
+UNSTRUCT_EVENT_SCHEMA = "%s/unstruct_event/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
 
 
 """
@@ -289,7 +289,7 @@ class Tracker:
             screen_view_properties["id"] = id_
 
         event_json = {
-            "schema": SNOWPLOW_VENDOR + "/screen_view/%s/1-0-0" % SCHEMA_TAG,
+            "schema": "%s/screen_view/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG),
             "data": screen_view_properties
         }
         return self.track_unstruct_event(event_json, context, tstamp)
