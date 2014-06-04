@@ -1,4 +1,4 @@
-Version 0.4.0 (2014-05-xx)
+Version 0.4.0 (2014-06-xx)
 --------------------------
 Made unstructured events vschema-compatible (#87)
 Made custom contexts vschema-compatible (#88)
