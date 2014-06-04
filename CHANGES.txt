@@ -1,7 +1,7 @@
 Version 0.4.0 (2014-06-xx)
 --------------------------
-Made unstructured events vschema-compatible (#87)
-Migrated contexts to self-describing JSON (#88)
+Migrated unstructured events to self-describing JSON (#87)
+Migrated custom contexts to self-describing JSON (#88)
 Gave separate events within an ecommerce transaction different transaction IDs (#89) 
 Added https support for tracker (#81)
 Added callbacks for flushing (#78)
