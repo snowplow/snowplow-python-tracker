@@ -21,7 +21,9 @@
 
 
 import unittest
+from freezegun import freeze_time
 from snowplow_tracker.tracker import Tracker
+from snowplow_tracker.emitters import Emitter
 
 
 class TestTracker(unittest.TestCase):
@@ -30,18 +32,24 @@ class TestTracker(unittest.TestCase):
         pass
 
     def test_initialisation(self):
-        t = Tracker("d3rkrsqld9gmqf.cloudfront.net", "cloudfront", encode_base64= False, app_id="AF003", context_vendor="com.example")
+        t = Tracker(Emitter("d3rkrsqld9gmqf.cloudfront.net"), namespace="cloudfront", encode_base64= False, app_id="AF003")
         self.assertEquals(t.standard_nv_pairs["tna"], "cloudfront")
         self.assertEquals(t.standard_nv_pairs["aid"], "AF003")
-        self.assertEquals(t.config["encode_base64"], False)
-        self.assertEquals(t.config["context_vendor"], "com.example")
+        self.assertEquals(t.encode_base64, False)
 
-    """
-    Testing URI generator
-    """
+    def test_get_transaction_id(self):
+        tid = Tracker.get_transaction_id()
+        self.assertTrue(tid >= 100000 and tid <= 999999)
 
-    def test_collector_uri_construction(self):
-        host = "d3rkrsqld9gmqf.cloudfront.net"
-        output = Tracker(host).collector_uri
-        exp_output = "http://d3rkrsqld9gmqf.cloudfront.net/i"
-        self.assertEquals(output, exp_output)
+    @freeze_time("1970-01-01 00:00:01")
+    def test_get_timestamp(self):
+        dtm = Tracker.get_timestamp()
+        self.assertEquals(dtm, 1000)   # 1970-01-01 00:00:01 in ms
+
+    def test_set_timestamp_1(self):
+        dtm = Tracker.get_timestamp(1399021242030)
+        self.assertEquals(dtm, 1399021242030)
+
+    def test_set_timestamp_2(self):
+        dtm = Tracker.get_timestamp(1399021242240.0303)
+        self.assertEquals(dtm, 1399021242240)

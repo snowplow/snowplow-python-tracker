@@ -19,10 +19,12 @@
     License: Apache License Version 2.0
 """
 
-import requests
 import time
+import random
 from snowplow_tracker import payload, _version
-from contracts import contract, new_contract, disable_all
+from snowplow_tracker import subject as _subject
+from contracts import contract, new_contract
+
 
 """
 Constants & config
@@ -30,12 +32,10 @@ Constants & config
 
 VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
-DEFAULT_PLATFORM = "pc"
-SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
-DEFAULT_VENDOR = "com.snowplowanalytics"
-HTTP_ERRORS = {"host not found",
-               "No address associated with name",
-               "No address associated with hostname"}
+BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow"
+SCHEMA_TAG = "jsonschema"
+CONTEXT_SCHEMA = "%s/contexts/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
+UNSTRUCT_EVENT_SCHEMA = "%s/unstruct_event/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
 
 
 """
@@ -50,133 +50,64 @@ class Tracker:
                  and len(s) > 0) or s is None)
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
-    def __init__(self, collector_uri, 
-                 namespace=None, app_id=None, context_vendor=None, encode_base64=DEFAULT_ENCODE_BASE64, contracts=True):
-        """
-        Constructor
-        """
-        if not contracts:
-            disable_all()
+    new_contract("tracker", lambda s: isinstance(s, Tracker))
 
-        self.collector_uri = self.as_collector_uri(collector_uri)
+    new_contract("emitter", lambda s: hasattr(s, "input"))
 
-        self.config = {
-            "encode_base64":    encode_base64,
-            "context_vendor": context_vendor
-        }
+    @contract
+    def __init__(self, emitter, subject=None,
+                 namespace=None, app_id=None, encode_base64=DEFAULT_ENCODE_BASE64):
+        """
+            :param emitter:          Emitter to which events will be sent
+            :type  emitter:          emitter
+            :param subject:          Subject to be tracked
+            :type  subject:          subject | None
+            :param namespace:        Identifier for the Tracker instance
+            :type  namespace:        string_or_none
+            :param app_id:           Application ID
+            :type  app_id:           string_or_none
+            :param encode_base64:    Whether JSONs in the payload should be base-64 encoded
+            :type  encode_base64:    bool
+        """
+        if subject is None:
+            subject = _subject.Subject()
+
+        self.emitter = emitter
+        self.subject = subject
+        self.encode_base64 = encode_base64
 
         self.standard_nv_pairs = {
-            "p": DEFAULT_PLATFORM,
             "tv": VERSION,
             "tna": namespace,
             "aid": app_id
         }
 
+
+    @staticmethod
     @contract
-    def as_collector_uri(self, host):
+    def get_transaction_id():
         """
-            Method to create a URL
+            Set transaction ID for the payload once during the lifetime of the
+            event.
 
-            :param  host:        URL input by user
-            :type   host:        str
-            :rtype:              str
+            :rtype:           int
         """
-        return "".join(["http://", host, "/i"])
+        tid = random.randrange(100000, 999999)
+        return tid
 
-    """
-    Fire a GET request
-    """
-
+    @staticmethod
     @contract
-    def http_get(self, payload):
+    def get_timestamp(tstamp=None):
         """
-            Send a GET request to the collector URI (generated from the
-            new_tracker methods) and return the relevant error message if any.
+            :param tstamp:    User-input timestamp or None
+            :type  tstamp:    int | float | None
+            :rtype:           int
+        """
+        if tstamp is None:
+            return int(time.time() * 1000)
+        elif isinstance(tstamp, (int, float)):
+            return int(tstamp)
 
-            :param  payload:        Generated dict track()
-            :type   payload:        payload
-            :rtype:                 tuple(bool, int | str)
-        """
-
-        r = requests.get(self.collector_uri, params=payload.context)
-        code = r.status_code
-        if code in HTTP_ERRORS:
-            return (False, "Host [" + r.url + "] not found (possible connectivity error)")
-        elif code < 0 or code >= 400:
-            return (False, code)
-        else:
-            return (True, code)
-
-    """
-    Setter methods
-    """
-
-    @contract
-    def set_platform(self, value):
-        """
-            :param  value:          One of ["pc", "tv", "mob", "cnsl", "iot"]
-            :type   value:          str
-        """
-        if value in SUPPORTED_PLATFORMS:
-            self.standard_nv_pairs["p"] = value
-        else:
-            raise RuntimeError(value + " is not a supported platform")
-
-    @contract
-    def set_user_id(self, user_id):
-        """
-            :param  user_id:        User ID
-            :type   user_id:        non_empty_string
-        """
-        self.standard_nv_pairs["uid"] = user_id
-
-    @contract
-    def set_screen_resolution(self, width, height):
-        """
-            :param  width:          Width of the screen
-            :param  height:         Height of the screen
-            :type   width:          int,>0
-            :type   height:         int,>0
-        """
-        self.standard_nv_pairs["res"] = "".join([str(width), "x", str(height)])
-
-    @contract
-    def set_viewport(self, width, height):
-        """
-            :param  width:          Width of the viewport
-            :param  height:         Height of the viewport
-            :type   width:          int,>0
-            :type   height:         int,>0
-        """
-        self.standard_nv_pairs["vp"] = "".join([str(width), "x", str(height)])
-
-    @contract
-    def set_color_depth(self, depth):
-        """
-            :param  depth:          Depth of the color on the screen
-            :type   depth:          int
-        """
-        self.standard_nv_pairs["cd"] = depth
-
-    @contract
-    def set_timezone(self, timezone):
-        """
-            Set timezone for the Tracker object.
-
-            :param  timezone:       Timezone as a string
-            :type   timezone:       non_empty_string
-        """
-        self.standard_nv_pairs["tz"] = timezone
-
-    @contract
-    def set_lang(self, lang):
-        """
-            Set language.
-
-            :param  lang:           Language the application is set to
-            :type   lang:           non_empty_string
-        """
-        self.standard_nv_pairs["lang"] = lang
 
     """
     Tracking methods
@@ -185,17 +116,43 @@ class Tracker:
     @contract
     def track(self, pb):
         """
+            Send the payload to a emitter
+
+            :param  pb:              Payload builder
+            :type   pb:              payload
+            :rtype:                  tracker | int
+        """
+        result = self.emitter.input(pb.nv_pairs)
+        if result is not None:
+            return result
+        else:
+            return self
+
+    @contract
+    def complete_payload(self, pb, context, tstamp):
+        """
             Called by all tracking events to add the standard name-value pairs
             to the Payload object irrespective of the tracked event.
 
             :param  pb:              Payload builder
             :type   pb:              payload
-            :rtype:                  tuple(bool, int | str)
+            :param  context:         Custom context for the event
+            :type   context:         list(dict(string:*)) | None
+            :param  tstamp:          Optional user-provided timestamp for the event
+            :type   tstamp:          int | float | None
+            :rtype:                  tracker | int
         """
+        pb.add("tid", Tracker.get_transaction_id())
+        pb.add("dtm", Tracker.get_timestamp(tstamp))
+        if context is not None:
+            context_envelope = {"schema": CONTEXT_SCHEMA, "data": context}
+            pb.add_json(context_envelope, self.encode_base64, "cx", "co")
+
         pb.add_dict(self.standard_nv_pairs)
-        if "co" in pb.context or "cx" in pb.context:
-            pb.add("cv", self.config["context_vendor"])
-        return self.http_get(pb)
+
+        pb.add_dict(self.subject.standard_nv_pairs)
+
+        return self.track(pb)
 
     @contract
     def track_page_view(self, page_url, page_title=None, referrer=None, context=None, tstamp=None):
@@ -207,23 +164,22 @@ class Tracker:
             :param  referrer:       Referrer of the page
             :type   referrer:       string_or_none
             :param  context:        Custom context for the event
-            :type   context:        dict(str:*) | None
-            :rtype:                 tuple(bool, int | str)
+            :type   context:        list(dict(string:*)) | None
+            :rtype:                 tracker | int
         """
-        pb = payload.Payload(tstamp)
+        pb = payload.Payload()
         pb.add("e", "pv")           # pv: page view
         pb.add("url", page_url)
         pb.add("page", page_title)
         pb.add("refr", referrer)
-        pb.add("evn", DEFAULT_VENDOR)
-        pb.add_json(context, self.config["encode_base64"], "cx", "co")
-        return self.track(pb)
+
+        return self.complete_payload(pb, context, tstamp)
 
     @contract
     def track_ecommerce_transaction_item(self, order_id, sku, price, quantity,
                                          name=None, category=None, currency=None,
                                          context=None,
-                                         tstamp=None, tid=None):
+                                         tstamp=None):
         """
             This is an internal method called by track_ecommerce_transaction.
             It is not for public use.
@@ -242,11 +198,11 @@ class Tracker:
             :type   category:    string_or_none
             :param  currency:    The currency the price is expressed in
             :type   currency:    string_or_none
-            :param  context:        Custom context for the event
-            :type   context:        dict(str:*) | None
-            :rtype:                 tuple(bool, int | str)
+            :param  context:     Custom context for the event
+            :type   context:     list(dict(string:*)) | None
+            :rtype:              tracker | int
         """
-        pb = payload.Payload(tstamp)
+        pb = payload.Payload()
         pb.add("e", "ti")
         pb.add("ti_id", order_id)
         pb.add("ti_sk", sku)
@@ -255,10 +211,8 @@ class Tracker:
         pb.add("ti_pr", price)
         pb.add("ti_qu", quantity)
         pb.add("ti_cu", currency)
-        pb.add("evn", DEFAULT_VENDOR)
-        pb.add("tid", tid)
-        pb.add_json(context, self.config["encode_base64"], "cx", "co")
-        return self.track(pb)
+
+        return self.complete_payload(pb, context, tstamp)
 
     @contract
     def track_ecommerce_transaction(self, order_id, total_value,
@@ -288,17 +242,10 @@ class Tracker:
             :param  items:          The items in the transaction
             :type   items:          list(dict(str:*))
             :param  context:        Custom context for the event
-            :type   context:        dict(str:*) | None
-            :rtype:                 dict(str: tuple(bool, int | str) | list(tuple(bool, int | str)))
+            :type   context:        list(dict(string:*)) | None
+            :rtype:                 tracker | dict(string:*)
         """
-        if tstamp is None:
-            tstamp = time.time()
-        if tstamp and isinstance(tstamp, (int, float)):
-            tstamp = int(tstamp * 1000)
-
-        tid = payload.Payload.set_transaction_id()
-
-        pb = payload.Payload(tstamp)
+        pb = payload.Payload()
         pb.add("e", "tr")
         pb.add("tr_id", order_id)
         pb.add("tr_tt", total_value)
@@ -309,23 +256,23 @@ class Tracker:
         pb.add("tr_st", state)
         pb.add("tr_co", country)
         pb.add("tr_cu", currency)
-        pb.add("evn", DEFAULT_VENDOR)
-        pb.add("tid", tid)
-        pb.add("dtm", tstamp)
-        pb.add_json(context, self.config["encode_base64"], "cx", "co")
 
-        transaction_result = self.track(pb)
+        tstamp = Tracker.get_timestamp(tstamp)
+
+        transaction_result = self.complete_payload(pb, context, tstamp)
 
         item_results = []
 
         for item in items:
-            item["tstamp"] = str(tstamp)
-            item["tid"] = tid
+            item["tstamp"] = tstamp
             item["order_id"] = order_id
             item["currency"] = currency
             item_results.append(self.track_ecommerce_transaction_item(**item))
         
-        return {"transaction_result": transaction_result, "item_results": item_results}
+        if not isinstance(transaction_result, Tracker):
+            return {"transaction_result": transaction_result, "item_results": item_results}
+        else:
+            return self
     
     @contract
     def track_screen_view(self, name, id_=None, context=None, tstamp=None):
@@ -335,13 +282,18 @@ class Tracker:
             :param  id_:            Screen view ID
             :type   id_:            string_or_none
             :param  context:        Custom context for the event
-            :type   context:        dict(str:*) | None
-            :rtype:                 tuple(bool, int | str)
+            :type   context:        list(dict(string:*)) | None
+            :rtype:                 tracker | int
         """
         screen_view_properties = {"name": name}
         if id_ is not None:
             screen_view_properties["id"] = id_
-        return self.track_unstruct_event(DEFAULT_VENDOR, "screen_view", screen_view_properties, context, tstamp)
+
+        event_json = {
+            "schema": "%s/screen_view/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG),
+            "data": screen_view_properties
+        }
+        return self.track_unstruct_event(event_json, context, tstamp)
 
     @contract
     def track_struct_event(self, category, action, label=None, property_=None, value=None,
@@ -361,38 +313,64 @@ class Tracker:
             :param  value:          A value associated with the user action
             :type   value:          int | float | None
             :param  context:        Custom context for the event
-            :type   context:        dict(str:*) | None
-            :rtype:                 tuple(bool, int | str)
+            :type   context:        list(dict(string:*)) | None
+            :rtype:                 tracker | int
         """
-        pb = payload.Payload(tstamp)
+        pb = payload.Payload()
         pb.add("e", "se")
         pb.add("se_ca", category)
         pb.add("se_ac", action)
         pb.add("se_la", label)
         pb.add("se_pr", property_)
         pb.add("se_va", value)
-        pb.add("evn", DEFAULT_VENDOR)
-        pb.add_json(context, self.config["encode_base64"], "cx", "co")
-        return self.track(pb)
+
+        return self.complete_payload(pb, context, tstamp)
 
     @contract
-    def track_unstruct_event(self, event_vendor, event_name, dict_, context=None, tstamp=None):
+    def track_unstruct_event(self, event_json, context=None, tstamp=None):
         """
-            :param  event_vendor:    The author of the event
-            :type   event_vendor:    non_empty_string        
-            :param  event_name:      The name of the event
-            :type   event_name:      non_empty_string
-            :param  dict_:           The properties of the event
-            :type   dict_:           dict(str:*)
+            :param  event_json:      The properties of the event. Has two field:
+                                     A "data" field containing the event properties and
+                                     A "schema" field identifying the schema against which the data is validated
+
+            :type   event_json:      dict(string: string | dict)
             :param  context:         Custom context for the event
-            :type   context:         dict(str:*) | None
-            :rtype:                  tuple(bool, int | str)
+            :type   context:         list(dict(string:*)) | None
+            :rtype:                  tracker | int
         """
-        pb = payload.Payload(tstamp)
+
+        envelope = {"schema": UNSTRUCT_EVENT_SCHEMA , "data": event_json}
+
+        pb = payload.Payload()
 
         pb.add("e", "ue")
-        pb.add("ue_na", event_name)
-        pb.add_unstruct(dict_, self.config["encode_base64"], "ue_px", "ue_pr")
-        pb.add("evn", event_vendor)
-        pb.add_json(context, self.config["encode_base64"], "cx", "co")
-        return self.track(pb)
+        pb.add_json(envelope, self.encode_base64, "ue_px", "ue_pr")
+
+        return self.complete_payload(pb, context, tstamp)
+
+    @contract
+    def flush(self, async=False):
+        """
+            Flush the emitter
+
+            :param  async:  Whether the flush is done asynchronously. Default is False
+            :type   async:  bool
+            :rtype:         tracker | int
+        """
+        if async:
+            self.emitter.flush()
+            return self
+        else:
+            return self.emitter.sync_flush()
+
+    @contract
+    def set_subject(self, subject):
+        """
+            Set the subject of the events fired by the tracker
+
+            :param subject: Subject to be tracked
+            :type  subject: subject | None
+            :rtype:          tracker
+        """
+        self.subject = subject
+        return self
