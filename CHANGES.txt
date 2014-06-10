@@ -1,4 +1,4 @@
-Version 0.4.0 (2014-06-xx)
+Version 0.4.0 (2014-06-10)
 --------------------------
 Migrated unstructured events to self-describing JSON (#87)
 Migrated custom contexts to self-describing JSON (#88)
