@@ -21,7 +21,8 @@
 
 import time
 import random
-from snowplow_tracker import payload, _version, subject
+from snowplow_tracker import payload, _version
+from snowplow_tracker import subject as _subject
 from contracts import contract, new_contract
 
 
@@ -54,13 +55,13 @@ class Tracker:
     new_contract("emitter", lambda s: hasattr(s, "input"))
 
     @contract
-    def __init__(self, emitter, _subject=None,
+    def __init__(self, emitter, subject=None,
                  namespace=None, app_id=None, encode_base64=DEFAULT_ENCODE_BASE64):
         """
             :param emitter:          Emitter to which events will be sent
             :type  emitter:          emitter
-            :param _subject:         Subject to be tracked
-            :type  _subject:         subject | None
+            :param subject:         Subject to be tracked
+            :type  subject:         subject | None
             :param namespace:        Identifier for the Tracker instance
             :type  namespace:        string_or_none
             :param app_id:           Application ID
@@ -68,11 +69,11 @@ class Tracker:
             :param encode_base64:    Whether JSONs in the payload should be base-64 encoded
             :type  encode_base64:    bool
         """
-        if _subject is None:
-            _subject = subject.Subject()
+        if subject is None:
+            subject = _subject.Subject()
 
         self.emitter = emitter
-        self.subject = _subject
+        self.subject = subject
         self.encode_base64 = encode_base64
 
         self.standard_nv_pairs = {
@@ -363,13 +364,13 @@ class Tracker:
             return self.emitter.sync_flush()
 
     @contract
-    def set_subject(self, _subject):
+    def setsubject(self, subject):
         """
             Set the subject of the events fired by the tracker
 
-            :param _subject: Subject to be tracked
-            :type  _subject: subject | None
+            :param subject: Subject to be tracked
+            :type  subject: subject | None
             :rtype:          tracker
         """
-        self.subject = _subject
+        self.subject = subject
         return self
