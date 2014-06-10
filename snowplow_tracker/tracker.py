@@ -60,12 +60,12 @@ class Tracker:
         """
             :param emitter:          Emitter to which events will be sent
             :type  emitter:          emitter
-            :param subject:         Subject to be tracked
-            :type  subject:         subject | None
+            :param subject:          Subject to be tracked
+            :type  subject:          subject | None
             :param namespace:        Identifier for the Tracker instance
             :type  namespace:        string_or_none
             :param app_id:           Application ID
-            :type  app_id:           string_or_none            
+            :type  app_id:           string_or_none
             :param encode_base64:    Whether JSONs in the payload should be base-64 encoded
             :type  encode_base64:    bool
         """
@@ -364,7 +364,7 @@ class Tracker:
             return self.emitter.sync_flush()
 
     @contract
-    def setsubject(self, subject):
+    def set_subject(self, subject):
         """
             Set the subject of the events fired by the tracker
 
