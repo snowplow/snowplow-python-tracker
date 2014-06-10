@@ -29,48 +29,20 @@ from contracts import contract
 
 class Payload:
 
-    def __init__(self, tstamp=None, dict_=None):
+    def __init__(self, dict_=None):
         """
             Constructor
         """
 
-        self.context = {}
-        # Set transaction for every event
-        self.context["tid"] = Payload.set_transaction_id()
-        # Set timestamp for every event
-        self.set_timestamp(tstamp)
+        self.nv_pairs = {}
+
         if dict_ is not None:
             for f in dict_:
-                self.context[f] = dict_[f]
+                self.nv_pairs[f] = dict_[f]
+
 
     """
-    Special payload creation functions
-    """
-    @staticmethod
-    def set_transaction_id():
-        """
-            Set transaction ID for the payload once during the lifetime of the
-            event.
-        """
-        tid = random.randrange(100000, 999999)
-        return tid
-
-    def set_timestamp(self, tstamp=None):
-        """
-            Set timestamp and allow rewriting it multiple times.
-
-            :param  tstamp:         Timestamp value
-        """
-        if tstamp is None:
-            value = int(time.time() * 1000)
-        elif tstamp and isinstance(tstamp, (int, float)):
-            value = int(tstamp)
-        else:
-            value = tstamp
-        self.context["dtm"] = value
-
-    """
-    Payload creators
+    Methods to add to the payload
     """
 
     def add(self, name, value):
@@ -78,7 +50,7 @@ class Payload:
             Add a name value pair to the Payload object
         """
         if not (value == "" or value is None):
-            self.context[name] = value
+            self.nv_pairs[name] = value
 
     @contract
     def add_dict(self, dict_, base64=False):
@@ -86,49 +58,10 @@ class Payload:
             Add a dict of name value pairs to the Payload object
 
             :param  dict_:          Dictionary to be added to the Payload
-            :type   dict_:          dict(*:*)
+            :type   dict_:          dict(string:*)
         """
         for f in dict_:
             self.add(f, dict_[f])
-
-    @contract
-    def add_unstruct(self, dict_, encode_base64,
-                     type_when_encoded, type_when_not_encoded):
-        """
-            Add an encoded or unencoded JSON to the payload after verifying
-            the contents of the dict
-
-            :param  dict_:      Dictionary of the payload to be generated
-            :type   dict_:      dict(str:*)
-            :param  encode_base64:      If the payload is base64 encoded
-            :type   encode_base64:      bool
-            :param  type_when_encoded:  Name of the field when encode_base64 is set
-            :type   type_when_encoded:  str
-            :param  type_when_not_encoded:  Name of the field when encode_base64 is not set
-            :type   type_when_not_encoded:  str
-        """
-        def raise_error(f, type_):
-            raise RuntimeError("".join([f, " in dict is not a ", type_]))
-
-        types = ["int", "flt", "geo", "dt", "ts", "tms"]
-
-        for f in dict_:
-            parts = f.split("$")
-            if parts[-1] in types:
-                type_ = parts[-1]
-                if ((type_ == "int" and not isinstance(dict_[f], int)) or
-                    (type_ == "flt" and not isinstance(dict_[f], float)) or
-                    (type_ == "geo" and not isinstance(dict_[f], tuple)) or
-                    (type_ == "dt" and not isinstance(dict_[f], int)) or
-                    (type_ == "ts" and not isinstance(dict_[f], int)) or
-                    (type_ == "tms" and not isinstance(dict_[f], int))):
-                    raise_error(f, type_)
-        json_dict = json.dumps(dict_)
-
-        if encode_base64:
-            self.add(type_when_encoded, base64.urlsafe_b64encode(json_dict.encode("ascii")))
-        else:
-            self.add(type_when_not_encoded, json_dict)
 
     @contract
     def add_json(self, dict_, encode_base64, type_when_encoded, type_when_not_encoded):
@@ -136,13 +69,13 @@ class Payload:
             Add an encoded or unencoded JSON to the payload
 
             :param  dict_:                  Custom context for the event
-            :type   dict_:                  dict(str:*) | None
+            :type   dict_:                  dict(string:*) | None
             :param  encode_base64:          If the payload is base64 encoded
             :type   encode_base64:          bool
             :param  type_when_encoded:      Name of the field when encode_base64 is set
-            :type   type_when_encoded:      str
+            :type   type_when_encoded:      string
             :param  type_when_not_encoded:  Name of the field when encode_base64 is not set
-            :type   type_when_not_encoded:  str
+            :type   type_when_not_encoded:  string
         """
 
         if dict_ is not None and dict_ != {}:
@@ -150,7 +83,11 @@ class Payload:
             json_dict = json.dumps(dict_)
 
             if encode_base64:
-                self.add(type_when_encoded, base64.urlsafe_b64encode(json_dict.encode("ascii")))
+                encoded_dict = base64.urlsafe_b64encode(json_dict.encode("ascii"))
+                if not isinstance(encoded_dict, str):
+                    encoded_dict = encoded_dict.decode("utf-8")
+                self.add(type_when_encoded, encoded_dict)                
+
             else:
                 self.add(type_when_not_encoded, json_dict)
 
@@ -158,4 +95,4 @@ class Payload:
         """
             Returns the context dictionary from the Payload object
         """
-        return self.context
+        return self.nv_pairs
