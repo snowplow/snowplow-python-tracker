@@ -57,7 +57,7 @@ except ImportError:
 
 class Emitter(object):
     """
-        Synchronously send Snowplow events to a Snowplow as_collector_uri
+        Synchronously send Snowplow events to a Snowplow collector
         Supports both GET and POST requests
     """
 
@@ -84,7 +84,7 @@ class Emitter(object):
                                    If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
             :type  on_failure:  function | None            
         """
-        self.endpoint = Emitter.as_collector_uri(endpoint, protocol, port)
+        self.endpoint = Emitter.as_collector_uri(endpoint, protocol, port, method)
 
         self.method = method
 
@@ -105,7 +105,7 @@ class Emitter(object):
 
     @staticmethod
     @contract
-    def as_collector_uri(endpoint, protocol="http", port=None):
+    def as_collector_uri(endpoint, protocol="http", port=None, method="get"):
         """
             :param endpoint:  The raw endpoint provided by the user
             :type  endpoint:  string
@@ -115,10 +115,14 @@ class Emitter(object):
             :type  port:      int | None            
             :rtype:           string
         """
-        if port is None:
-            return protocol + "://" + endpoint + "/i"
+        if method == "get":
+            path = "/i"
         else:
-            return protocol + "://" + endpoint + ":" + str(port) + "/i"
+            path = "/com.snowplowanalytics.snowplow/tp2"
+        if port is None:
+            return protocol + "://" + endpoint + path
+        else:
+            return protocol + "://" + endpoint + ":" + str(port) + path
 
     @contract
     def input(self, payload):
