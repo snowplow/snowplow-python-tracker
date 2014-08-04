@@ -1,7 +1,7 @@
 Version 0.5.0 (2014-08-xx)
 --------------------------
 Converted payload values to strings for POST requests (#100) (TODO)
-Set content type to "application/json; charset=utf-8" for POST requests (#99) (TODO)
+Set content type to "application/json; charset=utf-8" for POST requests (#99)
 Changed collector endpoint for POST to /com.snowplowanalytics.snowplow/tp2 (#98)
 Added ability to batch based on payload size (#95) (TODO)
 Stopped setting and sending tid (#94) (TODO)

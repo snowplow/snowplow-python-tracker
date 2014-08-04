@@ -189,7 +189,7 @@ class Emitter(object):
             :type  data:  string
         """
         logger.debug("Sending POST request...")
-        r = requests.post(self.endpoint, data=data)
+        r = requests.post(self.endpoint, data=data, headers={'content-type': 'application/json; charset=utf-8'})
         logger.info("POST request finished with status code: " + str(r.status_code))
         return r
 
