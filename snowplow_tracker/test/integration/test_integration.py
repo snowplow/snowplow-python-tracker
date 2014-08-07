@@ -192,6 +192,8 @@ class IntegrationTest(unittest.TestCase):
                            "p": "mob", "tv": "py-" + _version.__version__}
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        self.assertIsNotNone(from_querystring("eid", querystrings[-1]))
+        self.assertIsNotNone(from_querystring("dtm", querystrings[-1]))
 
     def test_integration_redis_default(self):
         r = redis.StrictRedis()

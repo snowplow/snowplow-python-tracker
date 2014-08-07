@@ -20,7 +20,7 @@
 """
 
 import time
-import random
+import uuid
 from snowplow_tracker import payload, _version
 from snowplow_tracker import subject as _subject
 from contracts import contract, new_contract
@@ -85,15 +85,14 @@ class Tracker:
 
     @staticmethod
     @contract
-    def get_transaction_id():
+    def get_uuid():
         """
             Set transaction ID for the payload once during the lifetime of the
             event.
 
-            :rtype:           int
+            :rtype:           string
         """
-        tid = random.randrange(100000, 999999)
-        return tid
+        return str(uuid.uuid4())
 
     @staticmethod
     @contract
@@ -142,7 +141,7 @@ class Tracker:
             :type   tstamp:          int | float | None
             :rtype:                  tracker | int
         """
-        pb.add("tid", Tracker.get_transaction_id())
+        pb.add("eid", Tracker.get_uuid())
         pb.add("dtm", Tracker.get_timestamp(tstamp))
         if context is not None:
             context_envelope = {"schema": CONTEXT_SCHEMA, "data": context}

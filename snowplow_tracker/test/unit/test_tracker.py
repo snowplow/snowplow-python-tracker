@@ -21,6 +21,7 @@
 
 
 import unittest
+import re
 from freezegun import freeze_time
 from snowplow_tracker.tracker import Tracker
 from snowplow_tracker.emitters import Emitter
@@ -37,9 +38,9 @@ class TestTracker(unittest.TestCase):
         self.assertEquals(t.standard_nv_pairs["aid"], "AF003")
         self.assertEquals(t.encode_base64, False)
 
-    def test_get_transaction_id(self):
-        tid = Tracker.get_transaction_id()
-        self.assertTrue(tid >= 100000 and tid <= 999999)
+    def test_get_uuid(self):
+        eid = Tracker.get_uuid()
+        self.assertIsNotNone(re.match('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\Z', eid))
 
     @freeze_time("1970-01-01 00:00:01")
     def test_get_timestamp(self):
