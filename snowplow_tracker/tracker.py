@@ -55,11 +55,11 @@ class Tracker:
     new_contract("emitter", lambda s: hasattr(s, "input"))
 
     @contract
-    def __init__(self, emitter, subject=None,
+    def __init__(self, emitters, subject=None,
                  namespace=None, app_id=None, encode_base64=DEFAULT_ENCODE_BASE64):
         """
-            :param emitter:          Emitter to which events will be sent
-            :type  emitter:          emitter
+            :param emitters:         Emitters to which events will be sent
+            :type  emitters:         list[>0](emitter)
             :param subject:          Subject to be tracked
             :type  subject:          subject | None
             :param namespace:        Identifier for the Tracker instance
@@ -72,7 +72,7 @@ class Tracker:
         if subject is None:
             subject = _subject.Subject()
 
-        self.emitter = emitter
+        self.emitters = emitters
         self.subject = subject
         self.encode_base64 = encode_base64
 
@@ -119,11 +119,12 @@ class Tracker:
 
             :param  pb:              Payload builder
             :type   pb:              payload
-            :rtype:                  tracker | int
+            :rtype:                  tracker | list(int)
         """
-        result = self.emitter.input(pb.nv_pairs)
-        if result is not None:
-            return result
+        results = [emitter.input(pb.nv_pairs) for emitter in self.emitters]
+        filtered = [res for res in results if res is not None]
+        if filtered:
+            return filtered
         else:
             return self
 
@@ -139,7 +140,7 @@ class Tracker:
             :type   context:         list(dict(string:*)) | None
             :param  tstamp:          Optional user-provided timestamp for the event
             :type   tstamp:          int | float | None
-            :rtype:                  tracker | int
+            :rtype:                  tracker | list(int)
         """
         pb.add("eid", Tracker.get_uuid())
         pb.add("dtm", Tracker.get_timestamp(tstamp))
@@ -164,7 +165,7 @@ class Tracker:
             :type   referrer:       string_or_none
             :param  context:        Custom context for the event
             :type   context:        list(dict(string:*)) | None
-            :rtype:                 tracker | int
+            :rtype:                 tracker | list(int)
         """
         pb = payload.Payload()
         pb.add("e", "pv")           # pv: page view
@@ -199,7 +200,7 @@ class Tracker:
             :type   currency:    string_or_none
             :param  context:     Custom context for the event
             :type   context:     list(dict(string:*)) | None
-            :rtype:              tracker | int
+            :rtype:              tracker | list(int)
         """
         pb = payload.Payload()
         pb.add("e", "ti")
@@ -282,7 +283,7 @@ class Tracker:
             :type   id_:            string_or_none
             :param  context:        Custom context for the event
             :type   context:        list(dict(string:*)) | None
-            :rtype:                 tracker | int
+            :rtype:                 tracker | list(int)
         """
         screen_view_properties = {"name": name}
         if id_ is not None:
@@ -313,7 +314,7 @@ class Tracker:
             :type   value:          int | float | None
             :param  context:        Custom context for the event
             :type   context:        list(dict(string:*)) | None
-            :rtype:                 tracker | int
+            :rtype:                 tracker | list(int)
         """
         pb = payload.Payload()
         pb.add("e", "se")
@@ -335,7 +336,7 @@ class Tracker:
             :type   event_json:      dict(string: string | dict)
             :param  context:         Custom context for the event
             :type   context:         list(dict(string:*)) | None
-            :rtype:                  tracker | int
+            :rtype:                  tracker | list(int)
         """
 
         envelope = {"schema": UNSTRUCT_EVENT_SCHEMA , "data": event_json}
@@ -354,7 +355,7 @@ class Tracker:
 
             :param  async:  Whether the flush is done asynchronously. Default is False
             :type   async:  bool
-            :rtype:         tracker | int
+            :rtype:         tracker | list(int)
         """
         if async:
             self.emitter.flush()

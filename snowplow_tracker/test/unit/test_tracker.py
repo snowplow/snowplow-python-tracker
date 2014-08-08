@@ -33,7 +33,7 @@ class TestTracker(unittest.TestCase):
         pass
 
     def test_initialisation(self):
-        t = Tracker(Emitter("d3rkrsqld9gmqf.cloudfront.net"), namespace="cloudfront", encode_base64= False, app_id="AF003")
+        t = Tracker([Emitter("d3rkrsqld9gmqf.cloudfront.net")], namespace="cloudfront", encode_base64= False, app_id="AF003")
         self.assertEquals(t.standard_nv_pairs["tna"], "cloudfront")
         self.assertEquals(t.standard_nv_pairs["aid"], "AF003")
         self.assertEquals(t.encode_base64, False)
