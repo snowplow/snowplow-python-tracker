@@ -358,10 +358,12 @@ class Tracker:
             :rtype:         tracker | list(int)
         """
         if async:
-            self.emitter.flush()
+            for e in self.emitters:
+                e.flush()
             return self
         else:
-            return self.emitter.sync_flush()
+            results = [emitter.sync_flush() for emitter in self.emitters]
+            return [r for r in results if r is not None]
 
     @contract
     def set_subject(self, subject):
