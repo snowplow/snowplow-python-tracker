@@ -59,7 +59,7 @@ class Tracker:
                  namespace=None, app_id=None, encode_base64=DEFAULT_ENCODE_BASE64):
         """
             :param emitters:         Emitters to which events will be sent
-            :type  emitters:         list[>0](emitter)
+            :type  emitters:         list[>0](emitter) | emitter
             :param subject:          Subject to be tracked
             :type  subject:          subject | None
             :param namespace:        Identifier for the Tracker instance
@@ -72,7 +72,11 @@ class Tracker:
         if subject is None:
             subject = _subject.Subject()
 
-        self.emitters = emitters
+        if type(emitters) is list:
+            self.emitters = emitters
+        else:
+            self.emitters = [emitters]
+        
         self.subject = subject
         self.encode_base64 = encode_base64
 
@@ -375,4 +379,16 @@ class Tracker:
             :rtype:          tracker
         """
         self.subject = subject
+        return self
+
+    @contract
+    def add_emitter(self, emitter):
+        """
+            Add a new emitter to which events should be passed
+
+            :param emitter: New emitter
+            :type  emitter: emitter
+            :rtype:         tracker
+        """
+        self.emitters.append(emitter)
         return self

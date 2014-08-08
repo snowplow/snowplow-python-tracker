@@ -54,3 +54,10 @@ class TestTracker(unittest.TestCase):
     def test_set_timestamp_2(self):
         dtm = Tracker.get_timestamp(1399021242240.0303)
         self.assertEquals(dtm, 1399021242240)
+
+    def test_add_emitter(self):
+        e1 = Emitter("d3rkrsqld9gmqf.cloudfront.net", method="get")
+        e2 = Emitter("d3rkrsqld9gmqf.cloudfront.net", method="post")
+        t = Tracker(e1, namespace="cloudfront", encode_base64= False, app_id="AF003")
+        t.add_emitter(e2)
+        self.assertEquals(t.emitters, [e1, e2])
