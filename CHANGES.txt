@@ -6,6 +6,7 @@ Changed collector endpoint for POST to /com.snowplowanalytics.snowplow/tp2 (#98)
 Stopped setting and sending tid (#94)
 Started setting and sending eid (#93)
 Allowed a single Tracker instance to send events to multiple Emitters (#91)
+Started passing a list of dictionaries to the on_failure callback for POST requests (#104)
 
 Version 0.4.0 (2014-06-10)
 --------------------------
