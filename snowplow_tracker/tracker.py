@@ -279,17 +279,19 @@ class Tracker:
             return self
     
     @contract
-    def track_screen_view(self, name, id_=None, context=None, tstamp=None):
+    def track_screen_view(self, name=None, id_=None, context=None, tstamp=None):
         """
             :param  name:           The name of the screen view event
-            :type   name:           non_empty_string
+            :type   name:           string_or_none
             :param  id_:            Screen view ID
             :type   id_:            string_or_none
             :param  context:        Custom context for the event
             :type   context:        list(dict(string:*)) | None
             :rtype:                 tracker | list(int)
         """
-        screen_view_properties = {"name": name}
+        screen_view_properties = {}
+        if name is not None:
+            screen_view_properties["name"] = name        
         if id_ is not None:
             screen_view_properties["id"] = id_
 

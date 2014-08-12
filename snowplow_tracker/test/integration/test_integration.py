@@ -110,12 +110,23 @@ class IntegrationTest(unittest.TestCase):
         self.assertEquals(from_querystring("dtm", querystrings[-3]), from_querystring("dtm", querystrings[-2]))
 
     def test_integration_screen_view(self):
-        t = tracker.Tracker([default_emitter], default_subject)
+        t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
-            t.track_screen_view("Game HUD 2", "Hello!")
+            t.track_screen_view("Game HUD 2", id_="534")
         expected_fields = {"e": "ue"}
         for key in expected_fields:          
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        envelope_string = from_querystring("ue_pr", querystrings[-1])
+        envelope = json.loads(unquote_plus(envelope_string))
+        self.assertEquals(envelope, {
+            "schema": "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0",
+            "data": {"schema": "iglu:com.snowplowanalytics.snowplow/screen_view/jsonschema/1-0-0",
+                "data": {
+                    "name": "Game HUD 2",
+                    "id": "534"
+                }
+            }
+        })
 
     def test_integration_struct_event(self):
         t = tracker.Tracker([default_emitter], default_subject)
