@@ -57,7 +57,7 @@ except ImportError:
 
 class Emitter(object):
     """
-        Synchronously send Snowplow events to a Snowplow as_collector_uri
+        Synchronously send Snowplow events to a Snowplow collector
         Supports both GET and POST requests
     """
 
@@ -84,7 +84,7 @@ class Emitter(object):
                                    If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
             :type  on_failure:  function | None            
         """
-        self.endpoint = Emitter.as_collector_uri(endpoint, protocol, port)
+        self.endpoint = Emitter.as_collector_uri(endpoint, protocol, port, method)
 
         self.method = method
 
@@ -105,7 +105,7 @@ class Emitter(object):
 
     @staticmethod
     @contract
-    def as_collector_uri(endpoint, protocol="http", port=None):
+    def as_collector_uri(endpoint, protocol="http", port=None, method="get"):
         """
             :param endpoint:  The raw endpoint provided by the user
             :type  endpoint:  string
@@ -115,10 +115,14 @@ class Emitter(object):
             :type  port:      int | None            
             :rtype:           string
         """
-        if port is None:
-            return protocol + "://" + endpoint + "/i"
+        if method == "get":
+            path = "/i"
         else:
-            return protocol + "://" + endpoint + ":" + str(port) + "/i"
+            path = "/com.snowplowanalytics.snowplow/tp2"
+        if port is None:
+            return protocol + "://" + endpoint + path
+        else:
+            return protocol + "://" + endpoint + ":" + str(port) + path
 
     @contract
     def input(self, payload):
@@ -129,10 +133,13 @@ class Emitter(object):
             :param payload:   The name-value pairs for the event
             :type  payload:   dict(string:*)
         """
-        self.buffer.append(payload)
+        if self.method == "post":
+            self.buffer.append({key: str(payload[key]) for key in payload})
+        else:
+            self.buffer.append(payload)
 
         if len(self.buffer) >= self.buffer_size:
-            return self.flush()
+            self.flush()
 
     @task(name="Flush")
     def flush(self):
@@ -140,18 +147,18 @@ class Emitter(object):
             Sends all events in the buffer to the collector.
         """
         if self.method == "post":
-            data = json.dumps({
-                "schema": PAYLOAD_DATA_SCHEMA,
-                "data": self.buffer
-            })
-            buffer_length = len(self.buffer)
-            self.buffer = []
-            status_code = self.http_post(data).status_code
-            if status_code == 200 and self.on_success is not None:
-                self.on_success(buffer_length)
-            elif self.on_failure is not None:
-                self.on_failure(0, data)
-            return status_code
+            if self.buffer:
+                data = json.dumps({
+                    "schema": PAYLOAD_DATA_SCHEMA,
+                    "data": self.buffer
+                })
+                temp_buffer = self.buffer
+                self.buffer = []
+                status_code = self.http_post(data).status_code
+                if status_code == 200 and self.on_success is not None:
+                    self.on_success(len(temp_buffer))
+                elif self.on_failure is not None:
+                    self.on_failure(0, temp_buffer)
 
         elif self.method == "get":
             success_count = 0
@@ -173,8 +180,6 @@ class Emitter(object):
             elif self.on_failure is not None:
                 self.on_failure(success_count, unsent_requests)
 
-            return status_code
-
         else:
             logger.warn(self.method + ' is not a recognised HTTP method. Use "get" or "post".')
 
@@ -185,7 +190,7 @@ class Emitter(object):
             :type  data:  string
         """
         logger.debug("Sending POST request...")
-        r = requests.post(self.endpoint, data=data)
+        r = requests.post(self.endpoint, data=data, headers={'content-type': 'application/json; charset=utf-8'})
         logger.info("POST request finished with status code: " + str(r.status_code))
         return r
 
@@ -209,8 +214,7 @@ class Emitter(object):
         result = Emitter.flush(self)
         for t in self.threads:
             t.join(THREAD_TIMEOUT)
-        logger.debug("Finished synchrous flush")
-        return result
+        logger.info("Finished synchrous flush")
 
 
 class AsyncEmitter(Emitter):

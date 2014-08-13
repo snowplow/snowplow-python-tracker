@@ -21,7 +21,6 @@
 
 
 import unittest
-import time
 from snowplow_tracker import payload
 
 

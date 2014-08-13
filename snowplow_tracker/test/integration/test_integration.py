@@ -65,7 +65,7 @@ def fail_response_content(url, request):
 class IntegrationTest(unittest.TestCase):
 
     def test_integration_page_view(self):
-        t = tracker.Tracker(default_emitter, default_subject)
+        t = tracker.Tracker([default_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_page_view("http://savethearctic.org", "Save The Arctic", "http://referrer.com")
         expected_fields = {"e": "pv", "page": "Save+The+Arctic", "url": "http%3A%2F%2Fsavethearctic.org", "refr": "http%3A%2F%2Freferrer.com"}
@@ -73,7 +73,7 @@ class IntegrationTest(unittest.TestCase):
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])            
 
     def test_integration_ecommerce_transaction_item(self):
-        t = tracker.Tracker(default_emitter, default_subject)
+        t = tracker.Tracker([default_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_ecommerce_transaction_item("12345", "pbz0025", 7.99, 2, "black-tarot", "tarot", currency="GBP")
         expected_fields = {"ti_ca": "tarot", "ti_id": "12345", "ti_qu": "2", "ti_sk": "pbz0025", "e": "ti", "ti_nm": "black-tarot", "ti_pr": "7.99", "ti_cu": "GBP"}
@@ -81,7 +81,7 @@ class IntegrationTest(unittest.TestCase):
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_ecommerce_transaction(self):
-        t = tracker.Tracker(default_emitter, default_subject)
+        t = tracker.Tracker([default_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_ecommerce_transaction("6a8078be", 35, city="London", currency="GBP", items=
                 [{  
@@ -110,15 +110,26 @@ class IntegrationTest(unittest.TestCase):
         self.assertEquals(from_querystring("dtm", querystrings[-3]), from_querystring("dtm", querystrings[-2]))
 
     def test_integration_screen_view(self):
-        t = tracker.Tracker(default_emitter, default_subject)
+        t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
-            t.track_screen_view("Game HUD 2", "Hello!")
+            t.track_screen_view("Game HUD 2", id_="534")
         expected_fields = {"e": "ue"}
         for key in expected_fields:          
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        envelope_string = from_querystring("ue_pr", querystrings[-1])
+        envelope = json.loads(unquote_plus(envelope_string))
+        self.assertEquals(envelope, {
+            "schema": "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0",
+            "data": {"schema": "iglu:com.snowplowanalytics.snowplow/screen_view/jsonschema/1-0-0",
+                "data": {
+                    "name": "Game HUD 2",
+                    "id": "534"
+                }
+            }
+        })
 
     def test_integration_struct_event(self):
-        t = tracker.Tracker(default_emitter, default_subject)
+        t = tracker.Tracker([default_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_struct_event("Ecomm", "add-to-basket", "dog-skateboarding-video", "hd", 13.99)
         expected_fields = {"se_ca": "Ecomm", "se_pr": "hd", "se_la": "dog-skateboarding-video", "se_va": "13.99", "se_ac": "add-to-basket", "e": "se"}
@@ -126,7 +137,7 @@ class IntegrationTest(unittest.TestCase):
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_unstruct_event_non_base64(self):
-        t = tracker.Tracker(default_emitter, default_subject, encode_base64=False)
+        t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
             t.track_unstruct_event({"schema": "iglu:com.acme/viewed_product/jsonschema/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}})
         expected_fields = {"e": "ue"}
@@ -140,7 +151,7 @@ class IntegrationTest(unittest.TestCase):
         })
 
     def test_integration_unstruct_event_base64(self):
-        t = tracker.Tracker(default_emitter, default_subject, encode_base64=True)
+        t = tracker.Tracker([default_emitter], default_subject, encode_base64=True)
         with HTTMock(pass_response_content):
             t.track_unstruct_event({"schema": "iglu:com.acme/viewed_product/jsonschema/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}})
         expected_fields = {"e": "ue"}
@@ -154,7 +165,7 @@ class IntegrationTest(unittest.TestCase):
         })
 
     def test_integration_context_non_base64(self):
-        t = tracker.Tracker(default_emitter, default_subject, encode_base64=False)
+        t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
             t.track_page_view("localhost", "local host", None, [{"schema": "iglu:com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}])
         envelope_string = from_querystring("co", querystrings[-1])
@@ -165,7 +176,7 @@ class IntegrationTest(unittest.TestCase):
         })
     
     def test_integration_context_base64(self):
-        t = tracker.Tracker(default_emitter, default_subject, encode_base64=True)
+        t = tracker.Tracker([default_emitter], default_subject, encode_base64=True)
         with HTTMock(pass_response_content):
             t.track_page_view("localhost", "local host", None, [{"schema": "iglu:com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}])
         envelope_string = unquote_plus(from_querystring("cx", querystrings[-1]))
@@ -184,7 +195,7 @@ class IntegrationTest(unittest.TestCase):
         s.set_timezone("Europe London")
         s.set_lang("en")
 
-        t = tracker.Tracker(emitters.Emitter("localhost"), s, "cf", app_id="angry-birds-android")
+        t = tracker.Tracker([emitters.Emitter("localhost")], s, "cf", app_id="angry-birds-android")
         with HTTMock(pass_response_content):
             t.track_page_view("localhost", "local host")
         expected_fields = {"tna": "cf", "res": "100x200",
@@ -192,10 +203,12 @@ class IntegrationTest(unittest.TestCase):
                            "p": "mob", "tv": "py-" + _version.__version__}
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+        self.assertIsNotNone(from_querystring("eid", querystrings[-1]))
+        self.assertIsNotNone(from_querystring("dtm", querystrings[-1]))
 
     def test_integration_redis_default(self):
         r = redis.StrictRedis()
-        t = tracker.Tracker(emitters.RedisEmitter(), default_subject)
+        t = tracker.Tracker([emitters.RedisEmitter()], default_subject)
         t.track_page_view("http://www.example.com")
         event_string = r.rpop("snowplow")
         event_dict = json.loads(event_string.decode("utf-8"))
@@ -203,7 +216,7 @@ class IntegrationTest(unittest.TestCase):
 
     def test_integration_redis_custom(self):
         r = redis.StrictRedis(db=1)
-        t = tracker.Tracker(emitters.RedisEmitter(rdb=r, key="custom_key"), default_subject)
+        t = tracker.Tracker([emitters.RedisEmitter(rdb=r, key="custom_key")], default_subject)
         t.track_page_view("http://www.example.com")
         event_string = r.rpop("custom_key")
         event_dict = json.loads(event_string.decode("utf-8"))
@@ -214,7 +227,7 @@ class IntegrationTest(unittest.TestCase):
         callback_failure_queue = []
         callback_emitter = emitters.Emitter("localhost", on_success=lambda x: callback_success_queue.append(x),
                                                            on_failure=lambda x, y:callback_failure_queue.append(x))
-        t = tracker.Tracker(callback_emitter, default_subject)
+        t = tracker.Tracker([callback_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_page_view("http://www.example.com")
         self.assertEquals(callback_success_queue[0], 1)
@@ -225,7 +238,7 @@ class IntegrationTest(unittest.TestCase):
         callback_failure_queue = []
         callback_emitter = emitters.Emitter("localhost", on_success=lambda x: callback_success_queue.append(x),
                                                            on_failure=lambda x, y:callback_failure_queue.append(x))
-        t = tracker.Tracker(callback_emitter, default_subject)
+        t = tracker.Tracker([callback_emitter], default_subject)
         with HTTMock(fail_response_content):
             t.track_page_view("http://www.example.com")
         self.assertEquals(callback_success_queue, [])
