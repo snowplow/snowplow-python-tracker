@@ -86,7 +86,6 @@ class Tracker:
             "aid": app_id
         }
 
-
     @staticmethod
     @contract
     def get_uuid():
@@ -260,15 +259,13 @@ class Tracker:
 
         tstamp = Tracker.get_timestamp(tstamp)
 
-        transaction_result = self.complete_payload(pb, context, tstamp)
-
-        item_results = []
+        self.complete_payload(pb, context, tstamp)
 
         for item in items:
             item["tstamp"] = tstamp
             item["order_id"] = order_id
             item["currency"] = currency
-            item_results.append(self.track_ecommerce_transaction_item(**item))
+            self.track_ecommerce_transaction_item(**item)
         
         return self
     
