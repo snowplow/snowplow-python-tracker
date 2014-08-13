@@ -1,4 +1,4 @@
-Version 0.5.0 (2014-08-xx)
+Version 0.5.0 (2014-08-13)
 --------------------------
 Converted payload values to strings for POST requests (#100)
 Set content type to "application/json; charset=utf-8" for POST requests (#99)
