@@ -139,7 +139,7 @@ class Emitter(object):
             self.buffer.append(payload)
 
         if len(self.buffer) >= self.buffer_size:
-            return self.flush()
+            self.flush()
 
     @task(name="Flush")
     def flush(self):
@@ -151,14 +151,13 @@ class Emitter(object):
                 "schema": PAYLOAD_DATA_SCHEMA,
                 "data": self.buffer
             })
-            buffer_length = len(self.buffer)
+            temp_buffer = self.buffer
             self.buffer = []
             status_code = self.http_post(data).status_code
             if status_code == 200 and self.on_success is not None:
                 self.on_success(len(temp_buffer))
             elif self.on_failure is not None:
                 self.on_failure(0, temp_buffer)
-            return status_code
 
         elif self.method == "get":
             success_count = 0
@@ -179,8 +178,6 @@ class Emitter(object):
 
             elif self.on_failure is not None:
                 self.on_failure(success_count, unsent_requests)
-
-            return status_code
 
         else:
             logger.warn(self.method + ' is not a recognised HTTP method. Use "get" or "post".')
@@ -216,8 +213,7 @@ class Emitter(object):
         result = Emitter.flush(self)
         for t in self.threads:
             t.join(THREAD_TIMEOUT)
-        logger.debug("Finished synchrous flush")
-        return result
+        logger.info("Finished synchrous flush")
 
 
 class AsyncEmitter(Emitter):

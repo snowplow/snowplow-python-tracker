@@ -123,14 +123,11 @@ class Tracker:
 
             :param  pb:              Payload builder
             :type   pb:              payload
-            :rtype:                  tracker | list(int)
+            :rtype:                  tracker
         """
-        results = [emitter.input(pb.nv_pairs) for emitter in self.emitters]
-        filtered = [res for res in results if res is not None]
-        if filtered:
-            return filtered
-        else:
-            return self
+        for emitter in self.emitters:
+            emitter.input(pb.nv_pairs)
+        return self
 
     @contract
     def complete_payload(self, pb, context, tstamp):
@@ -144,7 +141,7 @@ class Tracker:
             :type   context:         list(dict(string:*)) | None
             :param  tstamp:          Optional user-provided timestamp for the event
             :type   tstamp:          int | float | None
-            :rtype:                  tracker | list(int)
+            :rtype:                  tracker
         """
         pb.add("eid", Tracker.get_uuid())
         pb.add("dtm", Tracker.get_timestamp(tstamp))
@@ -169,7 +166,7 @@ class Tracker:
             :type   referrer:       string_or_none
             :param  context:        Custom context for the event
             :type   context:        list(dict(string:*)) | None
-            :rtype:                 tracker | list(int)
+            :rtype:                 tracker
         """
         pb = payload.Payload()
         pb.add("e", "pv")           # pv: page view
@@ -204,7 +201,7 @@ class Tracker:
             :type   currency:    string_or_none
             :param  context:     Custom context for the event
             :type   context:     list(dict(string:*)) | None
-            :rtype:              tracker | list(int)
+            :rtype:              tracker
         """
         pb = payload.Payload()
         pb.add("e", "ti")
@@ -247,7 +244,7 @@ class Tracker:
             :type   items:          list(dict(str:*))
             :param  context:        Custom context for the event
             :type   context:        list(dict(string:*)) | None
-            :rtype:                 tracker | dict(string:*)
+            :rtype:                 tracker
         """
         pb = payload.Payload()
         pb.add("e", "tr")
@@ -273,10 +270,7 @@ class Tracker:
             item["currency"] = currency
             item_results.append(self.track_ecommerce_transaction_item(**item))
         
-        if not isinstance(transaction_result, Tracker):
-            return {"transaction_result": transaction_result, "item_results": item_results}
-        else:
-            return self
+        return self
     
     @contract
     def track_screen_view(self, name=None, id_=None, context=None, tstamp=None):
@@ -287,7 +281,7 @@ class Tracker:
             :type   id_:            string_or_none
             :param  context:        Custom context for the event
             :type   context:        list(dict(string:*)) | None
-            :rtype:                 tracker | list(int)
+            :rtype:                 tracker
         """
         screen_view_properties = {}
         if name is not None:
@@ -320,7 +314,7 @@ class Tracker:
             :type   value:          int | float | None
             :param  context:        Custom context for the event
             :type   context:        list(dict(string:*)) | None
-            :rtype:                 tracker | list(int)
+            :rtype:                 tracker
         """
         pb = payload.Payload()
         pb.add("e", "se")
@@ -342,7 +336,7 @@ class Tracker:
             :type   event_json:      dict(string: string | dict)
             :param  context:         Custom context for the event
             :type   context:         list(dict(string:*)) | None
-            :rtype:                  tracker | list(int)
+            :rtype:                  tracker
         """
 
         envelope = {"schema": UNSTRUCT_EVENT_SCHEMA , "data": event_json}
@@ -361,15 +355,14 @@ class Tracker:
 
             :param  async:  Whether the flush is done asynchronously. Default is False
             :type   async:  bool
-            :rtype:         tracker | list(int)
+            :rtype:         tracker
         """
-        if async:
-            for e in self.emitters:
-                e.flush()
-            return self
-        else:
-            results = [emitter.sync_flush() for emitter in self.emitters]
-            return [r for r in results if r is not None]
+        for emitter in self.emitters:
+            if async:
+                emitter.flush()
+            else:
+                emitter.sync_flush()
+        return self
 
     @contract
     def set_subject(self, subject):
