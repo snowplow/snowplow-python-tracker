@@ -9,7 +9,7 @@ Allowed a single Tracker instance to send events to multiple Emitters (#91)
 Started passing a list of dictionaries to the on_failure callback for POST requests (#104)
 Made the "name" argument of track_screen_view optional (#103)
 Made all tracker methods chainable (#105)
-Stopped sending empty payloads (#106) (TODO)
+Stopped sending empty payloads (#106)
 
 Version 0.4.0 (2014-06-10)
 --------------------------

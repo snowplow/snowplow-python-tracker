@@ -147,17 +147,18 @@ class Emitter(object):
             Sends all events in the buffer to the collector.
         """
         if self.method == "post":
-            data = json.dumps({
-                "schema": PAYLOAD_DATA_SCHEMA,
-                "data": self.buffer
-            })
-            temp_buffer = self.buffer
-            self.buffer = []
-            status_code = self.http_post(data).status_code
-            if status_code == 200 and self.on_success is not None:
-                self.on_success(len(temp_buffer))
-            elif self.on_failure is not None:
-                self.on_failure(0, temp_buffer)
+            if self.buffer:
+                data = json.dumps({
+                    "schema": PAYLOAD_DATA_SCHEMA,
+                    "data": self.buffer
+                })
+                temp_buffer = self.buffer
+                self.buffer = []
+                status_code = self.http_post(data).status_code
+                if status_code == 200 and self.on_success is not None:
+                    self.on_success(len(temp_buffer))
+                elif self.on_failure is not None:
+                    self.on_failure(0, temp_buffer)
 
         elif self.method == "get":
             success_count = 0
