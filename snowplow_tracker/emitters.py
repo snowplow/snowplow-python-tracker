@@ -52,7 +52,7 @@ try:
 
 except ImportError:
     # Otherwise configure Celery with default settings
-    app = Celery("Snowplow", broker="redis://guest@localhost//")
+    app = Celery("Snowplow")
 
 
 class Emitter(object):
