@@ -70,7 +70,7 @@ setup(
     install_requires = [
         "requests",
         "pycontracts",
-        "celery",
+        "celery>=3.1",
         "gevent",
         "redis"
     ],
