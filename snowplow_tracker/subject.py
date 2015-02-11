@@ -125,3 +125,15 @@ class Subject(object):
         """
         self.standard_nv_pairs["duid"] = duid
         return self
+
+    @contract
+    def set_ip_address(self, ip):
+        """
+            Set the domain user ID
+
+            :param ip:              IP address
+            :type  ip:              string
+            :rtype:                 subject
+        """
+        self.standard_nv_pairs["ip"] = ip
+        return self
