@@ -171,7 +171,7 @@ class IntegrationTest(unittest.TestCase):
         envelope_string = from_querystring("co", querystrings[-1])
         envelope = json.loads(unquote_plus(envelope_string))
         self.assertEquals(envelope, {
-            "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0",
+            "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1",
             "data":[{"schema": "iglu:com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}]
         })
     
@@ -182,7 +182,7 @@ class IntegrationTest(unittest.TestCase):
         envelope_string = unquote_plus(from_querystring("cx", querystrings[-1]))
         envelope = json.loads((base64.urlsafe_b64decode(bytearray(envelope_string, "utf-8"))).decode("utf-8"))
         self.assertEquals(envelope, {
-            "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0",
+            "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1",
             "data":[{"schema": "iglu:com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}]
         })
     
