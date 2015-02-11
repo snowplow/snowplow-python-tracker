@@ -1,3 +1,16 @@
+Version 0.6.0 (2015-xx-xx)
+--------------------------
+Improved logging (#109)
+Removed unnecessary whitespace from POST requests (#110)
+Started sending payload_data version 1-0-2 (#113)
+Added set_domain_user_id method (#115)
+Added set_useragent method (#116)
+Added set_ip_address method (#117)
+Added set_network_user_id method (#118)
+Updated contexts schema to 1-0-1 (#119)
+Added integration tests using mocked POST requests (#122)
+Started preserving unicode characters in JSONs (#123)
+
 Version 0.5.0 (2014-08-13)
 --------------------------
 Converted payload values to strings for POST requests (#100)
