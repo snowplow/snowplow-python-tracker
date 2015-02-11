@@ -149,3 +149,16 @@ class Subject(object):
         """
         self.standard_nv_pairs["ua"] = ua
         return self
+
+    @contract
+    def set_network_user_id(self, nuid):
+        """
+            Set the network user ID field
+            This overwrites the nuid field set by the collector
+
+            :param nuid:            Network user ID
+            :type  nuid:            string
+            :rtype:                 subject
+        """
+        self.standard_nv_pairs["tnuid"] = nuid
+        return self
