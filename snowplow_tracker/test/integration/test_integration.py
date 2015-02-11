@@ -38,6 +38,8 @@ querystrings = [""]
 
 default_emitter = emitters.Emitter("localhost", protocol="http", port=80)
 
+post_emitter = emitters.Emitter("localhost", protocol="http", port=80, method='post', buffer_size=1)
+
 default_subject = subject.Subject()
 
 def from_querystring(field, url):
@@ -49,6 +51,14 @@ def from_querystring(field, url):
 @all_requests
 def pass_response_content(url, request):
     querystrings.append(request.url)
+    return {
+        "url": request.url,
+        "status_code": 200
+    }
+
+@all_requests
+def pass_post_response_content(url, request):
+    querystrings.append(json.loads(request.body))
     return {
         "url": request.url,
         "status_code": 200
@@ -262,3 +272,22 @@ class IntegrationTest(unittest.TestCase):
             t.track_page_view("http://www.example.com")
         self.assertEquals(callback_success_queue, [])
         self.assertEquals(callback_failure_queue[0], 0)
+
+    def test_post_page_view(self):
+        t = tracker.Tracker([post_emitter], default_subject)
+        with HTTMock(pass_post_response_content):
+            t.track_page_view("localhost", "local host", None)
+        expected_fields = {"e": "pv", "page": "local host", "url": "localhost"}
+        request = querystrings[-1]
+        self.assertEquals(request["schema"], "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-2")
+        for key in expected_fields:
+            self.assertEquals(request["data"][0][key], expected_fields[key])
+
+    def test_post_batched(self):
+        post_emitter = emitters.Emitter("localhost", protocol="http", port=80, method='post', buffer_size=2)
+        t = tracker.Tracker(post_emitter, default_subject)
+        with HTTMock(pass_post_response_content):
+            t.track_struct_event("Test", "A")
+            t.track_struct_event("Test", "B")
+        self.assertEquals(querystrings[-1]["data"][0]["se_ac"], "A")
+        self.assertEquals(querystrings[-1]["data"][1]["se_ac"], "B")
