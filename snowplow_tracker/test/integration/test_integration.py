@@ -206,6 +206,25 @@ class IntegrationTest(unittest.TestCase):
         self.assertIsNotNone(from_querystring("eid", querystrings[-1]))
         self.assertIsNotNone(from_querystring("dtm", querystrings[-1]))
 
+    def test_integration_identification_methods(self):
+        s = subject.Subject()
+        s.set_domain_user_id("4616bfb38f872d16")
+        s.set_ip_address("255.255.255.255")
+        s.set_useragent("Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/5.0)")
+        s.set_network_user_id("fbc6c76c-bce5-43ce-8d5a-31c5")
+
+        t = tracker.Tracker([emitters.Emitter("localhost")], s, "cf", app_id="angry-birds-android")
+        with HTTMock(pass_response_content):
+            t.track_page_view("localhost", "local host")
+        expected_fields = {
+            "duid": "4616bfb38f872d16",
+            "ip": "255.255.255.255",
+            "ua": "Mozilla%2F5.0+%28compatible%3B+MSIE+9.0%3B+Windows+NT+6.0%3B+Trident%2F5.0%29",
+            "tnuid": "fbc6c76c-bce5-43ce-8d5a-31c5"
+        }
+        for key in expected_fields:
+            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+
     def test_integration_redis_default(self):
         r = redis.StrictRedis()
         t = tracker.Tracker([emitters.RedisEmitter()], default_subject)
