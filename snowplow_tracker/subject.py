@@ -113,3 +113,15 @@ class Subject(object):
         """
         self.standard_nv_pairs["lang"] = lang
         return self
+
+    @contract
+    def set_domain_user_id(self, duid):
+        """
+            Set the domain user ID
+
+            :param duid:            Domain user ID
+            :type  duid:            string
+            :rtype:                 subject
+        """
+        self.standard_nv_pairs["duid"] = duid
+        return self
