@@ -137,3 +137,15 @@ class Subject(object):
         """
         self.standard_nv_pairs["ip"] = ip
         return self
+
+    @contract
+    def set_useragent(self, ua):
+        """
+            Set the user agent
+
+            :param ua:              User agent
+            :type  ua:              string
+            :rtype:                 subject
+        """
+        self.standard_nv_pairs["ua"] = ua
+        return self
