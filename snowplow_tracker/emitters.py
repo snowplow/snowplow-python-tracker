@@ -151,7 +151,7 @@ class Emitter(object):
                 data = json.dumps({
                     "schema": PAYLOAD_DATA_SCHEMA,
                     "data": self.buffer
-                })
+                }, separators=(',', ':'))
                 temp_buffer = self.buffer
                 self.buffer = []
                 status_code = self.http_post(data).status_code
