@@ -19,7 +19,6 @@
     License: Apache License Version 2.0
 """
 
-
 import random
 import time
 import json
@@ -80,7 +79,7 @@ class Payload:
 
         if dict_ is not None and dict_ != {}:
 
-            json_dict = json.dumps(dict_)
+            json_dict = json.dumps(dict_, ensure_ascii=False)
 
             if encode_base64:
                 encoded_dict = base64.urlsafe_b64encode(json_dict.encode("ascii"))
