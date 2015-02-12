@@ -8,6 +8,8 @@ Python Analytics for Snowplow
     :target: http://badge.fury.io/py/snowplow-tracker
 .. image:: https://coveralls.io/repos/snowplow/snowplow-python-tracker/badge.png
     :target: https://coveralls.io/r/snowplow/snowplow-python-tracker
+.. image:: http://img.shields.io/badge/license-Apache--2-blue.svg?style=flat
+    :target: http://www.apache.org/licenses/LICENSE-2.0
 
 
 Overview
