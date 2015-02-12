@@ -22,9 +22,8 @@
 import requests
 import json
 import threading
-import celery
-from celery import Celery
-from celery.contrib.methods import task
+
+from celery import shared_task
 import redis
 import logging
 from contracts import contract, new_contract
@@ -43,16 +42,6 @@ new_contract("method", lambda x: x == "get" or x == "post")
 new_contract("function", lambda x: hasattr(x, "__call__"))
 
 new_contract("redis", lambda x: isinstance(x, (redis.Redis, redis.StrictRedis)))
-
-try:
-    # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
-    import snowplow_celery_config
-    app = Celery()
-    app.config_from_object(snowplow_celery_config)
-
-except ImportError:
-    # Otherwise configure Celery with default settings
-    app = Celery("Snowplow", broker="redis://guest@localhost//")
 
 
 class Emitter(object):
@@ -82,7 +71,7 @@ class Emitter(object):
                                 1) The number of events which were successfully sent
                                 2) If method is "post": The unsent data in string form;
                                    If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
-            :type  on_failure:  function | None            
+            :type  on_failure:  function | None
         """
         self.endpoint = Emitter.as_collector_uri(endpoint, protocol, port, method)
 
@@ -110,9 +99,9 @@ class Emitter(object):
             :param endpoint:  The raw endpoint provided by the user
             :type  endpoint:  string
             :param protocol:  The protocol to use - http or https
-            :type  protocol:  protocol            
+            :type  protocol:  protocol
             :param port:      The collector port to connect to
-            :type  port:      int | None            
+            :type  port:      int | None
             :rtype:           string
         """
         if method == "get":
@@ -141,7 +130,7 @@ class Emitter(object):
         if len(self.buffer) >= self.buffer_size:
             self.flush()
 
-    @task(name="Flush")
+    @shared_task(name="Flush")
     def flush(self):
         """
             Sends all events in the buffer to the collector.
