@@ -130,48 +130,14 @@ class Emitter(object):
         if len(self.buffer) >= self.buffer_size:
             self.flush()
 
-    @shared_task(name="Flush")
-    def flush(self):
+    def flush(self, celery=False):
         """
             Sends all events in the buffer to the collector.
         """
-        logger.info("Attempting to send %s requests" % len(self.buffer))
-        if self.method == "post":
-            if self.buffer:
-                data = json.dumps({
-                    "schema": PAYLOAD_DATA_SCHEMA,
-                    "data": self.buffer
-                }, separators=(',', ':'))
-                temp_buffer = self.buffer
-                self.buffer = []
-                status_code = self.http_post(data).status_code
-                if status_code == 200 and self.on_success is not None:
-                    self.on_success(len(temp_buffer))
-                elif self.on_failure is not None:
-                    self.on_failure(0, temp_buffer)
-
-        elif self.method == "get":
-            success_count = 0
-            unsent_requests = []
-            status_code = None
-
-            while len(self.buffer) > 0:
-                payload = self.buffer.pop()
-                status_code = self.http_get(payload).status_code
-                if status_code == 200:
-                    success_count += 1
-                else:
-                    unsent_requests.append(payload)
-
-            if len(unsent_requests) == 0:
-                if self.on_success is not None:
-                    self.on_success(success_count)
-
-            elif self.on_failure is not None:
-                self.on_failure(success_count, unsent_requests)
-
+        if celery:
+            static_flush.delay(self)
         else:
-            logger.warn(self.method + ' is not a recognised HTTP method. Use "get" or "post".')
+            static_flush(self)
 
     @contract
     def http_post(self, data):
@@ -238,7 +204,7 @@ class CeleryEmitter(Emitter):
         """
             Schedules a flush task
         """
-        super(CeleryEmitter, self).flush.delay()
+        super(CeleryEmitter, self).flush(True)
         logger.info("Scheduled a Celery task to flush the event queue")
 
 
@@ -274,3 +240,46 @@ class RedisEmitter(object):
 
     def sync_flush(self):
         self.flush()
+
+@shared_task(name="Flush")
+def static_flush(self):
+    """
+        Sends all events in the buffer to the collector.
+    """
+    logger.info("Attempting to send %s requests" % len(self.buffer))
+    if self.method == "post":
+        if self.buffer:
+            data = json.dumps({
+                "schema": PAYLOAD_DATA_SCHEMA,
+                "data": self.buffer
+            }, separators=(',', ':'))
+            temp_buffer = self.buffer
+            self.buffer = []
+            status_code = self.http_post(data).status_code
+            if status_code == 200 and self.on_success is not None:
+                self.on_success(len(temp_buffer))
+            elif self.on_failure is not None:
+                self.on_failure(0, temp_buffer)
+
+    elif self.method == "get":
+        success_count = 0
+        unsent_requests = []
+        status_code = None
+
+        while len(self.buffer) > 0:
+            payload = self.buffer.pop()
+            status_code = self.http_get(payload).status_code
+            if status_code == 200:
+                success_count += 1
+            else:
+                unsent_requests.append(payload)
+
+        if len(unsent_requests) == 0:
+            if self.on_success is not None:
+                self.on_success(success_count)
+
+        elif self.on_failure is not None:
+            self.on_failure(success_count, unsent_requests)
+
+    else:
+        logger.warn(self.method + ' is not a recognised HTTP method. Use "get" or "post".')
