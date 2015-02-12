@@ -10,6 +10,7 @@ Added set_network_user_id method (#118)
 Updated contexts schema to 1-0-1 (#119)
 Added integration tests using mocked POST requests (#122)
 Started preserving unicode characters in JSONs (#123)
+Used Travis CI image for master branch in README (#125)
 
 Version 0.5.0 (2014-08-13)
 --------------------------

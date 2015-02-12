@@ -1,7 +1,7 @@
 ======================================================
 Python Analytics for Snowplow 
 ======================================================
-.. image:: https://travis-ci.org/snowplow/snowplow-python-tracker.png
+.. image:: https://travis-ci.org/snowplow/snowplow-python-tracker.png?branch=master
     :alt: Build Status
     :target: https://travis-ci.org/snowplow/snowplow-python-tracker
 .. image:: https://badge.fury.io/py/snowplow-tracker.png
