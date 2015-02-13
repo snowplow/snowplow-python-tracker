@@ -49,12 +49,16 @@ Find out more
 Contributing quickstart
 #######################
 
-::
+Assuming Git, Vagrant_ and VirtualBox_ are installed:
 
-  guest$ git clone --recursive https://github.com/snowplow/dev-environment.git && cd dev-environment
-  guest$ vagrant up && vagrant ssh
-   host$ ansible-playbook /vagrant/ansible-playbooks/snowplow-python-tracker.yml --inventory-file=/home/vagrant/ansible_hosts --connection=local
-   host$ /vagrant/snowplow-python-tracker/run-tests.sh
+::
+   host$ git clone git@github.com:snowplow/snowplow-python-tracker.git
+   host$ vagrant up && vagrant ssh
+  guest$ cd /vagrant
+  guest$ ./run-tests.sh
+
+.. _Vagrant: http://docs.vagrantup.com/v2/installation/index.html
+.. _VirtualBox: https://www.virtualbox.org/wiki/Downloads
 
 Copyright and license
 #####################
