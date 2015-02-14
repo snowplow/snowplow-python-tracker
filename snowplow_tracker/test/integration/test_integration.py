@@ -38,6 +38,8 @@ querystrings = [""]
 
 default_emitter = emitters.Emitter("localhost", protocol="http", port=80)
 
+post_emitter = emitters.Emitter("localhost", protocol="http", port=80, method='post', buffer_size=1)
+
 default_subject = subject.Subject()
 
 def from_querystring(field, url):
@@ -49,6 +51,14 @@ def from_querystring(field, url):
 @all_requests
 def pass_response_content(url, request):
     querystrings.append(request.url)
+    return {
+        "url": request.url,
+        "status_code": 200
+    }
+
+@all_requests
+def pass_post_response_content(url, request):
+    querystrings.append(json.loads(request.body))
     return {
         "url": request.url,
         "status_code": 200
@@ -171,7 +181,7 @@ class IntegrationTest(unittest.TestCase):
         envelope_string = from_querystring("co", querystrings[-1])
         envelope = json.loads(unquote_plus(envelope_string))
         self.assertEquals(envelope, {
-            "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0",
+            "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1",
             "data":[{"schema": "iglu:com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}]
         })
     
@@ -182,7 +192,7 @@ class IntegrationTest(unittest.TestCase):
         envelope_string = unquote_plus(from_querystring("cx", querystrings[-1]))
         envelope = json.loads((base64.urlsafe_b64decode(bytearray(envelope_string, "utf-8"))).decode("utf-8"))
         self.assertEquals(envelope, {
-            "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0",
+            "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1",
             "data":[{"schema": "iglu:com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}]
         })
     
@@ -205,6 +215,25 @@ class IntegrationTest(unittest.TestCase):
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
         self.assertIsNotNone(from_querystring("eid", querystrings[-1]))
         self.assertIsNotNone(from_querystring("dtm", querystrings[-1]))
+
+    def test_integration_identification_methods(self):
+        s = subject.Subject()
+        s.set_domain_user_id("4616bfb38f872d16")
+        s.set_ip_address("255.255.255.255")
+        s.set_useragent("Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/5.0)")
+        s.set_network_user_id("fbc6c76c-bce5-43ce-8d5a-31c5")
+
+        t = tracker.Tracker([emitters.Emitter("localhost")], s, "cf", app_id="angry-birds-android")
+        with HTTMock(pass_response_content):
+            t.track_page_view("localhost", "local host")
+        expected_fields = {
+            "duid": "4616bfb38f872d16",
+            "ip": "255.255.255.255",
+            "ua": "Mozilla%2F5.0+%28compatible%3B+MSIE+9.0%3B+Windows+NT+6.0%3B+Trident%2F5.0%29",
+            "tnuid": "fbc6c76c-bce5-43ce-8d5a-31c5"
+        }
+        for key in expected_fields:
+            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_redis_default(self):
         r = redis.StrictRedis()
@@ -243,3 +272,22 @@ class IntegrationTest(unittest.TestCase):
             t.track_page_view("http://www.example.com")
         self.assertEquals(callback_success_queue, [])
         self.assertEquals(callback_failure_queue[0], 0)
+
+    def test_post_page_view(self):
+        t = tracker.Tracker([post_emitter], default_subject)
+        with HTTMock(pass_post_response_content):
+            t.track_page_view("localhost", "local host", None)
+        expected_fields = {"e": "pv", "page": "local host", "url": "localhost"}
+        request = querystrings[-1]
+        self.assertEquals(request["schema"], "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-2")
+        for key in expected_fields:
+            self.assertEquals(request["data"][0][key], expected_fields[key])
+
+    def test_post_batched(self):
+        post_emitter = emitters.Emitter("localhost", protocol="http", port=80, method='post', buffer_size=2)
+        t = tracker.Tracker(post_emitter, default_subject)
+        with HTTMock(pass_post_response_content):
+            t.track_struct_event("Test", "A")
+            t.track_struct_event("Test", "B")
+        self.assertEquals(querystrings[-1]["data"][0]["se_ac"], "A")
+        self.assertEquals(querystrings[-1]["data"][1]["se_ac"], "B")

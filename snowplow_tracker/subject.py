@@ -113,3 +113,52 @@ class Subject(object):
         """
         self.standard_nv_pairs["lang"] = lang
         return self
+
+    @contract
+    def set_domain_user_id(self, duid):
+        """
+            Set the domain user ID
+
+            :param duid:            Domain user ID
+            :type  duid:            string
+            :rtype:                 subject
+        """
+        self.standard_nv_pairs["duid"] = duid
+        return self
+
+    @contract
+    def set_ip_address(self, ip):
+        """
+            Set the domain user ID
+
+            :param ip:              IP address
+            :type  ip:              string
+            :rtype:                 subject
+        """
+        self.standard_nv_pairs["ip"] = ip
+        return self
+
+    @contract
+    def set_useragent(self, ua):
+        """
+            Set the user agent
+
+            :param ua:              User agent
+            :type  ua:              string
+            :rtype:                 subject
+        """
+        self.standard_nv_pairs["ua"] = ua
+        return self
+
+    @contract
+    def set_network_user_id(self, nuid):
+        """
+            Set the network user ID field
+            This overwrites the nuid field set by the collector
+
+            :param nuid:            Network user ID
+            :type  nuid:            string
+            :rtype:                 subject
+        """
+        self.standard_nv_pairs["tnuid"] = nuid
+        return self

@@ -34,7 +34,7 @@ logger.setLevel(logging.INFO)
 
 DEFAULT_MAX_LENGTH = 10
 THREAD_TIMEOUT = 10
-PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-0"
+PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-2"
 
 new_contract("protocol", lambda x: x == "http" or x == "https")
 
@@ -146,12 +146,13 @@ class Emitter(object):
         """
             Sends all events in the buffer to the collector.
         """
+        logger.info("Attempting to send %s requests" % len(self.buffer))
         if self.method == "post":
             if self.buffer:
                 data = json.dumps({
                     "schema": PAYLOAD_DATA_SCHEMA,
                     "data": self.buffer
-                })
+                }, separators=(',', ':'))
                 temp_buffer = self.buffer
                 self.buffer = []
                 status_code = self.http_post(data).status_code
@@ -189,9 +190,10 @@ class Emitter(object):
             :param data:  The array of JSONs to be sent
             :type  data:  string
         """
-        logger.debug("Sending POST request...")
+        logger.info("Sending POST request to %s..." % self.endpoint)
+        logger.debug("Payload: %s" % data)
         r = requests.post(self.endpoint, data=data, headers={'content-type': 'application/json; charset=utf-8'})
-        logger.info("POST request finished with status code: " + str(r.status_code))
+        getattr(logger, "info" if r.status_code == 200 else "warn")("POST request finished with status code: " + str(r.status_code))
         return r
 
     @contract
@@ -200,9 +202,10 @@ class Emitter(object):
             :param payload:  The event properties
             :type  payload:  dict(string:*)
         """
-        logger.debug("Sending GET request...")
+        logger.info("Sending GET request to %s..." % self.endpoint)
+        logger.debug("Payload: %s" % payload)
         r = requests.get(self.endpoint, params=payload)        
-        logger.info("GET request finished with status code: " + str(r.status_code))
+        getattr(logger, "info" if r.status_code == 200 else "warn")("GET request finished with status code: " + str(r.status_code))
         return r
 
     def sync_flush(self):

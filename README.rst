@@ -1,13 +1,15 @@
 ======================================================
 Python Analytics for Snowplow 
 ======================================================
-.. image:: https://travis-ci.org/snowplow/snowplow-python-tracker.png
+.. image:: https://travis-ci.org/snowplow/snowplow-python-tracker.png?branch=master
     :alt: Build Status
     :target: https://travis-ci.org/snowplow/snowplow-python-tracker
 .. image:: https://badge.fury.io/py/snowplow-tracker.png
     :target: http://badge.fury.io/py/snowplow-tracker
 .. image:: https://coveralls.io/repos/snowplow/snowplow-python-tracker/badge.png
     :target: https://coveralls.io/r/snowplow/snowplow-python-tracker
+.. image:: http://img.shields.io/badge/license-Apache--2-blue.svg?style=flat
+    :target: http://www.apache.org/licenses/LICENSE-2.0
 
 
 Overview
@@ -47,12 +49,22 @@ Find out more
 Contributing quickstart
 #######################
 
-::
+Assuming Git, Vagrant_ and VirtualBox_ are installed:
 
-  guest$ git clone --recursive https://github.com/snowplow/dev-environment.git && cd dev-environment
-  guest$ vagrant up && vagrant ssh
-   host$ ansible-playbook /vagrant/ansible-playbooks/snowplow-python-tracker.yml --inventory-file=/home/vagrant/ansible_hosts --connection=local
-   host$ /vagrant/snowplow-python-tracker/run-tests.sh
+::
+   host$ git clone git@github.com:snowplow/snowplow-python-tracker.git
+   host$ vagrant up && vagrant ssh
+  guest$ cd /vagrant
+  guest$ ./run-tests.sh
+
+.. _Vagrant: http://docs.vagrantup.com/v2/installation/index.html
+.. _VirtualBox: https://www.virtualbox.org/wiki/Downloads
+
+Publishing
+##########
+
+::
+   host$ vagrant push
 
 Copyright and license
 #####################
