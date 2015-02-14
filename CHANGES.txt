@@ -1,5 +1,5 @@
-Version 0.6.0 (2015-02-14)
---------------------------
+Version 0.6.0.post1 (2015-02-14)
+--------------------------------
 Improved logging (#109)
 Removed unnecessary whitespace from POST requests (#110)
 Started sending payload_data version 1-0-2 (#113)
