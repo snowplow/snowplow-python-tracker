@@ -1,4 +1,4 @@
-Version 0.6.0 (2015-xx-xx)
+Version 0.6.0 (2015-02-14)
 --------------------------
 Improved logging (#109)
 Removed unnecessary whitespace from POST requests (#110)
@@ -13,6 +13,7 @@ Started preserving unicode characters in JSONs (#123)
 Used Travis CI image for master branch in README (#125)
 Added license button to README (#126)
 Added dedicated Vagrant setup (#127)
+Added Vagrant push to publish tracker to PyPI (#128)
 
 Version 0.5.0 (2014-08-13)
 --------------------------

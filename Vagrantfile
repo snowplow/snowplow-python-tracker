@@ -15,4 +15,9 @@ Vagrant.configure("2") do |config|
     sh.path = "vagrant/up.bash"
   end
 
+  # Requires Vagrant 1.7.0+
+  config.push.define "publish", strategy: "local-exec" do |push|
+    push.script = "vagrant/push.bash"
+  end
+
 end

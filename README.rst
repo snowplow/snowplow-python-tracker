@@ -60,6 +60,12 @@ Assuming Git, Vagrant_ and VirtualBox_ are installed:
 .. _Vagrant: http://docs.vagrantup.com/v2/installation/index.html
 .. _VirtualBox: https://www.virtualbox.org/wiki/Downloads
 
+Publishing
+##########
+
+::
+   host$ vagrant push
+
 Copyright and license
 #####################
 
