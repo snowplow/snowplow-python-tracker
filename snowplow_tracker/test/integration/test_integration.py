@@ -80,7 +80,7 @@ class IntegrationTest(unittest.TestCase):
             t.track_page_view("http://savethearctic.org", "Save The Arctic", "http://referrer.com")
         expected_fields = {"e": "pv", "page": "Save+The+Arctic", "url": "http%3A%2F%2Fsavethearctic.org", "refr": "http%3A%2F%2Freferrer.com"}
         for key in expected_fields:
-            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])            
+            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_ecommerce_transaction_item(self):
         t = tracker.Tracker([default_emitter], default_subject)
@@ -94,7 +94,7 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker([default_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_ecommerce_transaction("6a8078be", 35, city="London", currency="GBP", items=
-                [{  
+                [{
                     "sku": "pbz0026",
                     "price": 20,
                     "quantity": 1
@@ -102,7 +102,7 @@ class IntegrationTest(unittest.TestCase):
                 {
                     "sku": "pbz0038",
                     "price": 15,
-                    "quantity": 1  
+                    "quantity": 1
                 }])
 
         expected_fields = {"e": "tr", "tr_id": "6a8078be", "tr_tt": "35", "tr_ci": "London", "tr_cu": "GBP"}
@@ -124,7 +124,7 @@ class IntegrationTest(unittest.TestCase):
         with HTTMock(pass_response_content):
             t.track_screen_view("Game HUD 2", id_="534")
         expected_fields = {"e": "ue"}
-        for key in expected_fields:          
+        for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
         envelope_string = from_querystring("ue_pr", querystrings[-1])
         envelope = json.loads(unquote_plus(envelope_string))
@@ -184,7 +184,7 @@ class IntegrationTest(unittest.TestCase):
             "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1",
             "data":[{"schema": "iglu:com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}]
         })
-    
+
     def test_integration_context_base64(self):
         t = tracker.Tracker([default_emitter], default_subject, encode_base64=True)
         with HTTMock(pass_response_content):
@@ -195,7 +195,7 @@ class IntegrationTest(unittest.TestCase):
             "schema": "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1",
             "data":[{"schema": "iglu:com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}]
         })
-    
+
     def test_integration_standard_nv_pairs(self):
         s = subject.Subject()
         s.set_platform("mob")
@@ -234,6 +234,22 @@ class IntegrationTest(unittest.TestCase):
         }
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+
+    def test_integration_transaction(self):
+        s = subject.Subject()
+        s.set_domain_user_id("4616bfb38f872d16")
+        s.set_txn_id(10000)
+
+        t = tracker.Tracker([emitters.Emitter("localhost")], s, "cf", app_id="angry-birds-android")
+        with HTTMock(pass_response_content):
+            t.track_page_view("localhost", "local host")
+        expected_fields = {
+            "duid": "4616bfb38f872d16",
+            "tid": '10000'
+        }
+        for key in expected_fields:
+            self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
+
 
     def test_integration_redis_default(self):
         r = redis.StrictRedis()

@@ -162,3 +162,17 @@ class Subject(object):
         """
         self.standard_nv_pairs["tnuid"] = nuid
         return self
+
+    @contract
+    def set_txn_id(self, txn_id):
+        """
+            Set Transaction ID set client-side, used to de-dupe records.
+
+            :param txn_id:          Network user ID
+            :type  txn_id:          int
+            :rtype:                 subject
+        """
+        # Unfortunatly real name of this field is `tid`. This difference in
+        # documentation is little confusing.
+        self.standard_nv_pairs["tid"] = txn_id
+        return self
