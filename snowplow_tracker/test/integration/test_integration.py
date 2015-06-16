@@ -245,7 +245,7 @@ class IntegrationTest(unittest.TestCase):
             t.track_page_view("localhost", "local host")
         expected_fields = {
             "duid": "4616bfb38f872d16",
-            "txn_id": '10000'
+            "tid": '10000'
         }
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
