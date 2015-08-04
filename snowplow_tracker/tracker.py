@@ -21,6 +21,7 @@
 
 import time
 import uuid
+import six
 from snowplow_tracker import payload, _version
 from snowplow_tracker import subject as _subject
 from contracts import contract, new_contract
@@ -44,9 +45,9 @@ Tracker class
 
 class Tracker:
 
-    new_contract("non_empty_string", lambda s: isinstance(s, str)
+    new_contract("non_empty_string", lambda s: isinstance(s, six.string_types)
                  and len(s) > 0)
-    new_contract("string_or_none", lambda s: (isinstance(s, str)
+    new_contract("string_or_none", lambda s: (isinstance(s, six.string_types)
                  and len(s) > 0) or s is None)
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
