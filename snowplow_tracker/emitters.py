@@ -241,12 +241,46 @@ class AsyncEmitter(Emitter):
         Uses threads to send HTTP requests asynchronously
     """
 
-    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, on_success=None, on_failure=None):
+    @contract
+    def __init__(
+        self,
+        endpoint,
+        protocol="http",
+        port=None,
+        method="get",
+        buffer_size=None,
+        on_success=None,
+        on_failure=None,
+        thread_count=1):
+        """
+            :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
+            :type  endpoint:    string
+            :param protocol:    The protocol to use - http or https. Defaults to http.
+            :type  protocol:    protocol
+            :param port:        The collector port to connect to
+            :type  port:        int | None
+            :param method:      The HTTP request method
+            :type  method:      method
+            :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
+            :type  buffer_size: int | None
+            :param on_success:  Callback executed after every HTTP request in a flush has status code 200
+                                Gets passed the number of events flushed.
+            :type  on_success:  function | None
+            :param on_failure:  Callback executed if at least one HTTP request in a flush has status code 200
+                                Gets passed two arguments:
+                                1) The number of events which were successfully sent
+                                2) If method is "post": The unsent data in string form;
+                                   If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
+            :type  on_failure:  function | None
+            :param thread_count Number of worker threads to use for HTTP requests
+            :type  thread_count int
+        """
         super(AsyncEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, on_success, on_failure)
         self.queue = Queue()
-        self.t = threading.Thread(target=self.consume)
-        self.t.daemon = True
-        self.t.start()
+        for i in range(thread_count):
+            t = threading.Thread(target=self.consume)
+            t.daemon = True
+            t.start()
 
     def sync_flush(self):
         self.flush()
