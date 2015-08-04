@@ -52,6 +52,7 @@ Contributing quickstart
 Assuming Git, Vagrant_ and VirtualBox_ are installed:
 
 ::
+
    host$ git clone git@github.com:snowplow/snowplow-python-tracker.git
    host$ vagrant up && vagrant ssh
   guest$ cd /vagrant
@@ -64,6 +65,7 @@ Publishing
 ##########
 
 ::
+
    host$ vagrant push
 
 Copyright and license
