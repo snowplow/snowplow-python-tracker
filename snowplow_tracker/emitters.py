@@ -156,7 +156,7 @@ class Emitter(object):
                 temp_buffer = self.buffer
                 self.buffer = []
                 status_code = self.http_post(data).status_code
-                if status_code == 200:
+                if self.is_good_status_code(status_code):
                     if self.on_success is not None:
                         self.on_success(len(temp_buffer))
                 elif self.on_failure is not None:
@@ -170,7 +170,7 @@ class Emitter(object):
             while len(self.buffer) > 0:
                 payload = self.buffer.pop()
                 status_code = self.http_get(payload).status_code
-                if status_code == 200:
+                if self.is_good_status_code(status_code):
                     success_count += 1
                 else:
                     unsent_requests.append(payload)
@@ -194,7 +194,7 @@ class Emitter(object):
         logger.info("Sending POST request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % data)
         r = requests.post(self.endpoint, data=data, headers={'content-type': 'application/json; charset=utf-8'})
-        getattr(logger, "info" if r.status_code == 200 else "warn")("POST request finished with status code: " + str(r.status_code))
+        getattr(logger, "info" if self.is_good_status_code(r.status_code) else "warn")("POST request finished with status code: " + str(r.status_code))
         return r
 
     @contract
@@ -206,7 +206,7 @@ class Emitter(object):
         logger.info("Sending GET request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % payload)
         r = requests.get(self.endpoint, params=payload)        
-        getattr(logger, "info" if r.status_code == 200 else "warn")("GET request finished with status code: " + str(r.status_code))
+        getattr(logger, "info" if self.is_good_status_code(r.status_code) else "warn")("GET request finished with status code: " + str(r.status_code))
         return r
 
     def sync_flush(self):
@@ -219,6 +219,16 @@ class Emitter(object):
         for t in self.threads:
             t.join(THREAD_TIMEOUT)
         logger.info("Finished synchrous flush")
+
+    @staticmethod
+    @contract
+    def is_good_status_code(status_code):
+        """
+            :param status_code:  HTTP status code
+            :type  status_code:  int
+            :rtype:              bool
+        """
+        return 200 <= status_code < 400
 
 
 class AsyncEmitter(Emitter):
