@@ -156,8 +156,9 @@ class Emitter(object):
                 temp_buffer = self.buffer
                 self.buffer = []
                 status_code = self.http_post(data).status_code
-                if status_code == 200 and self.on_success is not None:
-                    self.on_success(len(temp_buffer))
+                if status_code == 200:
+                    if self.on_success is not None:
+                        self.on_success(len(temp_buffer))
                 elif self.on_failure is not None:
                     self.on_failure(0, temp_buffer)
 
