@@ -211,18 +211,29 @@ class Emitter(object):
                     "schema": PAYLOAD_DATA_SCHEMA,
                     "data": evts
                 }, separators=(',', ':'))
-                status_code = self.http_post(data).status_code
-                if self.is_good_status_code(status_code):
+                post_succeeded = False
+                try:
+                    status_code = self.http_post(data).status_code
+                    post_succeeded = self.is_good_status_code(status_code)
+                except requests.RequestException as e:
+                    logger.warn(e)
+                if post_succeeded:
                     if self.on_success is not None:
                         self.on_success(len(evts))
                 elif self.on_failure is not None:
                     self.on_failure(0, evts)
+
             elif self.method == 'get':
                 success_count = 0
                 unsent_requests = []
                 for evt in evts:
-                    status_code = self.http_get(evt).status_code
-                    if self.is_good_status_code(status_code):
+                    get_succeeded = False
+                    try:
+                        status_code = self.http_get(evt).status_code
+                        get_succeeded = self.is_good_status_code(status_code)
+                    except requests.RequestException as e:
+                        logger.warn(e)
+                    if get_succeeded:
                         success_count += 1
                     else:
                         unsent_requests.append(evt)
@@ -231,8 +242,6 @@ class Emitter(object):
                         self.on_success(success_count)
                 elif self.on_failure is not None:
                     self.on_failure(success_count, unsent_requests)
-            else:
-                logger.warn(self.method + ' is not a recognised HTTP method. Use "get" or "post".')
         else:
             logger.info("Skipping flush since buffer is empty")
 
