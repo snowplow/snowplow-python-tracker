@@ -28,12 +28,17 @@ from celery.contrib.methods import task
 import redis
 import logging
 from contracts import contract, new_contract
+try:
+    # Python 2
+    from Queue import Queue
+except ImportError:
+    # Python 3
+    from queue import Queue
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 DEFAULT_MAX_LENGTH = 10
-THREAD_TIMEOUT = 10
 PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-2"
 
 new_contract("protocol", lambda x: x == "http" or x == "https")
@@ -53,7 +58,6 @@ try:
 except ImportError:
     # Otherwise configure Celery with default settings
     app = Celery("Snowplow", broker="redis://guest@localhost//")
-
 
 class Emitter(object):
     """
@@ -99,7 +103,7 @@ class Emitter(object):
         self.on_success = on_success
         self.on_failure = on_failure
 
-        self.threads = []
+        self.lock = threading.RLock()
 
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
@@ -133,57 +137,23 @@ class Emitter(object):
             :param payload:   The name-value pairs for the event
             :type  payload:   dict(string:*)
         """
-        if self.method == "post":
-            self.buffer.append({key: str(payload[key]) for key in payload})
-        else:
-            self.buffer.append(payload)
+        with self.lock:
+            if self.method == "post":
+                self.buffer.append({key: str(payload[key]) for key in payload})
+            else:
+                self.buffer.append(payload)
 
-        if len(self.buffer) >= self.buffer_size:
-            self.flush()
+            if len(self.buffer) >= self.buffer_size:
+                self.flush()
 
     @task(name="Flush")
     def flush(self):
         """
             Sends all events in the buffer to the collector.
         """
-        logger.info("Attempting to send %s requests" % len(self.buffer))
-        if self.method == "post":
-            if self.buffer:
-                data = json.dumps({
-                    "schema": PAYLOAD_DATA_SCHEMA,
-                    "data": self.buffer
-                }, separators=(',', ':'))
-                temp_buffer = self.buffer
-                self.buffer = []
-                status_code = self.http_post(data).status_code
-                if self.is_good_status_code(status_code):
-                    if self.on_success is not None:
-                        self.on_success(len(temp_buffer))
-                elif self.on_failure is not None:
-                    self.on_failure(0, temp_buffer)
-
-        elif self.method == "get":
-            success_count = 0
-            unsent_requests = []
-            status_code = None
-
-            while len(self.buffer) > 0:
-                payload = self.buffer.pop()
-                status_code = self.http_get(payload).status_code
-                if self.is_good_status_code(status_code):
-                    success_count += 1
-                else:
-                    unsent_requests.append(payload)
-
-            if len(unsent_requests) == 0:
-                if self.on_success is not None:
-                    self.on_success(success_count)
-
-            elif self.on_failure is not None:
-                self.on_failure(success_count, unsent_requests)
-
-        else:
-            logger.warn(self.method + ' is not a recognised HTTP method. Use "get" or "post".')
+        with self.lock:
+            self.send_events(self.buffer)
+            self.buffer = []
 
     @contract
     def http_post(self, data):
@@ -216,8 +186,6 @@ class Emitter(object):
         """
         logger.debug("Starting synchronous flush...")
         result = Emitter.flush(self)
-        for t in self.threads:
-            t.join(THREAD_TIMEOUT)
         logger.info("Finished synchrous flush")
 
     @staticmethod
@@ -230,21 +198,74 @@ class Emitter(object):
         """
         return 200 <= status_code < 400
 
+    @contract
+    def send_events(self, evts):
+        """
+            :param evts: Array of events to be sent
+            :type  evts: list(dict(string:*))
+        """
+        if len(evts) > 0:
+            logger.info("Attempting to send %s requests" % len(evts))
+            if self.method == 'post':
+                data = json.dumps({
+                    "schema": PAYLOAD_DATA_SCHEMA,
+                    "data": evts
+                }, separators=(',', ':'))
+                status_code = self.http_post(data).status_code
+                if self.is_good_status_code(status_code):
+                    if self.on_success is not None:
+                        self.on_success(len(evts))
+                elif self.on_failure is not None:
+                    self.on_failure(0, evts)
+            elif self.method == 'get':
+                success_count = 0
+                unsent_requests = []
+                for evt in evts:
+                    status_code = self.http_get(evt).status_code
+                    if self.is_good_status_code(status_code):
+                        success_count += 1
+                    else:
+                        unsent_requests.append(evt)
+                if len(unsent_requests) == 0:
+                    if self.on_success is not None:
+                        self.on_success(success_count)
+                elif self.on_failure is not None:
+                    self.on_failure(success_count, unsent_requests)
+            else:
+                logger.warn(self.method + ' is not a recognised HTTP method. Use "get" or "post".')
+        else:
+            logger.info("Skipping flush since buffer is empty")
 
 class AsyncEmitter(Emitter):
     """
         Uses threads to send HTTP requests asynchronously
     """
+
+    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, on_success=None, on_failure=None):
+        super(AsyncEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, on_success, on_failure)
+        self.queue = Queue()
+        self.t = threading.Thread(target=self.consume)
+        self.t.daemon = True
+        self.t.start()
+
+    def sync_flush(self):
+        self.flush()
+        self.queue.join()
+
     def flush(self):
         """
             Removes all dead threads, then creates a new thread which
             excecutes the flush method of the base Emitter class
         """
-        self.threads = [t for t in self.threads if t.isAlive()]
-        logger.debug("Flushing thread running...")
-        t = threading.Thread(target=super(AsyncEmitter, self).flush)
-        self.threads.append(t)
-        t.start()
+        with self.lock:
+            self.queue.put(self.buffer)
+            self.buffer = []
+
+    def consume(self):
+        while True:
+            evts = self.queue.get()
+            self.send_events(evts)
+            self.queue.task_done()
 
 
 class CeleryEmitter(Emitter):
