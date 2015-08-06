@@ -26,6 +26,7 @@ import redis
 import json
 import base64
 from snowplow_tracker import tracker, _version, emitters, subject
+from snowplow_tracker.self_describing_json import SelfDescribingJson
 from httmock import all_requests, HTTMock
 
 try:
@@ -149,7 +150,7 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_unstruct_event_non_base64(self):
         t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
-            t.track_unstruct_event({"schema": "iglu:com.acme/viewed_product/jsonschema/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}})
+            t.track_unstruct_event(SelfDescribingJson("iglu:com.acme/viewed_product/jsonschema/2-0-2", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}))
         expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
@@ -163,7 +164,7 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_unstruct_event_base64(self):
         t = tracker.Tracker([default_emitter], default_subject, encode_base64=True)
         with HTTMock(pass_response_content):
-            t.track_unstruct_event({"schema": "iglu:com.acme/viewed_product/jsonschema/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}})
+            t.track_unstruct_event(SelfDescribingJson("iglu:com.acme/viewed_product/jsonschema/2-0-2", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}))
         expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
@@ -177,7 +178,7 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_context_non_base64(self):
         t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
-            t.track_page_view("localhost", "local host", None, [{"schema": "iglu:com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}])
+            t.track_page_view("localhost", "local host", None, [SelfDescribingJson("iglu:com.example/user/jsonschema/2-0-3", {"user_type": "tester"})])
         envelope_string = from_querystring("co", querystrings[-1])
         envelope = json.loads(unquote_plus(envelope_string))
         self.assertEquals(envelope, {
@@ -188,7 +189,7 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_context_base64(self):
         t = tracker.Tracker([default_emitter], default_subject, encode_base64=True)
         with HTTMock(pass_response_content):
-            t.track_page_view("localhost", "local host", None, [{"schema": "iglu:com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}])
+            t.track_page_view("localhost", "local host", None, [SelfDescribingJson("iglu:com.example/user/jsonschema/2-0-3", {"user_type": "tester"})])
         envelope_string = unquote_plus(from_querystring("cx", querystrings[-1]))
         envelope = json.loads((base64.urlsafe_b64decode(bytearray(envelope_string, "utf-8"))).decode("utf-8"))
         self.assertEquals(envelope, {
