@@ -1,3 +1,16 @@
+Version 0.7.0 (2015-08-07)
+--------------------------
+Added SelfDescribingJson class (#140)
+Added support for Python 2 unicode strings using six library, thanks @mthomas! (#138)
+Started handling RequestExceptions (#134)
+Started treating all 2xx and 3xx status codes as successful (#133)
+Made Emitter and AsyncEmitter thread-safe (#130)
+Made synchronous flush wait until buffer is empty (#139)
+Made the number of worker threads used by the AsyncEmitter configurable (#136)
+Fixed on_failure implementation for POST requests (#135)
+Fixed to latest Peru version (#132)
+Fixed code formatting in README (#129)
+
 Version 0.6.0.post1 (2015-02-14)
 --------------------------------
 Improved logging (#109)

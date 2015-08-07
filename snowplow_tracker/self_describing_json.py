@@ -1,5 +1,5 @@
 """
-    _version.py
+    self_describing_json.py
 
     Copyright (c) 2013-2014 Snowplow Analytics Ltd. All rights reserved.
 
@@ -19,6 +19,14 @@
     License: Apache License Version 2.0
 """
 
+class SelfDescribingJson(object):
 
-__version_info__ = (0, 7, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
+    def __init__(self, schema, data):
+        self.schema = schema
+        self.data = data
+
+    def to_json(self):
+        return {
+            "schema": self.schema,
+            "data": self.data
+        }

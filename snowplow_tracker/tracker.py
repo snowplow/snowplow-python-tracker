@@ -21,7 +21,8 @@
 
 import time
 import uuid
-from snowplow_tracker import payload, _version
+import six
+from snowplow_tracker import payload, _version, SelfDescribingJson
 from snowplow_tracker import subject as _subject
 from contracts import contract, new_contract
 
@@ -44,15 +45,19 @@ Tracker class
 
 class Tracker:
 
-    new_contract("non_empty_string", lambda s: isinstance(s, str)
+    new_contract("non_empty_string", lambda s: isinstance(s, six.string_types)
                  and len(s) > 0)
-    new_contract("string_or_none", lambda s: (isinstance(s, str)
+    new_contract("string_or_none", lambda s: (isinstance(s, six.string_types)
                  and len(s) > 0) or s is None)
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
     new_contract("tracker", lambda s: isinstance(s, Tracker))
 
     new_contract("emitter", lambda s: hasattr(s, "input"))
+
+    new_contract("self_describing_json", lambda s: isinstance(s, SelfDescribingJson))
+
+    new_contract("context_array", "list(self_describing_json)")
 
     @contract
     def __init__(self, emitters, subject=None,
@@ -137,7 +142,7 @@ class Tracker:
             :param  pb:              Payload builder
             :type   pb:              payload
             :param  context:         Custom context for the event
-            :type   context:         list(dict(string:*)) | None
+            :type   context:         context_array | None
             :param  tstamp:          Optional user-provided timestamp for the event
             :type   tstamp:          int | float | None
             :rtype:                  tracker
@@ -145,7 +150,8 @@ class Tracker:
         pb.add("eid", Tracker.get_uuid())
         pb.add("dtm", Tracker.get_timestamp(tstamp))
         if context is not None:
-            context_envelope = {"schema": CONTEXT_SCHEMA, "data": context}
+            context_jsons = list(map(lambda c: c.to_json(), context))
+            context_envelope = SelfDescribingJson(CONTEXT_SCHEMA, context_jsons).to_json()
             pb.add_json(context_envelope, self.encode_base64, "cx", "co")
 
         pb.add_dict(self.standard_nv_pairs)
@@ -164,7 +170,7 @@ class Tracker:
             :param  referrer:       Referrer of the page
             :type   referrer:       string_or_none
             :param  context:        Custom context for the event
-            :type   context:        list(dict(string:*)) | None
+            :type   context:        context_array | None
             :rtype:                 tracker
         """
         pb = payload.Payload()
@@ -199,7 +205,7 @@ class Tracker:
             :param  currency:    The currency the price is expressed in
             :type   currency:    string_or_none
             :param  context:     Custom context for the event
-            :type   context:     list(dict(string:*)) | None
+            :type   context:     context_array | None
             :rtype:              tracker
         """
         pb = payload.Payload()
@@ -242,7 +248,7 @@ class Tracker:
             :param  items:          The items in the transaction
             :type   items:          list(dict(str:*))
             :param  context:        Custom context for the event
-            :type   context:        list(dict(string:*)) | None
+            :type   context:        context_array | None
             :rtype:                 tracker
         """
         pb = payload.Payload()
@@ -277,7 +283,7 @@ class Tracker:
             :param  id_:            Screen view ID
             :type   id_:            string_or_none
             :param  context:        Custom context for the event
-            :type   context:        list(dict(string:*)) | None
+            :type   context:        context_array | None
             :rtype:                 tracker
         """
         screen_view_properties = {}
@@ -286,10 +292,8 @@ class Tracker:
         if id_ is not None:
             screen_view_properties["id"] = id_
 
-        event_json = {
-            "schema": "%s/screen_view/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG),
-            "data": screen_view_properties
-        }
+        event_json = SelfDescribingJson("%s/screen_view/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), screen_view_properties)
+
         return self.track_unstruct_event(event_json, context, tstamp)
 
     @contract
@@ -310,7 +314,7 @@ class Tracker:
             :param  value:          A value associated with the user action
             :type   value:          int | float | None
             :param  context:        Custom context for the event
-            :type   context:        list(dict(string:*)) | None
+            :type   context:        context_array | None
             :rtype:                 tracker
         """
         pb = payload.Payload()
@@ -330,13 +334,13 @@ class Tracker:
                                      A "data" field containing the event properties and
                                      A "schema" field identifying the schema against which the data is validated
 
-            :type   event_json:      dict(string: string | dict)
+            :type   event_json:      self_describing_json
             :param  context:         Custom context for the event
-            :type   context:         list(dict(string:*)) | None
+            :type   context:         context_array | None
             :rtype:                  tracker
         """
 
-        envelope = {"schema": UNSTRUCT_EVENT_SCHEMA , "data": event_json}
+        envelope = SelfDescribingJson(UNSTRUCT_EVENT_SCHEMA, event_json.to_json()).to_json()
 
         pb = payload.Payload()
 
