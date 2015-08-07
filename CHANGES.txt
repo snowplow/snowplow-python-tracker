@@ -1,4 +1,4 @@
-Version 0.7.0 (2015-xx-xx)
+Version 0.7.0 (2015-08-07)
 --------------------------
 Added SelfDescribingJson class (#140)
 Added support for Python 2 unicode strings using six library, thanks @mthomas! (#138)
