@@ -1,3 +1,7 @@
+Version 0.7.0 (2015-xx-xx)
+--------------------------
+Ensured synchronous flush always waits for the task queue to empty (#142)
+
 Version 0.7.0 (2015-08-07)
 --------------------------
 Added SelfDescribingJson class (#140)
