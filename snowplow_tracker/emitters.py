@@ -292,9 +292,11 @@ class AsyncEmitter(Emitter):
             t.start()
 
     def sync_flush(self):
-        while len(self.buffer) > 0:
+        while True:
             self.flush()
             self.queue.join()
+            if len(self.buffer) < 1:
+                break
 
     def flush(self):
         """
