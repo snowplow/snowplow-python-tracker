@@ -1,4 +1,4 @@
-Version 0.7.0 (2015-xx-xx)
+Version 0.7.0 (2015-08-11)
 --------------------------
 Ensured synchronous flush always waits for the task queue to empty (#142)
 
