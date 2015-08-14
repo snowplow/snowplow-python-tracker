@@ -281,8 +281,8 @@ class AsyncEmitter(Emitter):
                                 2) If method is "post": The unsent data in string form;
                                    If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
             :type  on_failure:  function | None
-            :param thread_count Number of worker threads to use for HTTP requests
-            :type  thread_count int
+            :param thread_count: Number of worker threads to use for HTTP requests
+            :type  thread_count: int
         """
         super(AsyncEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, on_success, on_failure)
         self.queue = Queue()
