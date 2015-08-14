@@ -1,3 +1,8 @@
+Version 0.7.2 (2015-08-xx)
+--------------------------
+Corrected contract typo in the docstring of AsyncEmitter's constructor (#147)
+Ensured that Travis uses latest versions of dependencies (#149)
+
 Version 0.7.1 (2015-08-11)
 --------------------------
 Ensured synchronous flush always waits for the task queue to empty (#142)
