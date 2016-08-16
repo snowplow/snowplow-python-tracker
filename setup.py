@@ -72,6 +72,7 @@ setup(
         "pycontracts",
         "celery",
         "gevent",
-        "redis"
+        "redis",
+        "six"
     ],
 )
