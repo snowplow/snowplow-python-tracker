@@ -45,6 +45,8 @@ Tracker class
 
 class Tracker:
 
+    new_contract("not_none", lambda s: s is not None)
+
     new_contract("non_empty_string", lambda s: isinstance(s, six.string_types)
                  and len(s) > 0)
     new_contract("string_or_none", lambda s: (isinstance(s, six.string_types)
@@ -58,6 +60,15 @@ class Tracker:
     new_contract("self_describing_json", lambda s: isinstance(s, SelfDescribingJson))
 
     new_contract("context_array", "list(self_describing_json)")
+
+    new_contract("form_node_name", lambda s: s in ("INPUT", "TEXTAREA", "SELECT"))
+
+    new_contract("form_type", lambda s: s in (
+        "button", "checkbox", "color", "date", "datetime",
+        "datetime-local", "email", "file", "hidden", "image", "month",
+        "number", "password", "radio", "range", "reset", "search",
+        "submit", "tel", "text", "time", "url", "week"
+    ))
 
     @contract
     def __init__(self, emitters, subject=None,
@@ -180,6 +191,265 @@ class Tracker:
         pb.add("refr", referrer)
 
         return self.complete_payload(pb, context, tstamp)
+
+    @contract
+    def track_page_ping(self, page_url, page_title=None, referrer=None, min_x=None, max_x=None, min_y=None, max_y=None, context=None, tstamp=None):
+        """
+            :param  page_url:       URL of the viewed page
+            :type   page_url:       non_empty_string
+            :param  page_title:     Title of the viewed page
+            :type   page_title:     string_or_none
+            :param  referrer:       Referrer of the page
+            :type   referrer:       string_or_none
+            :param  min_x:          Minimum page x offset seen in the last ping period
+            :type   min_x:          int | None
+            :param  max_x:          Maximum page x offset seen in the last ping period
+            :type   max_x:          int | None
+            :param  min_y:          Minimum page y offset seen in the last ping period
+            :type   min_y:          int | None
+            :param  max_y:          Maximum page y offset seen in the last ping period
+            :type   max_y:          int | None
+            :param  context:        Custom context for the event
+            :type   context:        context_array | None
+            :param  tstamp:         Optional user-provided timestamp for the event
+            :type   tstamp:         int | float | None
+            :rtype:                 tracker
+        """
+        pb = payload.Payload()
+        pb.add("e", "pp")           # pp: page ping
+        pb.add("url", page_url)
+        pb.add("page", page_title)
+        pb.add("refr", referrer)
+        pb.add("pp_mix", min_x)
+        pb.add("pp_max", max_x)
+        pb.add("pp_miy", min_y)
+        pb.add("pp_may", max_y)
+
+        return self.complete_payload(pb, context, tstamp)
+
+    @contract
+    def track_link_click(self, target_url, element_id=None,
+                         element_classes=None, element_target=None,
+                         element_content=None, context=None, tstamp=None):
+        """
+            :param  target_url:     Target URL of the link
+            :type   target_url:     non_empty_string
+            :param  element_id:     ID attribute of the HTML element
+            :type   element_id:     string_or_none
+            :param  element_classes:    Classes of the HTML element
+            :type   element_classes:    list(str) | tuple(str,*) | None
+            :param  element_content:    The content of the HTML element
+            :type   element_content:    string_or_none
+            :param  context:        Custom context for the event
+            :type   context:        context_array | None
+            :param  tstamp:         Optional user-provided timestamp for the event
+            :type   tstamp:         int | float | None
+            :rtype:                 tracker
+        """
+        properties = {}
+        properties["targetUrl"] = target_url
+        if element_id is not None:
+            properties["elementId"] = element_id
+        if element_classes is not None:
+            properties["elementClasses"] = element_classes
+        if element_target is not None:
+            properties["elementTarget"] = element_target
+        if element_content is not None:
+            properties["elementContent"] = element_content
+
+        event_json = SelfDescribingJson("%s/link_click/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties)
+
+        return self.track_unstruct_event(event_json, context, tstamp)
+
+    @contract
+    def track_add_to_cart(self, sku, quantity, name=None, category=None,
+                          unit_price=None, currency=None, context=None,
+                          tstamp=None):
+        """
+            :param  sku:            Item SKU or ID
+            :type   sku:            non_empty_string
+            :param  quantity:       Number added to cart
+            :type   quantity:       int
+            :param  name:           Item's name
+            :type   name:           string_or_none
+            :param  category:       Item's category
+            :type   category:       string_or_none
+            :param  unit_price:     Item's price
+            :type   unit_price:     int | float | None
+            :param  currency:       Type of currency the price is in
+            :type   currency:       string_or_none
+            :param  context:        Custom context for the event
+            :type   context:        context_array | None
+            :param  tstamp:         Optional user-provided timestamp for the event
+            :type   tstamp:         int | float | None
+            :rtype:                 tracker
+        """
+        properties = {}
+        properties["sku"] = sku
+        properties["quantity"] = quantity
+        if name is not None:
+            properties["name"] = name
+        if category is not None:
+            properties["category"] = category
+        if unit_price is not None:
+            properties["unitPrice"] = unit_price
+        if currency is not None:
+            properties["currency"] = currency
+
+        event_json = SelfDescribingJson("%s/add_to_cart/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties)
+
+        return self.track_unstruct_event(event_json, context, tstamp)
+
+    @contract
+    def track_remove_from_cart(self, sku, quantity, name=None, category=None,
+                               unit_price=None, currency=None, context=None,
+                               tstamp=None):
+        """
+            :param  sku:            Item SKU or ID
+            :type   sku:            non_empty_string
+            :param  quantity:       Number added to cart
+            :type   quantity:       int
+            :param  name:           Item's name
+            :type   name:           string_or_none
+            :param  category:       Item's category
+            :type   category:       string_or_none
+            :param  unit_price:     Item's price
+            :type   unit_price:     int | float | None
+            :param  currency:       Type of currency the price is in
+            :type   currency:       string_or_none
+            :param  context:        Custom context for the event
+            :type   context:        context_array | None
+            :param  tstamp:         Optional user-provided timestamp for the event
+            :type   tstamp:         int | float | None
+            :rtype:                 tracker
+        """
+        properties = {}
+        properties["sku"] = sku
+        properties["quantity"] = quantity
+        if name is not None:
+            properties["name"] = name
+        if category is not None:
+            properties["category"] = category
+        if unit_price is not None:
+            properties["unitPrice"] = unit_price
+        if currency is not None:
+            properties["currency"] = currency
+
+        event_json = SelfDescribingJson("%s/remove_from_cart/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties)
+
+        return self.track_unstruct_event(event_json, context, tstamp)
+
+    @contract
+    def track_form_change(self, form_id, element_id, node_name, value, type_=None,
+                          element_classes=None, context=None, tstamp=None):
+        """
+        :param  form_id:        ID attribute of the HTML form
+        :type   form_id:        non_empty_string
+        :param  element_id:     ID attribute of the HTML element
+        :type   element_id:     string_or_none
+        :param  node_name:      Type of input element
+        :type   node_name:      non_empty_string, form_node_name
+        :param  value:          Value of the input element
+        :type   value:          string_or_none
+        :param  type_:          Type of data the element represents
+        :type   type_:          non_empty_string, form_type
+        :param  element_classes:    Classes of the HTML element
+        :type   element_classes:    list(str) | tuple(str,*) | None
+        :param  context:        Custom context for the event
+        :type   context:        context_array | None
+        :param  tstamp:         Optional user-provided timestamp for the event
+        :type   tstamp:         int | float | None
+        :rtype:                 tracker
+        """
+        properties = {}
+        properties["formId"] = form_id
+        properties["elementId"] = element_id
+        properties["nodeName"] = node_name
+        properties["value"] = value
+        if type_ is not None:
+            properties["type"] = type_
+        if element_classes is not None:
+            properties["elementClasses"] = element_classes
+
+        event_json = SelfDescribingJson("%s/change_form/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties)
+
+        return self.track_unstruct_event(event_json, context, tstamp)
+
+    @contract
+    def track_form_submit(self, form_id, form_classes=None, elements=None,
+                          context=None, tstamp=None):
+        """
+            :param  form_id:        ID attribute of the HTML form
+            :type   form_id:        non_empty_string
+            :param  form_classes:   Classes of the HTML form
+            :type   form_classes:   list(str) | tuple(str,*) | None
+            :param  elements:       Classes of the HTML form
+            :type   elements:       list(dict[N](str:*)) | tuple(dict[N](str:*),*) | None, N>=3, N<=4
+            :param  context:        Custom context for the event
+            :type   context:        context_array | None
+            :param  tstamp:         Optional user-provided timestamp for the event
+            :type   tstamp:         int | float | None
+            :rtype:                 tracker
+        """
+        @contract
+        def process_element(name, value, node_name, type_=None):
+            """
+            :param  name:           Name of the form element
+            :type   name:           str
+            :param  value:          Value of the form element
+            :type   value:          not_none
+            :param  node_name:      Input element tag name
+            :type   node_name:      non_empty_string, form_node_name
+            :param  type_:          Input element type
+            :type   type_:          (non_empty_string, form_type) | None
+            :rtype:                 dict
+            """
+            d = {'name': name, 'value': value, 'nodeName': node_name}
+            if type_:
+                d['type'] = type_
+            return d
+
+        properties = {}
+        properties["formId"] = form_id
+        if form_classes is not None:
+            properties["formClasses"] = form_classes
+        if elements is not None:
+            elements = map(lambda e: process_element(**e), elements)
+
+        event_json = SelfDescribingJson("%s/submit_form/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties)
+
+        return self.track_unstruct_event(event_json, context, tstamp)
+
+    @contract
+    def track_site_search(self, terms, filters=None, total_results=None,
+                          page_results=None, context=None, tstamp=None):
+        """
+            :param  terms:          Search terms
+            :type   terms:          seq[>=1](str)
+            :param  filters:        Filters applied to the search
+            :type   filters:        dict(str:str|bool) | None
+            :param  total_results:  Total number of results returned
+            :type   total_results:  int | None
+            :param  page_results:   Total number of pages of results
+            :type   page_results:   int | None
+            :param  context:        Custom context for the event
+            :type   context:        context_array | None
+            :param  tstamp:         Optional user-provided timestamp for the event
+            :type   tstamp:         int | float | None
+            :rtype:                 tracker
+        """
+        properties = {}
+        properties["terms"] = terms
+        if filters is not None:
+            properties["filters"] = filters
+        if total_results is not None:
+            properties["totalResults"] = total_results
+        if page_results is not None:
+            properties["pageResults"] = page_results
+
+        event_json = SelfDescribingJson("%s/site_search/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties)
+
+        return self.track_unstruct_event(event_json, context, tstamp)
 
     @contract
     def track_ecommerce_transaction_item(self, order_id, sku, price, quantity,
