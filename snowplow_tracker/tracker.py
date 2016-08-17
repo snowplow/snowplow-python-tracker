@@ -37,7 +37,13 @@ BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow"
 SCHEMA_TAG = "jsonschema"
 CONTEXT_SCHEMA = "%s/contexts/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
 UNSTRUCT_EVENT_SCHEMA = "%s/unstruct_event/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
-
+FORM_NODE_NAMES = ("input", "textarea", "select")
+FORM_TYPES = (
+    "button", "checkbox", "color", "date", "datetime",
+    "datetime-local", "email", "file", "hidden", "image", "month",
+    "number", "password", "radio", "range", "reset", "search",
+    "submit", "tel", "text", "time", "url", "week"
+)
 
 """
 Tracker class
@@ -61,14 +67,9 @@ class Tracker:
 
     new_contract("context_array", "list(self_describing_json)")
 
-    new_contract("form_node_name", lambda s: s in ("INPUT", "TEXTAREA", "SELECT"))
+    new_contract("form_node_name", lambda s: s.lower() in FORM_NODE_NAMES)
 
-    new_contract("form_type", lambda s: s in (
-        "button", "checkbox", "color", "date", "datetime",
-        "datetime-local", "email", "file", "hidden", "image", "month",
-        "number", "password", "radio", "range", "reset", "search",
-        "submit", "tel", "text", "time", "url", "week"
-    ))
+    new_contract("form_type", lambda s: s.lower() in FORM_TYPES)
 
     @contract
     def __init__(self, emitters, subject=None,
