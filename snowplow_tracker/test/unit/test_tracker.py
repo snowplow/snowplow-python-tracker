@@ -20,9 +20,12 @@
 """
 
 
-import unittest
 import re
+import unittest
+
+from contracts.interface import ContractNotRespected
 from freezegun import freeze_time
+
 from snowplow_tracker.tracker import Tracker
 from snowplow_tracker.emitters import Emitter
 
@@ -61,3 +64,11 @@ class TestTracker(unittest.TestCase):
         t = Tracker(e1, namespace="cloudfront", encode_base64= False, app_id="AF003")
         t.add_emitter(e2)
         self.assertEquals(t.emitters, [e1, e2])
+
+    def test_alias_contract(self):
+        e1 = Emitter("d3rkrsqld9gmqf.cloudfront.net", method="get")
+        t = Tracker(e1, namespace="cloudfront", encode_base64= False, app_id="AF003")
+        try:
+            t.track_self_describing_event("not-SelfDescribingJson")
+        except Exception as e:
+            self.assertIsInstance(e, ContractNotRespected)

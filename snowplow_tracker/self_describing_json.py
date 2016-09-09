@@ -19,6 +19,7 @@
     License: Apache License Version 2.0
 """
 
+
 class SelfDescribingJson(object):
 
     def __init__(self, schema, data):

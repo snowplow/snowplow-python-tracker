@@ -81,7 +81,7 @@ class Tracker:
             self.emitters = emitters
         else:
             self.emitters = [emitters]
-        
+
         self.subject = subject
         self.encode_base64 = encode_base64
 
@@ -272,9 +272,9 @@ class Tracker:
             item["order_id"] = order_id
             item["currency"] = currency
             self.track_ecommerce_transaction_item(**item)
-        
+
         return self
-    
+
     @contract
     def track_screen_view(self, name=None, id_=None, context=None, tstamp=None):
         """
@@ -288,7 +288,7 @@ class Tracker:
         """
         screen_view_properties = {}
         if name is not None:
-            screen_view_properties["name"] = name        
+            screen_view_properties["name"] = name
         if id_ is not None:
             screen_view_properties["id"] = id_
 
@@ -333,10 +333,11 @@ class Tracker:
             :param  event_json:      The properties of the event. Has two field:
                                      A "data" field containing the event properties and
                                      A "schema" field identifying the schema against which the data is validated
-
             :type   event_json:      self_describing_json
             :param  context:         Custom context for the event
             :type   context:         context_array | None
+            :param  tstamp:          User-set timestamp
+            :type   tstamp:          int | None
             :rtype:                  tracker
         """
 
@@ -348,6 +349,9 @@ class Tracker:
         pb.add_json(envelope, self.encode_base64, "ue_px", "ue_pr")
 
         return self.complete_payload(pb, context, tstamp)
+
+    # Alias
+    track_self_describing_event = track_unstruct_event
 
     @contract
     def flush(self, async=False):
