@@ -19,21 +19,23 @@
     License: Apache License Version 2.0
 """
 
-import requests
 import json
-import threading
-import celery
-from celery import Celery
-from celery.contrib.methods import task
-import redis
 import logging
-from contracts import contract, new_contract
+import threading
 try:
     # Python 2
     from Queue import Queue
 except ImportError:
     # Python 3
     from queue import Queue
+
+from celery import Celery
+from celery.contrib.methods import task
+import redis
+import requests
+from contracts import contract, new_contract
+
+from snowplow_tracker.self_describing_json import SelfDescribingJson
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -58,6 +60,7 @@ try:
 except ImportError:
     # Otherwise configure Celery with default settings
     app = Celery("Snowplow", broker="redis://guest@localhost//")
+
 
 class Emitter(object):
     """
@@ -209,10 +212,7 @@ class Emitter(object):
         if len(evts) > 0:
             logger.info("Attempting to send %s requests" % len(evts))
             if self.method == 'post':
-                data = json.dumps({
-                    "schema": PAYLOAD_DATA_SCHEMA,
-                    "data": evts
-                }, separators=(',', ':'))
+                data = SelfDescribingJson(PAYLOAD_DATA_SCHEMA, evts).to_string()
                 post_succeeded = False
                 try:
                     status_code = self.http_post(data).status_code
