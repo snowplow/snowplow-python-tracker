@@ -105,6 +105,8 @@ class Emitter(object):
 
         self.lock = threading.RLock()
 
+        self.timer = None
+
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
     @staticmethod
@@ -245,6 +247,33 @@ class Emitter(object):
         else:
             logger.info("Skipping flush since buffer is empty")
 
+    @contract
+    def set_flush_timer(self, timeout, flush_now=False):
+        """
+            Set an interval at which the buffer will be flushed
+
+            :param timeout:   interval in seconds
+            :type  timeout:   int | float
+            :param flush_now: immediately flush buffer
+            :type  flush_now: bool
+        """
+
+        # Repeatable create new timer
+        if flush_now:
+            self.flush()
+        self.timer = threading.Timer(timeout, self.set_flush_timer, [timeout, True])
+        self.timer.daemon = True
+        self.timer.start()
+
+    def cancel_flush_timer(self):
+        """
+            Abort automatic async flushing
+        """
+
+        if self.timer is not None:
+            self.timer.cancel()
+
+
 class AsyncEmitter(Emitter):
     """
         Uses threads to send HTTP requests asynchronously
@@ -301,7 +330,7 @@ class AsyncEmitter(Emitter):
     def flush(self):
         """
             Removes all dead threads, then creates a new thread which
-            excecutes the flush method of the base Emitter class
+            executes the flush method of the base Emitter class
         """
         with self.lock:
             self.queue.put(self.buffer)

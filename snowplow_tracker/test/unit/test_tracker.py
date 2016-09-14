@@ -21,6 +21,7 @@
 
 
 import re
+import time
 import unittest
 
 from contracts.interface import ContractNotRespected
@@ -61,14 +62,30 @@ class TestTracker(unittest.TestCase):
     def test_add_emitter(self):
         e1 = Emitter("d3rkrsqld9gmqf.cloudfront.net", method="get")
         e2 = Emitter("d3rkrsqld9gmqf.cloudfront.net", method="post")
-        t = Tracker(e1, namespace="cloudfront", encode_base64= False, app_id="AF003")
+        t = Tracker(e1, namespace="cloudfront", encode_base64=False, app_id="AF003")
         t.add_emitter(e2)
         self.assertEquals(t.emitters, [e1, e2])
 
     def test_alias_contract(self):
         e1 = Emitter("d3rkrsqld9gmqf.cloudfront.net", method="get")
-        t = Tracker(e1, namespace="cloudfront", encode_base64= False, app_id="AF003")
+        t = Tracker(e1, namespace="cloudfront", encode_base64=False, app_id="AF003")
         try:
             t.track_self_describing_event("not-SelfDescribingJson")
         except Exception as e:
             self.assertIsInstance(e, ContractNotRespected)
+
+    def test_flush_timer(self):
+        e1 = Emitter("d3rkrsqld9gmqf.cloudfront.net", method="post", buffer_size=10)
+        t = Tracker(e1, namespace="cloudfront", encode_base64=False, app_id="AF003")
+        e1.set_flush_timer(3)
+        t.track_page_view("http://snowplowanalytics.com/blog/2016/09/22/introducing-sauna-a-decisioning-and-response-platform/")
+        t.track_page_view("http://snowplowanalytics.com/blog/2016/03/17/2015-2016-winternship-wrapup/")
+        t.track_page_view("http://snowplowanalytics.com/blog/2016/07/31/iglu-r5-scinde-dawk-released/")
+        self.assertEqual(len(e1.buffer), 3)
+        time.sleep(4)
+        self.assertEqual(len(e1.buffer), 0)
+        t.track_page_view("http://snowplowanalytics.com/blog/2016/03/03/guide-to-debugging-bad-data-in-elasticsearch-kibana/")
+        t.track_page_view("http://snowplowanalytics.com/blog/2016/03/17/2015-2016-winternship-wrapup/")
+        self.assertEqual(len(e1.buffer), 2)
+
+

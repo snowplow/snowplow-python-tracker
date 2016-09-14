@@ -110,6 +110,7 @@ class Tracker:
             "tna": namespace,
             "aid": app_id
         }
+        self.timer = None
 
     @staticmethod
     @contract

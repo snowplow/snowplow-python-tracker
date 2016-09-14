@@ -28,6 +28,7 @@ new_contract("subject", lambda x: isinstance(x, Subject))
 
 new_contract("supported_platform", lambda x: x in SUPPORTED_PLATFORMS)
 
+
 class Subject(object):
     """
         Class for an event subject, where we view events as of the form
