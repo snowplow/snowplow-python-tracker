@@ -22,9 +22,12 @@
 import time
 import uuid
 import six
+
+from contracts import contract, new_contract
+
 from snowplow_tracker import payload, _version, SelfDescribingJson
 from snowplow_tracker import subject as _subject
-from contracts import contract, new_contract
+from snowplow_tracker.timestamp import Timestamp, TrueTimestamp, DeviceTimestamp
 
 
 """
@@ -48,6 +51,7 @@ FORM_TYPES = (
 """
 Tracker class
 """
+
 
 class Tracker:
 
@@ -128,7 +132,7 @@ class Tracker:
         """
         if tstamp is None:
             return int(time.time() * 1000)
-        elif isinstance(tstamp, (int, float)):
+        elif isinstance(tstamp, (int, float, )):
             return int(tstamp)
 
 
@@ -160,11 +164,18 @@ class Tracker:
             :param  context:         Custom context for the event
             :type   context:         context_array | None
             :param  tstamp:          Optional user-provided timestamp for the event
-            :type   tstamp:          int | float | None
+            :type   tstamp:          timestamp | int | float | None
             :rtype:                  tracker
         """
         pb.add("eid", Tracker.get_uuid())
-        pb.add("dtm", Tracker.get_timestamp(tstamp))
+
+        if isinstance(tstamp, TrueTimestamp):
+            pb.add("ttm", tstamp.value)
+        if isinstance(tstamp, DeviceTimestamp):
+            pb.add("dtm", Tracker.get_timestamp(tstamp.value))
+        elif isinstance(tstamp, (int, float, type(None))):
+            pb.add("dtm", Tracker.get_timestamp(tstamp))
+
         if context is not None:
             context_jsons = list(map(lambda c: c.to_json(), context))
             context_envelope = SelfDescribingJson(CONTEXT_SCHEMA, context_jsons).to_json()
@@ -187,6 +198,8 @@ class Tracker:
             :type   referrer:       string_or_none
             :param  context:        Custom context for the event
             :type   context:        context_array | None
+            :param  tstamp:         Optional user-provided timestamp for the event
+            :type   tstamp:         timestamp | int | float | None
             :rtype:                 tracker
         """
         pb = payload.Payload()
@@ -217,7 +230,7 @@ class Tracker:
             :param  context:        Custom context for the event
             :type   context:        context_array | None
             :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         int | float | None
+            :type   tstamp:         timestamp | int | float | None
             :rtype:                 tracker
         """
         pb = payload.Payload()
@@ -248,7 +261,7 @@ class Tracker:
             :param  context:        Custom context for the event
             :type   context:        context_array | None
             :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         int | float | None
+            :type   tstamp:         timestamp | int | float | None
             :rtype:                 tracker
         """
         properties = {}
@@ -286,7 +299,7 @@ class Tracker:
             :param  context:        Custom context for the event
             :type   context:        context_array | None
             :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         int | float | None
+            :type   tstamp:         timestamp | int | float | None
             :rtype:                 tracker
         """
         properties = {}
@@ -325,7 +338,7 @@ class Tracker:
             :param  context:        Custom context for the event
             :type   context:        context_array | None
             :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         int | float | None
+            :type   tstamp:         timestamp | int | float | None
             :rtype:                 tracker
         """
         properties = {}
@@ -363,7 +376,7 @@ class Tracker:
         :param  context:        Custom context for the event
         :type   context:        context_array | None
         :param  tstamp:         Optional user-provided timestamp for the event
-        :type   tstamp:         int | float | None
+        :type   tstamp:         timestamp | int | float | None
         :rtype:                 tracker
         """
         properties = dict()
@@ -393,7 +406,7 @@ class Tracker:
             :param  context:        Custom context for the event
             :type   context:        context_array | None
             :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         int | float | None
+            :type   tstamp:         timestamp | int | float | None
             :rtype:                 tracker
         """
 
@@ -423,7 +436,7 @@ class Tracker:
             :param  context:        Custom context for the event
             :type   context:        context_array | None
             :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         int | float | None
+            :type   tstamp:         timestamp | int | float | None
             :rtype:                 tracker
         """
         properties = {}
@@ -595,7 +608,7 @@ class Tracker:
             :param  context:         Custom context for the event
             :type   context:         context_array | None
             :param  tstamp:          User-set timestamp
-            :type   tstamp:          int | None
+            :type   tstamp:          timestamp | int | None
             :rtype:                  tracker
         """
 
