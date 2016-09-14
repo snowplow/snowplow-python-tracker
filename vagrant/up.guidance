@@ -1,4 +1,5 @@
 To get started:
 vagrant ssh
 cd /vagrant
-./run-tests.sh
+./run-tests.sh deploy
+./run-tests.sh test

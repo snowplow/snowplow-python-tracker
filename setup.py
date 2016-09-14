@@ -74,12 +74,13 @@ setup(
         "Operating System :: OS Independent",
     ],
 
-    install_requires = [
-        "requests",
-        "pycontracts",
-        "celery",
-        "gevent",
-        "redis",
-        "six"
+    install_requires=[
+        "greenlet==0.4.10",
+        "requests==2.2.1",
+        "pycontracts==1.7.6",
+        "celery==3.1.11",
+        "gevent==1.0.2",
+        "redis==2.9.1",
+        "six==1.9.0"
     ],
 )
