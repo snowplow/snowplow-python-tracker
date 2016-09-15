@@ -302,18 +302,21 @@ class IntegrationTest(unittest.TestCase):
             with freeze_time("2013-01-14 03:21:34"):
                 t.track_page_view("localhost", "stamp0", None, tstamp=None)
                 t.track_page_view("localhost", "stamp1", None, tstamp=1358933694000)
-            t.track_page_view("localhost", "stamp2", None, tstamp=DeviceTimestamp(1458133694000))
-            t.track_page_view("localhost", "stamp3", None, tstamp=TrueTimestamp(1458033694000))
+            with freeze_time("2013-01-14 03:22:36"):
+                t.track_page_view("localhost", "stamp2", None, tstamp=DeviceTimestamp(1458133694000))
+                t.track_page_view("localhost", "stamp3", None, tstamp=TrueTimestamp(1458033694000))
 
         expected_timestamps = [
-            {"dtm": "1358133694000", "ttm": None},
-            {"dtm": "1358933694000", "ttm": None},
-            {"dtm": "1458133694000", "ttm": None},
-            {"dtm": None, "ttm": "1458033694000"},
+            {"dtm": "1358133694000", "ttm": None, "stm": "1358133756000"},
+            {"dtm": "1358933694000", "ttm": None, "stm": "1358133756000"},
+            {"dtm": "1458133694000", "ttm": None, "stm": "1358133756000"},
+            {"dtm": None, "ttm": "1458033694000", "stm": "1358133756000"},
         ]
         request = querystrings[-1]
 
         for i, event in enumerate(expected_timestamps):
             self.assertEquals(request["data"][i].get("dtm"), expected_timestamps[i]["dtm"])
             self.assertEquals(request["data"][i].get("ttm"), expected_timestamps[i]["ttm"])
+            self.assertEquals(request["data"][i].get("stm"), expected_timestamps[i]["stm"])
             self.assertEquals(request["data"][i].get("page"), "stamp" + str(i))
+

@@ -21,6 +21,7 @@
 
 import json
 import logging
+import time
 import threading
 try:
     # Python 2
@@ -89,7 +90,7 @@ class Emitter(object):
                                 1) The number of events which were successfully sent
                                 2) If method is "post": The unsent data in string form;
                                    If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
-            :type  on_failure:  function | None            
+            :type  on_failure:  function | None
         """
         self.endpoint = Emitter.as_collector_uri(endpoint, protocol, port, method)
 
@@ -119,9 +120,9 @@ class Emitter(object):
             :param endpoint:  The raw endpoint provided by the user
             :type  endpoint:  string
             :param protocol:  The protocol to use - http or https
-            :type  protocol:  protocol            
+            :type  protocol:  protocol
             :param port:      The collector port to connect to
-            :type  port:      int | None            
+            :type  port:      int | None
             :rtype:           string
         """
         if method == "get":
@@ -180,7 +181,7 @@ class Emitter(object):
         """
         logger.info("Sending GET request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % payload)
-        r = requests.get(self.endpoint, params=payload)        
+        r = requests.get(self.endpoint, params=payload)
         getattr(logger, "info" if self.is_good_status_code(r.status_code) else "warn")("GET request finished with status code: " + str(r.status_code))
         return r
 
@@ -211,6 +212,7 @@ class Emitter(object):
         """
         if len(evts) > 0:
             logger.info("Attempting to send %s requests" % len(evts))
+            Emitter.attach_sent_timestamp(evts)
             if self.method == 'post':
                 data = SelfDescribingJson(PAYLOAD_DATA_SCHEMA, evts).to_string()
                 post_succeeded = False
@@ -272,6 +274,21 @@ class Emitter(object):
 
         if self.timer is not None:
             self.timer.cancel()
+
+    @staticmethod
+    def attach_sent_timestamp(events):
+        """
+            Attach (by mutating in-place) current timestamp in milliseconds
+            as `stm` param
+
+            :param events: Array of events to be sent
+            :type  events: list(dict(string:*))
+            :rtype: None
+        """
+        def update(e):
+            e.update({'stm': str(int(time.time()) * 1000)})
+
+        [update(event) for event in events]
 
 
 class AsyncEmitter(Emitter):
