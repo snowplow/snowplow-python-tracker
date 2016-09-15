@@ -320,3 +320,13 @@ class IntegrationTest(unittest.TestCase):
             self.assertEquals(request["data"][i].get("stm"), expected_timestamps[i]["stm"])
             self.assertEquals(request["data"][i].get("page"), "stamp" + str(i))
 
+    def test_bytelimit(self):
+        post_emitter = emitters.Emitter("localhost", protocol="http", port=80, method='post', buffer_size=5, byte_limit=420)
+        t = tracker.Tracker(post_emitter, default_subject)
+        with HTTMock(pass_post_response_content):
+            t.track_struct_event("Test", "A")       # 140 bytes
+            t.track_struct_event("Test", "A")       # 280 bytes
+            t.track_struct_event("Test", "A")       # 420 bytes. Send
+            t.track_struct_event("Test", "AA")      # 141
+        self.assertEquals(len(querystrings[-1]["data"]), 3)
+        self.assertEqual(post_emitter.bytes_queued, 141)
