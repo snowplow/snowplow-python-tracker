@@ -56,7 +56,8 @@ Assuming Git, Vagrant_ and VirtualBox_ are installed:
    host$ git clone git@github.com:snowplow/snowplow-python-tracker.git
    host$ vagrant up && vagrant ssh
   guest$ cd /vagrant
-  guest$ ./run-tests.sh
+  guest$ ./run-tests.sh deploy
+  guest$ ./run-tests.sh test
 
 .. _Vagrant: http://docs.vagrantup.com/v2/installation/index.html
 .. _VirtualBox: https://www.virtualbox.org/wiki/Downloads
