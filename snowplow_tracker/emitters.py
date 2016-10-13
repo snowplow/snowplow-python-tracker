@@ -19,15 +19,10 @@
     License: Apache License Version 2.0
 """
 
-import requests
 import json
-import threading
-import celery
-from celery import Celery
-from celery.contrib.methods import task
-import redis
 import logging
-from contracts import contract, new_contract
+import time
+import threading
 try:
     # Python 2
     from Queue import Queue
@@ -35,11 +30,19 @@ except ImportError:
     # Python 3
     from queue import Queue
 
+from celery import Celery
+from celery.contrib.methods import task
+import redis
+import requests
+from contracts import contract, new_contract
+
+from snowplow_tracker.self_describing_json import SelfDescribingJson
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 DEFAULT_MAX_LENGTH = 10
-PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-2"
+PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4"
 
 new_contract("protocol", lambda x: x == "http" or x == "https")
 
@@ -59,6 +62,7 @@ except ImportError:
     # Otherwise configure Celery with default settings
     app = Celery("Snowplow", broker="redis://guest@localhost//")
 
+
 class Emitter(object):
     """
         Synchronously send Snowplow events to a Snowplow collector
@@ -66,7 +70,7 @@ class Emitter(object):
     """
 
     @contract
-    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, on_success=None, on_failure=None):
+    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, on_success=None, on_failure=None, byte_limit=None):
         """
             :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
             :type  endpoint:    string
@@ -86,7 +90,9 @@ class Emitter(object):
                                 1) The number of events which were successfully sent
                                 2) If method is "post": The unsent data in string form;
                                    If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
-            :type  on_failure:  function | None            
+            :type  on_failure:  function | None
+            :param byte_limit:  The size event list after reaching which queued events will be flushed
+            :type  byte_limit:  int | None
         """
         self.endpoint = Emitter.as_collector_uri(endpoint, protocol, port, method)
 
@@ -99,11 +105,15 @@ class Emitter(object):
                 buffer_size = 1
         self.buffer_size = buffer_size
         self.buffer = []
+        self.byte_limit = byte_limit
+        self.bytes_queued = None if byte_limit is None else 0
 
         self.on_success = on_success
         self.on_failure = on_failure
 
         self.lock = threading.RLock()
+
+        self.timer = None
 
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
@@ -114,9 +124,11 @@ class Emitter(object):
             :param endpoint:  The raw endpoint provided by the user
             :type  endpoint:  string
             :param protocol:  The protocol to use - http or https
-            :type  protocol:  protocol            
+            :type  protocol:  protocol
             :param port:      The collector port to connect to
-            :type  port:      int | None            
+            :type  port:      int | None
+            :param method:    Either `get` or `post` HTTP method
+            :type  method:    method
             :rtype:           string
         """
         if method == "get":
@@ -138,13 +150,27 @@ class Emitter(object):
             :type  payload:   dict(string:*)
         """
         with self.lock:
+            if self.bytes_queued is not None:
+                self.bytes_queued += len(str(payload))
+
             if self.method == "post":
                 self.buffer.append({key: str(payload[key]) for key in payload})
             else:
                 self.buffer.append(payload)
 
-            if len(self.buffer) >= self.buffer_size:
+            if self.reached_limit():
                 self.flush()
+
+    def reached_limit(self):
+        """
+            Checks if event-size or bytes limit are reached
+
+            :rtype: bool
+        """
+        if self.byte_limit is None:
+            return len(self.buffer) >= self.buffer_size
+        else:
+            return self.bytes_queued >= self.byte_limit or len(self.buffer) >= self.buffer_size
 
     @task(name="Flush")
     def flush(self):
@@ -154,6 +180,8 @@ class Emitter(object):
         with self.lock:
             self.send_events(self.buffer)
             self.buffer = []
+            if self.bytes_queued is not None:
+                self.bytes_queued = 0
 
     @contract
     def http_post(self, data):
@@ -175,7 +203,7 @@ class Emitter(object):
         """
         logger.info("Sending GET request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % payload)
-        r = requests.get(self.endpoint, params=payload)        
+        r = requests.get(self.endpoint, params=payload)
         getattr(logger, "info" if self.is_good_status_code(r.status_code) else "warn")("GET request finished with status code: " + str(r.status_code))
         return r
 
@@ -185,7 +213,7 @@ class Emitter(object):
             This is guaranteed to be blocking, not asynchronous.
         """
         logger.debug("Starting synchronous flush...")
-        result = Emitter.flush(self)
+        Emitter.flush(self)
         logger.info("Finished synchrous flush")
 
     @staticmethod
@@ -206,11 +234,9 @@ class Emitter(object):
         """
         if len(evts) > 0:
             logger.info("Attempting to send %s requests" % len(evts))
+            Emitter.attach_sent_timestamp(evts)
             if self.method == 'post':
-                data = json.dumps({
-                    "schema": PAYLOAD_DATA_SCHEMA,
-                    "data": evts
-                }, separators=(',', ':'))
+                data = SelfDescribingJson(PAYLOAD_DATA_SCHEMA, evts).to_string()
                 post_succeeded = False
                 try:
                     status_code = self.http_post(data).status_code
@@ -245,6 +271,48 @@ class Emitter(object):
         else:
             logger.info("Skipping flush since buffer is empty")
 
+    @contract
+    def set_flush_timer(self, timeout, flush_now=False):
+        """
+            Set an interval at which the buffer will be flushed
+
+            :param timeout:   interval in seconds
+            :type  timeout:   int | float
+            :param flush_now: immediately flush buffer
+            :type  flush_now: bool
+        """
+
+        # Repeatable create new timer
+        if flush_now:
+            self.flush()
+        self.timer = threading.Timer(timeout, self.set_flush_timer, [timeout, True])
+        self.timer.daemon = True
+        self.timer.start()
+
+    def cancel_flush_timer(self):
+        """
+            Abort automatic async flushing
+        """
+
+        if self.timer is not None:
+            self.timer.cancel()
+
+    @staticmethod
+    def attach_sent_timestamp(events):
+        """
+            Attach (by mutating in-place) current timestamp in milliseconds
+            as `stm` param
+
+            :param events: Array of events to be sent
+            :type  events: list(dict(string:*))
+            :rtype: None
+        """
+        def update(e):
+            e.update({'stm': str(int(time.time()) * 1000)})
+
+        [update(event) for event in events]
+
+
 class AsyncEmitter(Emitter):
     """
         Uses threads to send HTTP requests asynchronously
@@ -260,7 +328,8 @@ class AsyncEmitter(Emitter):
         buffer_size=None,
         on_success=None,
         on_failure=None,
-        thread_count=1):
+        thread_count=1,
+        byte_limit=None):
         """
             :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
             :type  endpoint:    string
@@ -283,8 +352,10 @@ class AsyncEmitter(Emitter):
             :type  on_failure:  function | None
             :param thread_count: Number of worker threads to use for HTTP requests
             :type  thread_count: int
+            :param byte_limit:  The size event list after reaching which queued events will be flushed
+            :type  byte_limit:  int | None
         """
-        super(AsyncEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, on_success, on_failure)
+        super(AsyncEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, on_success, on_failure, byte_limit)
         self.queue = Queue()
         for i in range(thread_count):
             t = threading.Thread(target=self.consume)
@@ -301,11 +372,13 @@ class AsyncEmitter(Emitter):
     def flush(self):
         """
             Removes all dead threads, then creates a new thread which
-            excecutes the flush method of the base Emitter class
+            executes the flush method of the base Emitter class
         """
         with self.lock:
             self.queue.put(self.buffer)
             self.buffer = []
+            if self.bytes_queued is not None:
+                self.bytes_queued = 0
 
     def consume(self):
         while True:
@@ -320,8 +393,8 @@ class CeleryEmitter(Emitter):
         Works like the base Emitter class,
         but on_success and on_failure callbacks cannot be set.
     """
-    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None):
-        super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, None, None)
+    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, byte_limit=None):
+        super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, None, None, byte_limit)
 
     def flush(self):
         """

@@ -15,10 +15,11 @@
     language governing permissions and limitations there under.
 
     Authors: Anuj More, Alex Dean, Fred Blundun
-    Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
+    Copyright: Copyright (c) 2013-2016 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
 
 
-__version_info__ = (0, 7, 2)
+__version_info__ = (0, 8, 0)
 __version__ = ".".join(str(x) for x in __version_info__)
+__build_version__ = __version__ + ''

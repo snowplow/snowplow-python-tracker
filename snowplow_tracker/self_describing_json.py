@@ -19,6 +19,9 @@
     License: Apache License Version 2.0
 """
 
+import json
+
+
 class SelfDescribingJson(object):
 
     def __init__(self, schema, data):
@@ -30,3 +33,7 @@ class SelfDescribingJson(object):
             "schema": self.schema,
             "data": self.data
         }
+
+    def to_string(self):
+        return json.dumps(self.to_json())
+

@@ -1,3 +1,19 @@
+Version 0.8.0 (2016-09-xx)
+--------------------------
+Add byte_limit to Emitter (#170)
+Add support for dvce_sent_tstamp (#159)
+Use SelfDescribingJson class to build payload_data JSON (#141)
+Add ability to automatically send all events in buffer at a regular time interval (#114)
+Add support for attaching true timestamp for events (#161)
+Use exact dependencies versions and remove requirements.txt (#175)
+Add missing dependencies (#174)
+Remove Python 3.2 from travis testing (#173)
+Add missing classifiers to setup.py (#148)
+Add additional supported platforms to Subject (#172)
+Add missing tracker events (#165)
+Add support for Python 3.4 and 3.5 (#169)
+Add `track_self_describing_event()` method (#160)
+
 Version 0.7.2 (2015-08-16)
 --------------------------
 Corrected contract typo in the docstring of AsyncEmitter's constructor (#147)

@@ -61,17 +61,26 @@ setup(
     long_description=open('README.rst').read(),
 
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python"
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Operating System :: OS Independent",
     ],
 
-    install_requires = [
-        "requests",
-        "pycontracts",
-        "celery",
-        "gevent",
-        "redis"
+    install_requires=[
+        "greenlet==0.4.10",
+        "requests==2.2.1",
+        "pycontracts==1.7.6",
+        "celery==3.1.11",
+        "gevent==1.0.2",
+        "redis==2.9.1",
+        "six==1.9.0"
     ],
 )

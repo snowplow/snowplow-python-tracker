@@ -21,12 +21,13 @@
 
 from contracts import contract, new_contract
 
-SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot"])
+SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot", "web", "srv", "app"])
 DEFAULT_PLATFORM = "pc"
 
 new_contract("subject", lambda x: isinstance(x, Subject))
 
 new_contract("supported_platform", lambda x: x in SUPPORTED_PLATFORMS)
+
 
 class Subject(object):
     """
@@ -41,7 +42,7 @@ class Subject(object):
     @contract
     def set_platform(self, value):
         """
-            :param  value:          One of ["pc", "tv", "mob", "cnsl", "iot"]
+            :param  value:          One of ["pc", "tv", "mob", "cnsl", "iot", "web", "srv", "app"]
             :type   value:          supported_platform
             :rtype:                 subject
         """

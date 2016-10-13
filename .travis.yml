@@ -1,20 +1,24 @@
 language: python
-
 services:
- - redis-server
-
+- redis-server
 python:
-  - "2.7"
-  - "3.2"
-  - "3.3"
-# command to install dependencies
+- '2.7'
+- '3.3'
+- '3.4'
+- '3.5'
 install:
-  - "pip install httmock"
-  - "pip install freezegun"
-  - "pip install coveralls"
-  - "python setup.py install"
-# command to run tests
-script:
-  nosetests --with-coverage --cover-package=snowplow_tracker
-after_success:
-  coveralls
+- pip install -r requirements-test.txt
+- pip install release-manager
+- pip install -e .
+script: pytest --cov=snowplow_tracker
+after_success: coveralls
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: ./.travis/deploy.py
+  on:
+    tags: true
+    python: '2.7'
+env:
+  global:
+    secure: SnavmHqH0sB6xmyqSiN7HscdVpNr6pk+bWs/8Oin2FZ0Kp52V9vIQf1A9TjDQY67P3YgUsMFJKWmCIpbsWFUl65Nos2LXGK6oTe9mt7O5fsR6BsI1IiiZoC8wNZwmaUjqyJa3/Y5KUYvWXlTLYChbyiqxcTCtkBDnLaiFFDOEis=
