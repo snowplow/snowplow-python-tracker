@@ -53,7 +53,7 @@ Tracker class
 """
 
 
-class Tracker:
+class Tracker(object):
 
     new_contract("not_none", lambda s: s is not None)
 
