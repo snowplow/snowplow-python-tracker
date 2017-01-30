@@ -39,7 +39,6 @@ from contracts import contract, new_contract
 from snowplow_tracker.self_describing_json import SelfDescribingJson
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 DEFAULT_MAX_LENGTH = 10
 PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4"
