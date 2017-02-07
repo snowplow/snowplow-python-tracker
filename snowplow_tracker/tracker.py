@@ -59,8 +59,8 @@ class Tracker:
 
     new_contract("non_empty_string", lambda s: isinstance(s, six.string_types)
                  and len(s) > 0)
-    new_contract("string_or_none", lambda s: (isinstance(s, six.string_types)
-                 and len(s) > 0) or s is None)
+    new_contract("string_or_none", lambda s: isinstance(s, six.string_types)
+                 or s is None)
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
     new_contract("tracker", lambda s: isinstance(s, Tracker))
