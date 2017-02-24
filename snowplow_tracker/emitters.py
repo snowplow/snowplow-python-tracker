@@ -39,7 +39,6 @@ from contracts import contract, new_contract
 from snowplow_tracker.self_describing_json import SelfDescribingJson
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 DEFAULT_MAX_LENGTH = 10
 PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4"
@@ -51,16 +50,6 @@ new_contract("method", lambda x: x == "get" or x == "post")
 new_contract("function", lambda x: hasattr(x, "__call__"))
 
 new_contract("redis", lambda x: isinstance(x, (redis.Redis, redis.StrictRedis)))
-
-try:
-    # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
-    import snowplow_celery_config
-    app = Celery()
-    app.config_from_object(snowplow_celery_config)
-
-except ImportError:
-    # Otherwise configure Celery with default settings
-    app = Celery("Snowplow", broker="redis://guest@localhost//")
 
 
 class Emitter(object):
@@ -172,7 +161,6 @@ class Emitter(object):
         else:
             return self.bytes_queued >= self.byte_limit or len(self.buffer) >= self.buffer_size
 
-    @task(name="Flush")
     def flush(self):
         """
             Sends all events in the buffer to the collector.
