@@ -81,6 +81,6 @@ class TestPayload(unittest.TestCase):
 
     def test_add_json_with_emoji(self):
         p = payload.Payload()
-        p.add_json({"name9": "\xF0\x9F\x98\x82", "name10": 10}, True, "Encoded_type", "Not_encoded_type")
-        output = {'Encoded_type': 'eyJuYW1lMTAiOiAxMCwgIm5hbWU5IjogIvCfmIIifQ=='}
+        p.add_json({"name9": "\xF0\xe0\xe7\x82\xf1\U0001f44d", "name10": 10}, True, "Encoded_type", "Not_encoded_type")
+        output = {'Encoded_type': 'eyJuYW1lMTAiOiAxMCwgIm5hbWU5IjogIvDg54LxXFxVMDAwMWY0NGQifQ=='}
         self.assertDictEqual(output, p.nv_pairs)
