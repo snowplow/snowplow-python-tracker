@@ -84,10 +84,9 @@ class Payload:
                     encoded_dict = base64.urlsafe_b64encode(json_dict)
                     if not isinstance(encoded_dict, str):
                         encoded_dict = encoded_dict.decode("utf-8")
-                    self.add(type_when_encoded, encoded_dict)
                 except UnicodeDecodeError:
                     encoded_dict = encoded_dict.decode("utf-8")
-                    self.add(type_when_encoded, encoded_dict)
+                self.add(type_when_encoded, encoded_dict)
             else:
                 self.add(type_when_not_encoded, json_dict)
 
