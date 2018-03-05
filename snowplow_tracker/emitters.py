@@ -52,16 +52,6 @@ new_contract("function", lambda x: hasattr(x, "__call__"))
 
 new_contract("redis", lambda x: isinstance(x, (redis.Redis, redis.StrictRedis)))
 
-try:
-    # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
-    import snowplow_celery_config
-    app = Celery()
-    app.config_from_object(snowplow_celery_config)
-
-except ImportError:
-    # Otherwise configure Celery with default settings
-    app = Celery("Snowplow", broker="redis://guest@localhost//")
-
 
 class Emitter(object):
     """
@@ -172,7 +162,6 @@ class Emitter(object):
         else:
             return self.bytes_queued >= self.byte_limit or len(self.buffer) >= self.buffer_size
 
-    @task(name="Flush")
     def flush(self):
         """
             Sends all events in the buffer to the collector.
@@ -393,15 +382,31 @@ class CeleryEmitter(Emitter):
         Works like the base Emitter class,
         but on_success and on_failure callbacks cannot be set.
     """
+    celery_app = None
+
     def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, byte_limit=None):
         super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, None, None, byte_limit)
+
+        try:
+            # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
+            import snowplow_celery_config
+            self.celery_app = Celery()
+            self.celery_app.config_from_object(snowplow_celery_config)
+        except ImportError:
+            # Otherwise configure Celery with default settings
+            self.celery_app = Celery("Snowplow", broker="redis://guest@localhost//")
+
+        self.async_flush = self.celery_app.task(self.async_flush)
 
     def flush(self):
         """
             Schedules a flush task
         """
-        super(CeleryEmitter, self).flush.delay()
+        self.async_flush.delay()
         logger.info("Scheduled a Celery task to flush the event queue")
+
+    def async_flush(self):
+        super(CeleryEmitter, self).flush()
 
 
 class RedisEmitter(object):
