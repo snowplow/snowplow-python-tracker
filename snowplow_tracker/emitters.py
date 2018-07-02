@@ -23,16 +23,7 @@ import json
 import logging
 import time
 import threading
-try:
-    # Python 2
-    from Queue import Queue
-except ImportError:
-    # Python 3
-    from queue import Queue
 
-from celery import Celery
-from celery.contrib.methods import task
-import redis
 import requests
 from contracts import contract, new_contract
 
@@ -45,23 +36,8 @@ DEFAULT_MAX_LENGTH = 10
 PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4"
 
 new_contract("protocol", lambda x: x == "http" or x == "https")
-
 new_contract("method", lambda x: x == "get" or x == "post")
-
 new_contract("function", lambda x: hasattr(x, "__call__"))
-
-new_contract("redis", lambda x: isinstance(x, (redis.Redis, redis.StrictRedis)))
-
-try:
-    # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
-    import snowplow_celery_config
-    app = Celery()
-    app.config_from_object(snowplow_celery_config)
-
-except ImportError:
-    # Otherwise configure Celery with default settings
-    app = Celery("Snowplow", broker="redis://guest@localhost//")
-
 
 class Emitter(object):
     """
@@ -311,128 +287,3 @@ class Emitter(object):
             e.update({'stm': str(int(time.time()) * 1000)})
 
         [update(event) for event in events]
-
-
-class AsyncEmitter(Emitter):
-    """
-        Uses threads to send HTTP requests asynchronously
-    """
-
-    @contract
-    def __init__(
-        self,
-        endpoint,
-        protocol="http",
-        port=None,
-        method="get",
-        buffer_size=None,
-        on_success=None,
-        on_failure=None,
-        thread_count=1,
-        byte_limit=None):
-        """
-            :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
-            :type  endpoint:    string
-            :param protocol:    The protocol to use - http or https. Defaults to http.
-            :type  protocol:    protocol
-            :param port:        The collector port to connect to
-            :type  port:        int | None
-            :param method:      The HTTP request method
-            :type  method:      method
-            :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
-            :type  buffer_size: int | None
-            :param on_success:  Callback executed after every HTTP request in a flush has status code 200
-                                Gets passed the number of events flushed.
-            :type  on_success:  function | None
-            :param on_failure:  Callback executed if at least one HTTP request in a flush has status code 200
-                                Gets passed two arguments:
-                                1) The number of events which were successfully sent
-                                2) If method is "post": The unsent data in string form;
-                                   If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
-            :type  on_failure:  function | None
-            :param thread_count: Number of worker threads to use for HTTP requests
-            :type  thread_count: int
-            :param byte_limit:  The size event list after reaching which queued events will be flushed
-            :type  byte_limit:  int | None
-        """
-        super(AsyncEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, on_success, on_failure, byte_limit)
-        self.queue = Queue()
-        for i in range(thread_count):
-            t = threading.Thread(target=self.consume)
-            t.daemon = True
-            t.start()
-
-    def sync_flush(self):
-        while True:
-            self.flush()
-            self.queue.join()
-            if len(self.buffer) < 1:
-                break
-
-    def flush(self):
-        """
-            Removes all dead threads, then creates a new thread which
-            executes the flush method of the base Emitter class
-        """
-        with self.lock:
-            self.queue.put(self.buffer)
-            self.buffer = []
-            if self.bytes_queued is not None:
-                self.bytes_queued = 0
-
-    def consume(self):
-        while True:
-            evts = self.queue.get()
-            self.send_events(evts)
-            self.queue.task_done()
-
-
-class CeleryEmitter(Emitter):
-    """
-        Uses a Celery worker to send HTTP requests asynchronously.
-        Works like the base Emitter class,
-        but on_success and on_failure callbacks cannot be set.
-    """
-    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, byte_limit=None):
-        super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, None, None, byte_limit)
-
-    def flush(self):
-        """
-            Schedules a flush task
-        """
-        super(CeleryEmitter, self).flush.delay()
-        logger.info("Scheduled a Celery task to flush the event queue")
-
-
-class RedisEmitter(object):
-    """
-        Sends Snowplow events to a Redis database
-    """
-    @contract
-    def __init__(self, rdb=None, key="snowplow"):
-        """
-            :param rdb:  Optional custom Redis database
-            :type  rdb:  redis | None
-            :param key:  The Redis key for the list of events
-            :type  key:  string
-        """
-        if rdb is None:
-            rdb = redis.StrictRedis()
-        self.rdb = rdb
-        self.key = key
-
-    @contract
-    def input(self, payload):
-        """
-            :param payload:  The event properties
-            :type  payload:  dict(string:*)
-        """
-        logger.debug("Pushing event to Redis queue...")
-        self.rdb.rpush(self.key, json.dumps(payload))
-        logger.info("Finished sending event to Redis.")
-
-    def flush(self):
-        logger.warn("The RedisEmitter class does not need to be flushed")
-
-    def sync_flush(self):
-        self.flush()

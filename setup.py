@@ -75,12 +75,8 @@ setup(
     ],
 
     install_requires=[
-        "greenlet==0.4.10",
-        "requests==2.2.1",
-        "pycontracts==1.7.6",
-        "celery==3.1.11",
-        "gevent==1.0.2",
-        "redis==2.9.1",
-        "six==1.9.0"
+        "requests>=2.2.1,<3.0",
+        "pycontracts>=1.7.6,<2.0",
+        "six>=1.9.0,<2.0"
     ],
 )
