@@ -49,25 +49,14 @@ Find out more
 Contributing quickstart
 #######################
 
-Assuming Git, Vagrant_ and VirtualBox_ are installed:
+Assuming Git and Docker_ (with docker-compose) are installed:
 
 ::
 
    host$ git clone git@github.com:snowplow/snowplow-python-tracker.git
-   host$ vagrant up && vagrant ssh
-  guest$ cd /vagrant
-  guest$ ./run-tests.sh deploy
-  guest$ ./run-tests.sh test
+   host$ docker-compose run --rm test tox
 
-.. _Vagrant: http://docs.vagrantup.com/v2/installation/index.html
-.. _VirtualBox: https://www.virtualbox.org/wiki/Downloads
-
-Publishing
-##########
-
-::
-
-   host$ vagrant push
+.. _Docker: https://www.docker.com/community-edition
 
 Copyright and license
 #####################
