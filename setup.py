@@ -1,6 +1,7 @@
 """
     setup.py
 
+    Copyright (c) 2018 Fishtown Analytics LLC.
     Copyright (c) 2013-2014 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
@@ -40,24 +41,20 @@ exec(open(version_file_path).read(), {}, locals())
 authors_list = [
     'Anuj More',
     'Alexander Dean',
-    'Fred Blundun'
-    ]
+    'Fred Blundun',
+    'Drew Bannin',
+    'Jacob Beck'
+]
 authors_str = ', '.join(authors_list)
 
-authors_email_list = [
-    'support@snowplowanalytics.com',
-    ]
-authors_email_str = ', '.join(authors_email_list)
-
 setup(
-    name='snowplow-tracker',
+    name='minimal-snowplow-tracker',
     version=__version__,
     author=authors_str,
-    author_email=authors_email_str,
     packages=['snowplow_tracker', 'snowplow_tracker.test'],
-    url='http://snowplowanalytics.com',
+    url='https://www.fishtownanalytics.com',
     license='Apache License 2.0',
-    description='Snowplow event tracker for Python. Add analytics to your Python and Django apps, webapps and games',
+    description='A minimal snowplow event tracker for Python. Add analytics to your Python and Django apps, webapps and games',
     long_description=open('README.rst').read(),
 
     classifiers=[
@@ -71,6 +68,8 @@ setup(
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Operating System :: OS Independent",
     ],
 

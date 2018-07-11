@@ -1,0 +1,13 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: python:3.7
+    steps:
+      - checkout
+      - run: apt-get update && apt-get install -y python3-dev python-pip python-dev
+      - run: pip install --upgrade pip
+      - run: pip install virtualenv
+      - run: pip install virtualenvwrapper
+      - run: pip install tox
+      - run: tox
