@@ -7,6 +7,8 @@ python:
 - '3.4'
 - '3.5'
 install:
+# ensure we have recent pip/setuptools
+- pip install --upgrade pip setuptools
 - pip install -r requirements-test.txt
 - pip install release-manager
 - pip install -e .
