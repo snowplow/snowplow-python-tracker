@@ -51,7 +51,7 @@ authors_email_str = ', '.join(authors_email_list)
 
 setup(
     name='snowplow-tracker',
-    version=__version__,
+    version='0.8.1rc1.dev1',
     author=authors_str,
     author_email=authors_email_str,
     packages=['snowplow_tracker', 'snowplow_tracker.test'],
@@ -75,12 +75,12 @@ setup(
     ],
 
     install_requires=[
-        "greenlet==0.4.10",
-        "requests==2.2.1",
-        "pycontracts==1.7.6",
-        "celery==3.1.11",
-        "gevent==1.0.2",
-        "redis==2.9.1",
-        "six==1.9.0"
+        "greenlet>=0.4.10,<1.0.0",
+        "requests>=2.2.1,<3.0.0",
+        "pycontracts>=1.7.6,<2.0.0",
+        "celery>=3.1.11,<4.0.0",
+        "gevent>=1.0.2,<2.0.0",
+        "redis>=2.9.1,<3.0.0",
+        "six>=1.9.0,<2.0.0"
     ],
 )
