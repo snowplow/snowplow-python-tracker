@@ -7,6 +7,7 @@ python:
 - '3.4'
 - '3.5'
 install:
+- pip install -U pip setuptools virtualenv twine
 - pip install -r requirements-test.txt
 - pip install release-manager
 - pip install -e .
