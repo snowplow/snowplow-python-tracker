@@ -1,4 +1,4 @@
-Version 0.8.0 (2016-09-xx)
+Version 0.8.0 (2016-10-13)
 --------------------------
 Add byte_limit to Emitter (#170)
 Add support for dvce_sent_tstamp (#159)
