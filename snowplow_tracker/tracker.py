@@ -23,8 +23,6 @@ import time
 import uuid
 import six
 
-from contracts import contract, new_contract
-
 from snowplow_tracker import payload, _version, SelfDescribingJson
 from snowplow_tracker import subject as _subject
 from snowplow_tracker.timestamp import Timestamp, TrueTimestamp, DeviceTimestamp
@@ -47,27 +45,6 @@ Tracker class
 
 
 class Tracker:
-
-    new_contract("not_none", lambda s: s is not None)
-
-    new_contract("non_empty_string", lambda s: isinstance(s, six.string_types)
-                 and len(s) > 0)
-    new_contract("string_or_none", lambda s: (isinstance(s, six.string_types)
-                 and len(s) > 0) or s is None)
-    new_contract("payload", lambda s: isinstance(s, payload.Payload))
-
-    new_contract("tracker", lambda s: isinstance(s, Tracker))
-
-    new_contract("emitter", lambda s: hasattr(s, "input"))
-
-    new_contract("self_describing_json", lambda s: isinstance(s, SelfDescribingJson))
-
-    new_contract("context_array", "list(self_describing_json)")
-
-    new_contract("timestamp", lambda x: (isinstance(x, Timestamp)))
-
-
-    @contract
     def __init__(self, emitters, subject=None,
                  namespace=None, app_id=None, encode_base64=DEFAULT_ENCODE_BASE64):
         """
@@ -101,7 +78,6 @@ class Tracker:
         self.timer = None
 
     @staticmethod
-    @contract
     def get_uuid():
         """
             Set transaction ID for the payload once during the lifetime of the
@@ -112,7 +88,6 @@ class Tracker:
         return str(uuid.uuid4())
 
     @staticmethod
-    @contract
     def get_timestamp(tstamp=None):
         """
             :param tstamp:    User-input timestamp or None
@@ -128,8 +103,6 @@ class Tracker:
     """
     Tracking methods
     """
-
-    @contract
     def track(self, pb):
         """
             Send the payload to a emitter
@@ -142,7 +115,6 @@ class Tracker:
             emitter.input(pb.nv_pairs)
         return self
 
-    @contract
     def complete_payload(self, pb, context, tstamp):
         """
             Called by all tracking events to add the standard name-value pairs
@@ -176,7 +148,6 @@ class Tracker:
 
         return self.track(pb)
 
-    @contract
     def track_struct_event(self, category, action, label=None, property_=None, value=None,
                            context=None,
                            tstamp=None):
@@ -207,7 +178,6 @@ class Tracker:
 
         return self.complete_payload(pb, context, tstamp)
 
-    @contract
     def track_unstruct_event(self, event_json, context=None, tstamp=None):
         """
             :param  event_json:      The properties of the event. Has two field:
@@ -233,7 +203,6 @@ class Tracker:
     # Alias
     track_self_describing_event = track_unstruct_event
 
-    @contract
     def flush(self, asynchronous=False):
         """
             Flush the emitter
@@ -249,7 +218,6 @@ class Tracker:
                 emitter.sync_flush()
         return self
 
-    @contract
     def set_subject(self, subject):
         """
             Set the subject of the events fired by the tracker
@@ -261,7 +229,6 @@ class Tracker:
         self.subject = subject
         return self
 
-    @contract
     def add_emitter(self, emitter):
         """
             Add a new emitter to which events should be passed

@@ -25,7 +25,6 @@ import time
 import threading
 
 import requests
-from contracts import contract, new_contract
 
 from snowplow_tracker.self_describing_json import SelfDescribingJson
 
@@ -35,9 +34,6 @@ logger.setLevel(logging.INFO)
 DEFAULT_MAX_LENGTH = 10
 PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4"
 
-new_contract("protocol", lambda x: x == "http" or x == "https")
-new_contract("method", lambda x: x == "get" or x == "post")
-new_contract("function", lambda x: hasattr(x, "__call__"))
 
 class Emitter(object):
     """
@@ -45,7 +41,6 @@ class Emitter(object):
         Supports both GET and POST requests
     """
 
-    @contract
     def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, on_success=None, on_failure=None, byte_limit=None):
         """
             :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
@@ -94,7 +89,6 @@ class Emitter(object):
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
     @staticmethod
-    @contract
     def as_collector_uri(endpoint, protocol="http", port=None, method="get"):
         """
             :param endpoint:  The raw endpoint provided by the user
@@ -116,7 +110,6 @@ class Emitter(object):
         else:
             return protocol + "://" + endpoint + ":" + str(port) + path
 
-    @contract
     def input(self, payload):
         """
             Adds an event to the buffer.
@@ -158,7 +151,6 @@ class Emitter(object):
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
 
-    @contract
     def http_post(self, data):
         """
             :param data:  The array of JSONs to be sent
@@ -170,7 +162,6 @@ class Emitter(object):
         getattr(logger, "info" if self.is_good_status_code(r.status_code) else "warn")("POST request finished with status code: " + str(r.status_code))
         return r
 
-    @contract
     def http_get(self, payload):
         """
             :param payload:  The event properties
@@ -192,7 +183,6 @@ class Emitter(object):
         logger.info("Finished synchrous flush")
 
     @staticmethod
-    @contract
     def is_good_status_code(status_code):
         """
             :param status_code:  HTTP status code
@@ -201,7 +191,6 @@ class Emitter(object):
         """
         return 200 <= status_code < 400
 
-    @contract
     def send_events(self, evts):
         """
             :param evts: Array of events to be sent
@@ -246,7 +235,6 @@ class Emitter(object):
         else:
             logger.info("Skipping flush since buffer is empty")
 
-    @contract
     def set_flush_timer(self, timeout, flush_now=False):
         """
             Set an interval at which the buffer will be flushed
