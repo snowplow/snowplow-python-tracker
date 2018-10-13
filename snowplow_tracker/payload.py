@@ -23,7 +23,6 @@ import random
 import time
 import json
 import base64
-from contracts import contract
 
 
 class Payload:
@@ -51,7 +50,6 @@ class Payload:
         if not (value == "" or value is None):
             self.nv_pairs[name] = value
 
-    @contract
     def add_dict(self, dict_, base64=False):
         """
             Add a dict of name value pairs to the Payload object
@@ -62,7 +60,6 @@ class Payload:
         for f in dict_:
             self.add(f, dict_[f])
 
-    @contract
     def add_json(self, dict_, encode_base64, type_when_encoded, type_when_not_encoded):
         """
             Add an encoded or unencoded JSON to the payload
@@ -85,7 +82,7 @@ class Payload:
                 encoded_dict = base64.urlsafe_b64encode(json_dict.encode("ascii"))
                 if not isinstance(encoded_dict, str):
                     encoded_dict = encoded_dict.decode("utf-8")
-                self.add(type_when_encoded, encoded_dict)                
+                self.add(type_when_encoded, encoded_dict)
 
             else:
                 self.add(type_when_not_encoded, json_dict)

@@ -42,8 +42,9 @@ authors_list = [
     'Anuj More',
     'Alexander Dean',
     'Fred Blundun',
-    'Drew Bannin',
-    'Jacob Beck'
+    'Drew Banin',
+    'Jacob Beck',
+    'Connor McArthur',
 ]
 authors_str = ', '.join(authors_list)
 
@@ -75,7 +76,6 @@ setup(
 
     install_requires=[
         "requests>=2.2.1,<3.0",
-        "pycontracts>=1.7.6,<2.0",
         "six>=1.9.0,<2.0"
     ],
 )

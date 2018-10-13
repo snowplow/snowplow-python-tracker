@@ -19,13 +19,8 @@
     License: Apache License Version 2.0
 """
 
-from contracts import contract, new_contract
-
-new_contract("ts_type", lambda x: x == "ttm" or x == "dtm")
-
 
 class Timestamp(object):
-    @contract
     def __init__(self, ts_type, value):
         """
             Construct base timestamp type
@@ -41,7 +36,6 @@ class Timestamp(object):
 
 
 class TrueTimestamp(Timestamp):
-    @contract
     def __init__(self, value):
         """
             Construct true_timestamp (ttm)
@@ -53,7 +47,6 @@ class TrueTimestamp(Timestamp):
 
 
 class DeviceTimestamp(Timestamp):
-    @contract
     def __init__(self, value):
         """
             Construct device_timestamp (dtm)
@@ -62,4 +55,3 @@ class DeviceTimestamp(Timestamp):
             :type value:    int
         """
         super(DeviceTimestamp, self).__init__("dtm", value)
-

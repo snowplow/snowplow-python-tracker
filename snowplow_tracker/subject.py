@@ -19,14 +19,8 @@
     License: Apache License Version 2.0
 """
 
-from contracts import contract, new_contract
-
 SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot", "web", "srv", "app"])
 DEFAULT_PLATFORM = "pc"
-
-new_contract("subject", lambda x: isinstance(x, Subject))
-
-new_contract("supported_platform", lambda x: x in SUPPORTED_PLATFORMS)
 
 
 class Subject(object):
@@ -39,7 +33,6 @@ class Subject(object):
 
         self.standard_nv_pairs = {"p": DEFAULT_PLATFORM}
 
-    @contract
     def set_platform(self, value):
         """
             :param  value:          One of ["pc", "tv", "mob", "cnsl", "iot", "web", "srv", "app"]
@@ -49,7 +42,6 @@ class Subject(object):
         self.standard_nv_pairs["p"] = value
         return self
 
-    @contract
     def set_user_id(self, user_id):
         """
             :param  user_id:        User ID
@@ -59,7 +51,6 @@ class Subject(object):
         self.standard_nv_pairs["uid"] = user_id
         return self
 
-    @contract
     def set_screen_resolution(self, width, height):
         """
             :param  width:          Width of the screen
@@ -71,7 +62,6 @@ class Subject(object):
         self.standard_nv_pairs["res"] = "".join([str(width), "x", str(height)])
         return self
 
-    @contract
     def set_viewport(self, width, height):
         """
             :param  width:          Width of the viewport
@@ -83,7 +73,6 @@ class Subject(object):
         self.standard_nv_pairs["vp"] = "".join([str(width), "x", str(height)])
         return self
 
-    @contract
     def set_color_depth(self, depth):
         """
             :param  depth:          Depth of the color on the screen
@@ -93,7 +82,6 @@ class Subject(object):
         self.standard_nv_pairs["cd"] = depth
         return self
 
-    @contract
     def set_timezone(self, timezone):
         """
             :param  timezone:       Timezone as a string
@@ -103,7 +91,6 @@ class Subject(object):
         self.standard_nv_pairs["tz"] = timezone
         return self
 
-    @contract
     def set_lang(self, lang):
         """
             Set language.
@@ -115,7 +102,6 @@ class Subject(object):
         self.standard_nv_pairs["lang"] = lang
         return self
 
-    @contract
     def set_domain_user_id(self, duid):
         """
             Set the domain user ID
@@ -127,7 +113,6 @@ class Subject(object):
         self.standard_nv_pairs["duid"] = duid
         return self
 
-    @contract
     def set_ip_address(self, ip):
         """
             Set the domain user ID
@@ -139,7 +124,6 @@ class Subject(object):
         self.standard_nv_pairs["ip"] = ip
         return self
 
-    @contract
     def set_useragent(self, ua):
         """
             Set the user agent
@@ -151,7 +135,6 @@ class Subject(object):
         self.standard_nv_pairs["ua"] = ua
         return self
 
-    @contract
     def set_network_user_id(self, nuid):
         """
             Set the network user ID field
