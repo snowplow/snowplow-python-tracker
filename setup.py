@@ -42,8 +42,9 @@ authors_list = [
     'Anuj More',
     'Alexander Dean',
     'Fred Blundun',
-    'Drew Bannin',
-    'Jacob Beck'
+    'Drew Banin',
+    'Jacob Beck',
+    'Connor McArthur',
 ]
 authors_str = ', '.join(authors_list)
 
