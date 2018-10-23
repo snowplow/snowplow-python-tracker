@@ -626,16 +626,16 @@ class Tracker:
     track_self_describing_event = track_unstruct_event
 
     @contract
-    def flush(self, async=False):
+    def flush(self, is_async=False):
         """
             Flush the emitter
 
-            :param  async:  Whether the flush is done asynchronously. Default is False
-            :type   async:  bool
+            :param  is_async:  Whether the flush is done asynchronously. Default is False
+            :type   is_async:  bool
             :rtype:         tracker
         """
         for emitter in self.emitters:
-            if async:
+            if is_async:
                 emitter.flush()
             else:
                 emitter.sync_flush()
