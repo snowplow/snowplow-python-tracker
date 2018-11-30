@@ -329,4 +329,4 @@ class IntegrationTest(unittest.TestCase):
             t.track_struct_event("Test", "A")       # 420 bytes. Send
             t.track_struct_event("Test", "AA")      # 141
         self.assertEquals(len(querystrings[-1]["data"]), 3)
-        self.assertEqual(post_emitter.bytes_queued, 141)
+        self.assertEqual(post_emitter.bytes_queued, 149)
