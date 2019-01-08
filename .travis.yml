@@ -3,13 +3,11 @@ services:
 - redis-server
 python:
 - '2.7'
-- '3.3'
 - '3.4'
 - '3.5'
+- '3.6'
 install:
 - pip install -r requirements-test.txt
-- pip list
-- pip freeze
 - pip install release-manager
 - pip install -e .
 script: pytest --cov=snowplow_tracker
