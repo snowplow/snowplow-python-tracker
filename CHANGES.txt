@@ -1,4 +1,14 @@
-Version 0.8.0 (2016-09-xx)
+Version 0.8.2 (2018-12-01)
+--------------------------
+Fix date for 0.8.0 release in CHANGELOG (#183)
+Remove Python 3.3 from tests (#206)
+Update PyPI deployment to use Twine (#207)
+Add version bounds for all dependencies (#208)
+Upgrade Celery to 4.x (#210)
+Fix flush argument clash with async keyword (#211)
+Add Python 3.7 to test suite (close #212)
+
+Version 0.8.0 (2016-10-13)
 --------------------------
 Add byte_limit to Emitter (#170)
 Add support for dvce_sent_tstamp (#159)

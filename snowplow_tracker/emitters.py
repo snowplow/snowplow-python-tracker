@@ -163,7 +163,6 @@ class Emitter(object):
         else:
             return self.bytes_queued >= self.byte_limit or len(self.buffer) >= self.buffer_size
 
-    @task(name="Flush")
     def flush(self):
         """
             Sends all events in the buffer to the collector.
@@ -378,6 +377,14 @@ class AsyncEmitter(Emitter):
             self.queue.task_done()
 
 
+@app.task(bind=True, name='tasks.flush')  # the self passed with bind can be used for on_fail/retrying
+def flush_emitter(self, emitter):
+    try:
+        emitter.flush()
+    finally:
+        logger.info("Flush called on emitter")
+
+
 class CeleryEmitter(Emitter):
     """
         Uses a Celery worker to send HTTP requests asynchronously.
@@ -401,7 +408,7 @@ class CeleryEmitter(Emitter):
         """
             Schedules a flush task
         """
-        super(CeleryEmitter, self).flush.delay()
+        flush_emitter.delay(self)  # passes emitter (self - CeleryEmitter) to task
         logger.info("Scheduled a Celery task to flush the event queue")
 
 

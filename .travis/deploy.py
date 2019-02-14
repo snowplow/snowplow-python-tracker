@@ -13,7 +13,6 @@ from snowplow_tracker import _version
 
 
 HOME = expanduser("~")
-DEFAULT_SERVER = 'https://pypi.python.org/pypi'
 DEFAULT_REPO = 'pypi'
 PYPIRC_FILE = '%s/.pypirc' % HOME
 
@@ -55,7 +54,6 @@ def write_config():
         '  %s\n' % DEFAULT_REPO,
         '\n',
         '[%s]\n' % DEFAULT_REPO,
-        'repository=%s\n' % DEFAULT_SERVER,
         'username=snowplow\n',
         'password=%s\n' % PYPI_PASSWORD
     ]
@@ -71,8 +69,8 @@ def deploy_to_pypi():
     """Deploys the release to PyPi"""
     logger.log_start("Deploying to PyPi")
     os.chdir(TRAVIS_BUILD_DIR)
-    utils.execute("python setup.py register -r pypi", shell=True)
-    utils.execute("python setup.py sdist upload -r pypi", shell=True)
+    utils.execute("python setup.py sdist bdist_wheel", shell=True)
+    utils.execute("twine upload dist/*", shell=True)
     logger.log_info("Module deployed to PyPi!")
     logger.log_done()
 
