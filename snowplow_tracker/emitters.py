@@ -30,6 +30,7 @@ except ImportError:
     # Python 3
     from queue import Queue
 
+import celery
 from celery import Celery
 import redis
 import requests
@@ -50,16 +51,6 @@ new_contract("method", lambda x: x == "get" or x == "post")
 new_contract("function", lambda x: hasattr(x, "__call__"))
 
 new_contract("redis", lambda x: isinstance(x, (redis.Redis, redis.StrictRedis)))
-
-try:
-    # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
-    import snowplow_celery_config
-    app = Celery()
-    app.config_from_object(snowplow_celery_config)
-except ImportError:
-    # Otherwise configure Celery with default settings
-    snowplow_celery_config = None
-    app = Celery("Snowplow", broker="redis://guest@localhost//")
 
 
 class Emitter(object):
@@ -400,6 +391,16 @@ class CeleryEmitter(Emitter):
         but on_success and on_failure callbacks cannot be set.
     """
     def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, byte_limit=None):
+        if not celery.current_app or not celery.current_app.configured:
+            try:
+                # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
+                import snowplow_celery_config
+                app = Celery()
+                app.config_from_object(snowplow_celery_config)
+            except ImportError:
+                # Otherwise configure Celery with default settings
+                snowplow_celery_config = None
+                app = Celery("Snowplow", broker="redis://guest@localhost//")
         super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, None, None, byte_limit)
 
     def flush(self):
