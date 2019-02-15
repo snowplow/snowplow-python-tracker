@@ -1,15 +1,21 @@
 language: python
 services:
-- redis-server
+  - redis-server
 python:
-- '2.7'
-- '3.4'
-- '3.5'
-- '3.6'
+  - '2.7'
+  - '3.4'
+  - '3.5'
+  - '3.6'
+matrix:
+  include:
+    - python: '3.7'
+      dist: xenial
+      sudo: true
 install:
-- pip install -r requirements-test.txt
-- pip install release-manager
-- pip install -e .
+  - pip install -U pip setuptools virtualenv twine
+  - pip install -r requirements-test.txt
+  - pip install -e .
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install release-manager; fi
 script: pytest --cov=snowplow_tracker
 after_success: coveralls
 deploy:

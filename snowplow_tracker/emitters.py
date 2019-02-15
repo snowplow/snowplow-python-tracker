@@ -32,7 +32,6 @@ except ImportError:
 
 import celery
 from celery import Celery
-from celery.contrib.methods import task
 import redis
 import requests
 from contracts import contract, new_contract
@@ -163,7 +162,6 @@ class Emitter(object):
         else:
             return self.bytes_queued >= self.byte_limit or len(self.buffer) >= self.buffer_size
 
-    @task(name="Flush")
     def flush(self):
         """
             Sends all events in the buffer to the collector.
@@ -394,6 +392,7 @@ class CeleryEmitter(Emitter):
 
             except ImportError:
                 # Otherwise configure Celery with default settings
+                snowplow_celery_config = None
                 app = Celery("Snowplow", broker="redis://guest@localhost//")
         super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, None, None, byte_limit)
 
