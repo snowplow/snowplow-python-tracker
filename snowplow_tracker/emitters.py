@@ -84,7 +84,7 @@ class Emitter(object):
             :param on_success:  Callback executed after every HTTP request in a flush has status code 200
                                 Gets passed the number of events flushed.
             :type  on_success:  function | None
-            :param on_failure:  Callback executed if at least one HTTP request in a flush has status code 200
+            :param on_failure:  Callback executed if at least one HTTP request in a flush has status code other than 200
                                 Gets passed two arguments:
                                 1) The number of events which were successfully sent
                                 2) If method is "post": The unsent data in string form;
@@ -342,7 +342,7 @@ class AsyncEmitter(Emitter):
             :param on_success:  Callback executed after every HTTP request in a flush has status code 200
                                 Gets passed the number of events flushed.
             :type  on_success:  function | None
-            :param on_failure:  Callback executed if at least one HTTP request in a flush has status code 200
+            :param on_failure:  Callback executed if at least one HTTP request in a flush has status code other than 200
                                 Gets passed two arguments:
                                 1) The number of events which were successfully sent
                                 2) If method is "post": The unsent data in string form;
