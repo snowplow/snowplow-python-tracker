@@ -1,3 +1,13 @@
+Version 0.8.3 (2019-06-28)
+--------------------------
+Fix test_bytelimit test (#227)
+Initialize Celery in CeleryEmitter (#226)
+Allow non ascii characters to be encoded using Base64 (#194)
+Allow empty strings in string_or_none contract (#184)
+Fix on_failure param docstring description (#225)
+Bump max version requirement of redis (#223)
+Remove Vagrant & Ansible (#222)
+
 Version 0.8.2 (2018-12-01)
 --------------------------
 Fix date for 0.8.0 release in CHANGELOG (#183)

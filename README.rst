@@ -1,13 +1,13 @@
 ======================================================
 Python Analytics for Snowplow 
 ======================================================
-.. image:: https://travis-ci.org/snowplow/snowplow-python-tracker.png?branch=master
+.. image:: https://travis-ci.org/snowplow/snowplow-python-tracker.svg?branch=master
     :alt: Build Status
     :target: https://travis-ci.org/snowplow/snowplow-python-tracker
-.. image:: https://badge.fury.io/py/snowplow-tracker.png
+.. image:: https://badge.fury.io/py/snowplow-tracker.svg
     :target: http://badge.fury.io/py/snowplow-tracker
-.. image:: https://coveralls.io/repos/snowplow/snowplow-python-tracker/badge.png
-    :target: https://coveralls.io/r/snowplow/snowplow-python-tracker
+.. image:: https://coveralls.io/repos/github/snowplow/snowplow-python-tracker/badge.svg?branch=master
+    :target: https://coveralls.io/github/snowplow/snowplow-python-tracker?branch=master
 .. image:: http://img.shields.io/badge/license-Apache--2-blue.svg?style=flat
     :target: http://www.apache.org/licenses/LICENSE-2.0
 
@@ -46,33 +46,25 @@ Find out more
 .. _`Roadmap`: https://github.com/snowplow/snowplow/wiki/Python-Tracker-Roadmap
 .. _`Contributing`: https://github.com/snowplow/snowplow/wiki/Python-Tracker-Contributing
 
-Contributing quickstart
+Quickstart
 #######################
 
-Assuming Git, Vagrant_ and VirtualBox_ are installed:
+Assuming pyenv_ is installed
 
 ::
 
    host$ git clone git@github.com:snowplow/snowplow-python-tracker.git
-   host$ vagrant up && vagrant ssh
-  guest$ cd /vagrant
-  guest$ ./run-tests.sh deploy
-  guest$ ./run-tests.sh test
+   host$ cd snowplow-python-tracker
+   host$ pyenv install 2.7.15 && pyenv install 3.4.9 && pyenv install 3.5.2 && pyenv install 3.7.1
+   host$ ./run-tests.sh deploy
+   host$ ./run-tests.sh test
 
-.. _Vagrant: http://docs.vagrantup.com/v2/installation/index.html
-.. _VirtualBox: https://www.virtualbox.org/wiki/Downloads
-
-Publishing
-##########
-
-::
-
-   host$ vagrant push
+.. _pyenv: https://github.com/pyenv/pyenv
 
 Copyright and license
 #####################
 
-The Snowplow Python Tracker is copyright 2013-2014 Snowplow Analytics Ltd.
+The Snowplow Python Tracker is copyright 2013-2019 Snowplow Analytics Ltd.
 
 Licensed under the `Apache License, Version 2.0`_ (the "License");
 you may not use this software except in compliance with the License.
