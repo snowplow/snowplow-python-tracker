@@ -1,7 +1,7 @@
 """
     _version.py
 
-    Copyright (c) 2013-2014 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2013-2019 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -15,11 +15,11 @@
     language governing permissions and limitations there under.
 
     Authors: Anuj More, Alex Dean, Fred Blundun
-    Copyright: Copyright (c) 2013-2016 Snowplow Analytics Ltd
+    Copyright: Copyright (c) 2013-2019 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
 
 
-__version_info__ = (0, 8, 2)
+__version_info__ = (0, 8, 3)
 __version__ = ".".join(str(x) for x in __version_info__)
 __build_version__ = __version__ + ''

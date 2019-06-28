@@ -1,7 +1,7 @@
 """
     setup.py
 
-    Copyright (c) 2013-2014 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2013-2019 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -15,7 +15,7 @@
     language governing permissions and limitations there under.
 
     Authors: Anuj More, Alex Dean, Fred Blundun
-    Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
+    Copyright: Copyright (c) 2013-2019 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
 
@@ -80,7 +80,7 @@ setup(
         "pycontracts>=1.7.6,<2.0",
         "celery>=4.0,<5.0",
         "gevent>=1.0.2,<2.0",
-        "redis>=2.9.1,<3.0",
+        "redis>=2.9.1,<4.0",
         "six>=1.9.0,<2.0"
     ],
 )

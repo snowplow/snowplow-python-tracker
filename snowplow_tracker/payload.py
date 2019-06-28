@@ -1,7 +1,7 @@
 """
     payload.py
 
-    Copyright (c) 2013-2014 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2013-2019 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -15,7 +15,7 @@
     language governing permissions and limitations there under.
 
     Authors: Anuj More, Alex Dean, Fred Blundun
-    Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
+    Copyright: Copyright (c) 2013-2019 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
 
@@ -82,7 +82,7 @@ class Payload:
             json_dict = json.dumps(dict_, ensure_ascii=False)
 
             if encode_base64:
-                encoded_dict = base64.urlsafe_b64encode(json_dict.encode("ascii"))
+                encoded_dict = base64.urlsafe_b64encode(json_dict.encode("utf-8"))
                 if not isinstance(encoded_dict, str):
                     encoded_dict = encoded_dict.decode("utf-8")
                 self.add(type_when_encoded, encoded_dict)                

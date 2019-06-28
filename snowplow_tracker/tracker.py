@@ -1,7 +1,7 @@
 """
     tracker.py
 
-    Copyright (c) 2013-2014 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2013-2019 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -15,7 +15,7 @@
     language governing permissions and limitations there under.
 
     Authors: Anuj More, Alex Dean, Fred Blundun
-    Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
+    Copyright: Copyright (c) 2013-2019 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
 
@@ -59,8 +59,8 @@ class Tracker:
 
     new_contract("non_empty_string", lambda s: isinstance(s, six.string_types)
                  and len(s) > 0)
-    new_contract("string_or_none", lambda s: (isinstance(s, six.string_types)
-                 and len(s) > 0) or s is None)
+    new_contract("string_or_none", lambda s: isinstance(s, six.string_types)
+                 or s is None)
     new_contract("payload", lambda s: isinstance(s, payload.Payload))
 
     new_contract("tracker", lambda s: isinstance(s, Tracker))

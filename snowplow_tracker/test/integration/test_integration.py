@@ -1,7 +1,7 @@
 """
     test_integration.py
 
-    Copyright (c) 2013-2014 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2013-2019 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -15,7 +15,7 @@
     language governing permissions and limitations there under.
 
     Authors: Anuj More, Alex Dean, Fred Blundun
-    Copyright: Copyright (c) 2013-2014 Snowplow Analytics Ltd
+    Copyright: Copyright (c) 2013-2019 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
 
@@ -329,4 +329,4 @@ class IntegrationTest(unittest.TestCase):
             t.track_struct_event("Test", "A")       # 420 bytes. Send
             t.track_struct_event("Test", "AA")      # 141
         self.assertEquals(len(querystrings[-1]["data"]), 3)
-        self.assertEqual(post_emitter.bytes_queued, 141)
+        self.assertEqual(post_emitter.bytes_queued, 136 + len(_version.__version__))
