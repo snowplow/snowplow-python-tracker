@@ -14,7 +14,7 @@
     express or implied. See the Apache License Version 2.0 for the specific
     language governing permissions and limitations there under.
 
-    Authors: Anuj More, Alex Dean, Fred Blundun
+    Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
     Copyright: Copyright (c) 2013-2020 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """

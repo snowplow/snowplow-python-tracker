@@ -14,12 +14,12 @@
     express or implied. See the Apache License Version 2.0 for the specific
     language governing permissions and limitations there under.
 
-    Authors: Anuj More, Alex Dean, Fred Blundun
+    Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
     Copyright: Copyright (c) 2013-2020 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
 
 
-__version_info__ = (0, 8, 3)
+__version_info__ = (0, 8, 4)
 __version__ = ".".join(str(x) for x in __version_info__)
 __build_version__ = __version__ + ''
