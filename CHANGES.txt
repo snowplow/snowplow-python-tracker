@@ -1,3 +1,10 @@
+Version 0.8.4 (2020-10-10)
+--------------------------
+Fix incompatible versions of greenlet and gevent (closes #236)
+Update build to Active Python Releases (closes #237)
+Add Snyk monitoring (closes #238)
+Update Copyright notices to 2020 (closes #235)
+
 Version 0.8.3 (2019-06-28)
 --------------------------
 Fix test_bytelimit test (#227)

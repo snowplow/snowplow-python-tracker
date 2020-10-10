@@ -14,7 +14,7 @@
     express or implied. See the Apache License Version 2.0 for the specific
     language governing permissions and limitations there under.
 
-    Authors: Anuj More, Alex Dean, Fred Blundun
+    Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
     Copyright: Copyright (c) 2013-2020 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
@@ -33,7 +33,8 @@ import os
 authors_list = [
     'Anuj More',
     'Alexander Dean',
-    'Fred Blundun'
+    'Fred Blundun',
+    'Paul Boocock'
     ]
 authors_str = ', '.join(authors_list)
 
@@ -44,7 +45,7 @@ authors_email_str = ', '.join(authors_email_list)
 
 setup(
     name='snowplow-tracker',
-    version='0.8.3',
+    version='0.8.4',
     author=authors_str,
     author_email=authors_email_str,
     packages=['snowplow_tracker', 'snowplow_tracker.test'],
