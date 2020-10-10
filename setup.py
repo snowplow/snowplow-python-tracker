@@ -30,13 +30,6 @@ except ImportError:
 
 import os
 
-version_file_path = os.path.join(
-    os.path.dirname(__file__),
-    'snowplow_tracker',
-    '_version.py'
-    )
-exec(open(version_file_path).read(), {}, locals())
-
 authors_list = [
     'Anuj More',
     'Alexander Dean',
@@ -51,7 +44,7 @@ authors_email_str = ', '.join(authors_email_list)
 
 setup(
     name='snowplow-tracker',
-    version=__version__,
+    version='0.8.3',
     author=authors_str,
     author_email=authors_email_str,
     packages=['snowplow_tracker', 'snowplow_tracker.test'],
