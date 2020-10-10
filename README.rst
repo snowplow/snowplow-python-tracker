@@ -58,7 +58,7 @@ Assuming pyenv_ is installed
 
    host$ git clone git@github.com:snowplow/snowplow-python-tracker.git
    host$ cd snowplow-python-tracker
-   host$ pyenv install 2.7.15 && pyenv install 3.4.9 && pyenv install 3.5.2 && pyenv install 3.7.1
+   host$ pyenv install 2.7.18 && pyenv install 3.5.10 && pyenv install 3.6.12 && pyenv install 3.7.9 && pyenv install 3.8.6 && pyenv install 3.9.0
    host$ ./run-tests.sh deploy
    host$ ./run-tests.sh test
 
