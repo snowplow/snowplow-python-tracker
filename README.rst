@@ -67,7 +67,7 @@ Assuming pyenv_ is installed
 Copyright and license
 #####################
 
-The Snowplow Python Tracker is copyright 2013-2019 Snowplow Analytics Ltd.
+The Snowplow Python Tracker is copyright 2013-2020 Snowplow Analytics Ltd.
 
 Licensed under the `Apache License, Version 2.0`_ (the "License");
 you may not use this software except in compliance with the License.
