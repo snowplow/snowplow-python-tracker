@@ -75,7 +75,7 @@ setup(
     ],
 
     install_requires=[
-        "greenlet>=0.4.10,<1.0",
+        "greenlet>=0.4.10,<=0.4.16",
         "requests>=2.2.1,<3.0",
         "pycontracts>=1.7.6,<2.0",
         "celery>=4.0,<5.0",
