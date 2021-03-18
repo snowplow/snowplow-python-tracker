@@ -40,6 +40,17 @@ def is_subset(dict1, dict2):
         return False
 
 
+def date_encoder(o):
+    """Sample custom JSON encoder which converts dates into their ISO format"""
+    from datetime import date
+    from json.encoder import JSONEncoder
+
+    if isinstance(o,date):
+        return o.isoformat()
+
+    return JSONEncoder.default(o)
+
+
 class TestPayload(unittest.TestCase):
 
     def setUp(self):
@@ -66,3 +77,16 @@ class TestPayload(unittest.TestCase):
         p.add_dict({"name4": 4, "name3": 3})            # Order doesn't matter
         output = {"n1": "v1", "n2": "v2", "name3": 3, "name4": 4}
         self.assertTrue(is_subset(output, p.nv_pairs))
+
+    def test_add_json_with_custom_enc(self):
+        from datetime import date
+        import json
+
+        p = payload.Payload()
+
+        input = {"key1": date(2020,2,1)}
+
+        p.add_json(input, False, "name1", "name1", date_encoder)
+
+        results = json.loads(p.nv_pairs["name1"])
+        self.assertTrue(is_subset({"key1": "2020-02-01"}, results))

@@ -81,7 +81,8 @@ class Tracker:
 
     @contract
     def __init__(self, emitters, subject=None,
-                 namespace=None, app_id=None, encode_base64=DEFAULT_ENCODE_BASE64):
+                 namespace=None, app_id=None,
+                 encode_base64=DEFAULT_ENCODE_BASE64, json_encoder=None):
         """
             :param emitters:         Emitters to which events will be sent
             :type  emitters:         list[>0](emitter) | emitter
@@ -93,6 +94,8 @@ class Tracker:
             :type  app_id:           string_or_none
             :param encode_base64:    Whether JSONs in the payload should be base-64 encoded
             :type  encode_base64:    bool
+            :param json_encoder:     Custom JSON serializer that gets called on non-serializable object
+            :type  json_encoder:     function | None
         """
         if subject is None:
             subject = _subject.Subject()
@@ -104,6 +107,7 @@ class Tracker:
 
         self.subject = subject
         self.encode_base64 = encode_base64
+        self.json_encoder = json_encoder
 
         self.standard_nv_pairs = {
             "tv": VERSION,
@@ -180,7 +184,7 @@ class Tracker:
         if context is not None:
             context_jsons = list(map(lambda c: c.to_json(), context))
             context_envelope = SelfDescribingJson(CONTEXT_SCHEMA, context_jsons).to_json()
-            pb.add_json(context_envelope, self.encode_base64, "cx", "co")
+            pb.add_json(context_envelope, self.encode_base64, "cx", "co", self.json_encoder)
 
         pb.add_dict(self.standard_nv_pairs)
 
@@ -618,7 +622,7 @@ class Tracker:
         pb = payload.Payload()
 
         pb.add("e", "ue")
-        pb.add_json(envelope, self.encode_base64, "ue_px", "ue_pr")
+        pb.add_json(envelope, self.encode_base64, "ue_px", "ue_pr", self.json_encoder)
 
         return self.complete_payload(pb, context, tstamp)
 
