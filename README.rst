@@ -1,5 +1,5 @@
 ======================================================
-Python Analytics for Snowplow 
+Python Analytics for Snowplow
 ======================================================
 .. image:: https://img.shields.io/static/v1?style=flat&label=Snowplow&message=Early%20Release&color=014477&labelColor=9ba0aa&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAeFBMVEVMaXGXANeYANeXANZbAJmXANeUANSQAM+XANeMAMpaAJhZAJeZANiXANaXANaOAM2WANVnAKWXANZ9ALtmAKVaAJmXANZaAJlXAJZdAJxaAJlZAJdbAJlbAJmQAM+UANKZANhhAJ+EAL+BAL9oAKZnAKVjAKF1ALNBd8J1AAAAKHRSTlMAa1hWXyteBTQJIEwRgUh2JjJon21wcBgNfmc+JlOBQjwezWF2l5dXzkW3/wAAAHpJREFUeNokhQOCA1EAxTL85hi7dXv/E5YPCYBq5DeN4pcqV1XbtW/xTVMIMAZE0cBHEaZhBmIQwCFofeprPUHqjmD/+7peztd62dWQRkvrQayXkn01f/gWp2CrxfjY7rcZ5V7DEMDQgmEozFpZqLUYDsNwOqbnMLwPAJEwCopZxKttAAAAAElFTkSuQmCC
     :alt: Early Release
@@ -67,7 +67,7 @@ Assuming pyenv_ is installed
 Copyright and license
 #####################
 
-The Snowplow Python Tracker is copyright 2013-2020 Snowplow Analytics Ltd.
+The Snowplow Python Tracker is copyright 2013-2021 Snowplow Analytics Ltd.
 
 Licensed under the `Apache License, Version 2.0`_ (the "License");
 you may not use this software except in compliance with the License.
