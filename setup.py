@@ -74,6 +74,7 @@ setup(
         "greenlet>=0.4.10,<=0.4.16",
         "requests>=2.2.1,<3.0",
         "pycontracts>=1.7.6,<2.0",
+        "decorator>=4.4,<5.0;python_version<'3.6'",
         "celery>=4.0,<5.0",
         "gevent>=1.0.2,<2.0",
         "redis>=2.9.1,<4.0",
