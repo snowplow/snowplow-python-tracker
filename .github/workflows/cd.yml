@@ -1,0 +1,124 @@
+name: Deploy
+
+on:
+  push:
+    tags:
+    - '*.*.*'
+
+jobs:
+  version_check:
+    runs-on: ubuntu-20.04
+    outputs:
+      v_tracker: ${{ steps.version.outputs.PYTHON_TRACKER_VERSION}}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+         python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e .
+
+    - name: Get tag and tracker versions
+      id: version
+      run: |
+        echo ::set-output name=TAG_VERSION::${GITHUB_REF#refs/*/}
+        echo "##[set-output name=PYTHON_TRACKER_VERSION;]$(python -c 'from snowplow_tracker import _version;print(_version.__build_version__)')"
+
+    - name: Fail if version mismatch
+      if: ${{ steps.version.outputs.TAG_VERSION != steps.version.outputs.PYTHON_TRACKER_VERSION }}
+      run: |
+        echo "Tag version (${{ steps.version.outputs.TAG_VERSION }}) doesn't match version in project (${{ steps.version.outputs.PYTHON_TRACKER_VERSION }})"
+        exit 1
+
+  build:
+    needs: ["version_check"]
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        python-version: [2.7]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Ensure pip version for python 2
+      run: |
+        if [ "${{ matrix.python-version}}" == "2.7" ] ; then
+            echo "pip_v=pip < 21.0" >> $GITHUB_ENV
+        else
+            echo "pip_v=pip" >> $GITHUB_ENV
+        fi
+
+    - name: Build
+      run: |
+        python -m pip install --upgrade "${{ env.pip_v }}" setuptools wheel
+        python setup.py sdist bdist_wheel
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: distfiles_${{ github.run_id }}
+        path: dist
+
+  publish:
+    needs: ["build"]
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: distfiles_${{ github.run_id }}
+        path: ${{ github.workspace }}/dist
+
+    - name: Twine check
+      run: |
+        python -m pip install --upgrade pip twine
+        twine check ${{ github.workspace }}/dist/*
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@v1.4.2
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_TOKEN }}
+        packages_dir: ${{ github.workspace }}/dist/
+        verbose: true
+
+  release:
+    needs: ["publish", "version_check"]
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        name: Snowplow Python Tracker v${{ needs.version_check.outputs.v_tracker }}
+        draft: false
+        prerelease: ${{ contains(needs.version_check.outputs.v_tracker, 'rc') }}
