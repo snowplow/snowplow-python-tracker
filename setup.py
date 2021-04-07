@@ -48,7 +48,7 @@ setup(
     version='0.8.4',
     author=authors_str,
     author_email=authors_email_str,
-    packages=['snowplow_tracker', 'snowplow_tracker.test'],
+    packages=['snowplow_tracker', 'snowplow_tracker.test', 'snowplow_tracker.redis', 'snowplow_tracker.celery'],
     url='http://snowplowanalytics.com',
     license='Apache License 2.0',
     description='Snowplow event tracker for Python. Add analytics to your Python and Django apps, webapps and games',
@@ -75,9 +75,18 @@ setup(
         "requests>=2.2.1,<3.0",
         "pycontracts>=1.7.6,<2.0",
         "decorator>=4.4,<5.0;python_version<'3.6'",
-        "celery>=4.0,<5.0",
-        "gevent>=21.1.2",
-        "redis>=2.9.1,<4.0",
         "six>=1.9.0,<2.0"
     ],
+
+    extras_require={
+        "celery": [
+            "celery>=4.0,<5.0;python_version<'3.0'",
+            "celery>=4.0;python_version>='3.0'"
+        ],
+        "redis": [
+            "redis>=2.9.1,<4.0;python_version<'3.0'",
+            "redis>=2.9.1;python_version>='3.0'",
+            "gevent>=21.1.2"
+        ]
+    },
 )

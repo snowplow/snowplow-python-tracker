@@ -23,6 +23,10 @@ import json
 import logging
 import time
 import threading
+import requests
+from contracts import contract, new_contract
+from snowplow_tracker.self_describing_json import SelfDescribingJson
+
 try:
     # Python 2
     from Queue import Queue
@@ -30,26 +34,20 @@ except ImportError:
     # Python 3
     from queue import Queue
 
-from celery import Celery
-import redis
-import requests
-from contracts import contract, new_contract
-
-from snowplow_tracker.self_describing_json import SelfDescribingJson
-
+# logging
+logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 DEFAULT_MAX_LENGTH = 10
 PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4"
 
+# contracts
 new_contract("protocol", lambda x: x == "http" or x == "https")
 
 new_contract("method", lambda x: x == "get" or x == "post")
 
 new_contract("function", lambda x: hasattr(x, "__call__"))
-
-new_contract("redis", lambda x: isinstance(x, (redis.Redis, redis.StrictRedis)))
 
 
 class Emitter(object):
@@ -373,70 +371,3 @@ class AsyncEmitter(Emitter):
             evts = self.queue.get()
             self.send_events(evts)
             self.queue.task_done()
-
-
-class CeleryEmitter(Emitter):
-    """
-        Uses a Celery worker to send HTTP requests asynchronously.
-        Works like the base Emitter class,
-        but on_success and on_failure callbacks cannot be set.
-    """
-    celery_app = None
-
-    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, byte_limit=None):
-        super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, None, None, byte_limit)
-
-        try:
-            # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
-            import snowplow_celery_config
-            self.celery_app = Celery()
-            self.celery_app.config_from_object(snowplow_celery_config)
-        except ImportError:
-            # Otherwise configure Celery with default settings
-            self.celery_app = Celery("Snowplow", broker="redis://guest@localhost//")
-
-        self.async_flush = self.celery_app.task(self.async_flush)
-
-    def flush(self):
-        """
-            Schedules a flush task
-        """
-        self.async_flush.delay()
-        logger.info("Scheduled a Celery task to flush the event queue")
-
-    def async_flush(self):
-        super(CeleryEmitter, self).flush()
-
-
-class RedisEmitter(object):
-    """
-        Sends Snowplow events to a Redis database
-    """
-    @contract
-    def __init__(self, rdb=None, key="snowplow"):
-        """
-            :param rdb:  Optional custom Redis database
-            :type  rdb:  redis | None
-            :param key:  The Redis key for the list of events
-            :type  key:  string
-        """
-        if rdb is None:
-            rdb = redis.StrictRedis()
-        self.rdb = rdb
-        self.key = key
-
-    @contract
-    def input(self, payload):
-        """
-            :param payload:  The event properties
-            :type  payload:  dict(string:*)
-        """
-        logger.debug("Pushing event to Redis queue...")
-        self.rdb.rpush(self.key, json.dumps(payload))
-        logger.info("Finished sending event to Redis.")
-
-    def flush(self):
-        logger.warn("The RedisEmitter class does not need to be flushed")
-
-    def sync_flush(self):
-        self.flush()

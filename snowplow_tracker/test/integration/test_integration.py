@@ -28,13 +28,14 @@ try:
 except ImportError:
     from urllib import unquote_plus        # Python 2
 
-import redis
+import pytest
 from httmock import all_requests, HTTMock
 from freezegun import freeze_time
 
 from snowplow_tracker import tracker, _version, emitters, subject
 from snowplow_tracker.timestamp import DeviceTimestamp, TrueTimestamp
 from snowplow_tracker.self_describing_json import SelfDescribingJson
+from snowplow_tracker.redis import redis_emitter, redis_worker
 
 
 querystrings = [""]
@@ -239,20 +240,30 @@ class IntegrationTest(unittest.TestCase):
             self.assertEquals(from_querystring(key, querystrings[-1]), expected_fields[key])
 
     def test_integration_redis_default(self):
-        r = redis.StrictRedis()
-        t = tracker.Tracker([emitters.RedisEmitter()], default_subject)
-        t.track_page_view("http://www.example.com")
-        event_string = r.rpop("snowplow")
-        event_dict = json.loads(event_string.decode("utf-8"))
-        self.assertEquals(event_dict["e"], "pv")
+        try:
+            import redis
+            r = redis.StrictRedis()
+            t = tracker.Tracker([redis_emitter.RedisEmitter()], default_subject)
+            t.track_page_view("http://www.example.com")
+            event_string = r.rpop("snowplow")
+            event_dict = json.loads(event_string.decode("utf-8"))
+            self.assertEquals(event_dict["e"], "pv")
+        except ImportError:
+            with pytest.raises(RuntimeError):
+                re = redis_emitter.RedisEmitter()
 
     def test_integration_redis_custom(self):
-        r = redis.StrictRedis(db=1)
-        t = tracker.Tracker([emitters.RedisEmitter(rdb=r, key="custom_key")], default_subject)
-        t.track_page_view("http://www.example.com")
-        event_string = r.rpop("custom_key")
-        event_dict = json.loads(event_string.decode("utf-8"))
-        self.assertEquals(event_dict["e"], "pv")
+        try:
+            import redis
+            r = redis.StrictRedis(db=1)
+            t = tracker.Tracker([redis_emitter.RedisEmitter(rdb=r, key="custom_key")], default_subject)
+            t.track_page_view("http://www.example.com")
+            event_string = r.rpop("custom_key")
+            event_dict = json.loads(event_string.decode("utf-8"))
+            self.assertEquals(event_dict["e"], "pv")
+        except ImportError:
+            with pytest.raises(RuntimeError):
+                re = redis_emitter.RedisEmitter("arg", key="kwarg")
 
     def test_integration_success_callback(self):
         callback_success_queue = []
