@@ -178,7 +178,7 @@ class Emitter(object):
         logger.info("Sending POST request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % data)
         r = requests.post(self.endpoint, data=data, headers={'content-type': 'application/json; charset=utf-8'})
-        getattr(logger, "info" if self.is_good_status_code(r.status_code) else "warn")("POST request finished with status code: " + str(r.status_code))
+        getattr(logger, "info" if self.is_good_status_code(r.status_code) else "warning")("POST request finished with status code: " + str(r.status_code))
         return r
 
     @contract
@@ -190,7 +190,7 @@ class Emitter(object):
         logger.info("Sending GET request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % payload)
         r = requests.get(self.endpoint, params=payload)
-        getattr(logger, "info" if self.is_good_status_code(r.status_code) else "warn")("GET request finished with status code: " + str(r.status_code))
+        getattr(logger, "info" if self.is_good_status_code(r.status_code) else "warning")("GET request finished with status code: " + str(r.status_code))
         return r
 
     def sync_flush(self):
@@ -228,7 +228,7 @@ class Emitter(object):
                     status_code = self.http_post(data).status_code
                     post_succeeded = self.is_good_status_code(status_code)
                 except requests.RequestException as e:
-                    logger.warn(e)
+                    logger.warning(e)
                 if post_succeeded:
                     if self.on_success is not None:
                         self.on_success(len(evts))
@@ -244,7 +244,7 @@ class Emitter(object):
                         status_code = self.http_get(evt).status_code
                         get_succeeded = self.is_good_status_code(status_code)
                     except requests.RequestException as e:
-                        logger.warn(e)
+                        logger.warning(e)
                     if get_succeeded:
                         success_count += 1
                     else:

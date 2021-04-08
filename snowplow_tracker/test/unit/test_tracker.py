@@ -38,33 +38,33 @@ class TestTracker(unittest.TestCase):
 
     def test_initialisation(self):
         t = Tracker([Emitter("d3rkrsqld9gmqf.cloudfront.net")], namespace="cloudfront", encode_base64= False, app_id="AF003")
-        self.assertEquals(t.standard_nv_pairs["tna"], "cloudfront")
-        self.assertEquals(t.standard_nv_pairs["aid"], "AF003")
-        self.assertEquals(t.encode_base64, False)
+        self.assertEqual(t.standard_nv_pairs["tna"], "cloudfront")
+        self.assertEqual(t.standard_nv_pairs["aid"], "AF003")
+        self.assertEqual(t.encode_base64, False)
 
     def test_get_uuid(self):
         eid = Tracker.get_uuid()
-        self.assertIsNotNone(re.match('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\Z', eid))
+        self.assertIsNotNone(re.match(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\Z', eid))
 
     @freeze_time("1970-01-01 00:00:01")
     def test_get_timestamp(self):
         dtm = Tracker.get_timestamp()
-        self.assertEquals(dtm, 1000)   # 1970-01-01 00:00:01 in ms
+        self.assertEqual(dtm, 1000)   # 1970-01-01 00:00:01 in ms
 
     def test_set_timestamp_1(self):
         dtm = Tracker.get_timestamp(1399021242030)
-        self.assertEquals(dtm, 1399021242030)
+        self.assertEqual(dtm, 1399021242030)
 
     def test_set_timestamp_2(self):
         dtm = Tracker.get_timestamp(1399021242240.0303)
-        self.assertEquals(dtm, 1399021242240)
+        self.assertEqual(dtm, 1399021242240)
 
     def test_add_emitter(self):
         e1 = Emitter("d3rkrsqld9gmqf.cloudfront.net", method="get")
         e2 = Emitter("d3rkrsqld9gmqf.cloudfront.net", method="post")
         t = Tracker(e1, namespace="cloudfront", encode_base64=False, app_id="AF003")
         t.add_emitter(e2)
-        self.assertEquals(t.emitters, [e1, e2])
+        self.assertEqual(t.emitters, [e1, e2])
 
     def test_alias_contract(self):
         e1 = Emitter("d3rkrsqld9gmqf.cloudfront.net", method="get")
