@@ -177,7 +177,7 @@ class Emitter(object):
         """
         logger.info("Sending POST request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % data)
-        r = requests.post(self.endpoint, data=data, headers={'content-type': 'application/json; charset=utf-8'})
+        r = requests.post(self.endpoint, data=data, headers={'Content-Type': 'application/json; charset=utf-8'})
         getattr(logger, "info" if self.is_good_status_code(r.status_code) else "warning")("POST request finished with status code: " + str(r.status_code))
         return r
 
