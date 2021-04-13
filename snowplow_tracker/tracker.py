@@ -135,10 +135,9 @@ class Tracker:
             :type  tstamp:    int | float | None
             :rtype:           int
         """
-        if tstamp is None:
-            return int(time.time() * 1000)
-        elif isinstance(tstamp, (int, float, )):
+        if isinstance(tstamp, (int, float, )):
             return int(tstamp)
+        return int(time.time() * 1000)
 
 
     """

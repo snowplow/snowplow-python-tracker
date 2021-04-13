@@ -25,6 +25,7 @@ import time
 import unittest
 
 from contracts.interface import ContractNotRespected
+from contracts import disable_all, enable_all
 from freezegun import freeze_time
 
 from snowplow_tracker.tracker import Tracker
@@ -58,6 +59,13 @@ class TestTracker(unittest.TestCase):
     def test_set_timestamp_2(self):
         dtm = Tracker.get_timestamp(1399021242240.0303)
         self.assertEqual(dtm, 1399021242240)
+
+    @freeze_time("1970-01-01 00:00:01")
+    def test_set_timestamp_3(self):
+        disable_all()
+        dtm = Tracker.get_timestamp("1399021242030")   # test wrong arg type
+        self.assertEqual(dtm, 1000)                    # 1970-01-01 00:00:01 in ms
+        enable_all()
 
     def test_add_emitter(self):
         e1 = Emitter("d3rkrsqld9gmqf.cloudfront.net", method="get")
