@@ -72,8 +72,8 @@ setup(
     ],
 
     install_requires=[
-        "requests>=2.2.1,<3.0",
-        "pycontracts>=1.7.6,<2.0",
+        "requests>=2.25.1,<3.0",
+        "pycontracts>=1.8.12,<2.0",
         "decorator>=4.4,<5.0;python_version<'3.6'",
         "six>=1.9.0,<2.0"
     ],
