@@ -14,6 +14,17 @@ Python Analytics for Snowplow
 .. image:: http://img.shields.io/badge/license-Apache--2-blue.svg?style=flat
     :target: http://www.apache.org/licenses/LICENSE-2.0
 
+Release Gemfury
+########
+To release a new version of this package to our Gemfury instance do the following:
+
+1 Generate the snowplow-tracker package
+.. python setup.py sdist
+
+2 Upload the package to the Gemfury instance
+.. curl -f package=@dist/snowplow-tracker-X.Y.Z.tar.gz https://PUSH_TOKEN@push.fury.io/USERNAME
+
+Where PUSH_TOKEN can be retrieved from and .. USERNAME=oda
 
 Overview
 ########
