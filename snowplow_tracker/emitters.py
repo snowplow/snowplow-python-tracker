@@ -19,6 +19,8 @@
     License: Apache License Version 2.0
 """
 
+
+import sys
 import json
 import logging
 import time
@@ -141,12 +143,21 @@ class Emitter(object):
                 self.bytes_queued += len(str(payload))
 
             if self.method == "post":
-                self.buffer.append({key: str(payload[key]) for key in payload})
+                self.buffer.append({key: Emitter.to_str(payload[key]) for key in payload})
             else:
                 self.buffer.append(payload)
 
             if self.reached_limit():
                 self.flush()
+
+    @staticmethod
+    def to_str(x):
+        pyVersion = sys.version_info[0]
+        if pyVersion < 3:
+            if isinstance(x, basestring):
+                return x
+            return str(x)
+        return str(x)
 
     def reached_limit(self):
         """

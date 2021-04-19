@@ -341,3 +341,46 @@ class IntegrationTest(unittest.TestCase):
             t.track_struct_event("Test", "AA")      # 141
         self.assertEqual(len(querystrings[-1]["data"]), 3)
         self.assertEqual(post_emitter.bytes_queued, 136 + len(_version.__version__))
+
+    def test_unicode_get(self):
+        t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
+        unicode_a = u'\u0107'
+        unicode_b = u'test.\u0107om'
+        test_ctx = SelfDescribingJson('iglu:a.b/c/jsonschema/1-0-0', {'test': unicode_a})
+        with HTTMock(pass_response_content):
+            t.track_page_view(unicode_b, context=[test_ctx])
+            t.track_screen_view(unicode_b, context=[test_ctx])
+
+        url_string = unquote_plus(from_querystring("url", querystrings[-2]))
+        try:
+            self.assertEqual(url_string.decode('utf-8'), unicode_b)
+        except AttributeError:
+            # in python 3: str type contains unicode (so no 'decode')
+            self.assertEqual(url_string, unicode_b)
+
+        context_string = unquote_plus(from_querystring("co", querystrings[-1]))
+        actual_a = json.loads(context_string)['data'][0]['data']['test']
+        self.assertEqual(actual_a, unicode_a)
+
+        uepr_string = unquote_plus(from_querystring("ue_pr", querystrings[-1]))
+        actual_b = json.loads(uepr_string)['data']['data']['name']
+        self.assertEqual(actual_b, unicode_b)
+
+    def test_unicode_post(self):
+        t = tracker.Tracker([post_emitter], default_subject, encode_base64=False)
+        unicode_a = u'\u0107'
+        unicode_b = u'test.\u0107om'
+        test_ctx = SelfDescribingJson('iglu:a.b/c/jsonschema/1-0-0', {'test': unicode_a})
+        with HTTMock(pass_post_response_content):
+            t.track_page_view(unicode_b, context=[test_ctx])
+            t.track_screen_view(unicode_b, context=[test_ctx])
+
+        pv_event = querystrings[-2]
+        self.assertEqual(pv_event['data'][0]['url'], unicode_b)
+
+        in_test_ctx = json.loads(pv_event['data'][0]['co'])['data'][0]['data']['test']
+        self.assertEqual(in_test_ctx, unicode_a)
+
+        sv_event = querystrings[-1]
+        in_uepr_name = json.loads(sv_event['data'][0]['ue_pr'])['data']['data']['name']
+        self.assertEqual(in_uepr_name, unicode_b)
