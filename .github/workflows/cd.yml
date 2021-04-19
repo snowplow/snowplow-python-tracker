@@ -17,19 +17,12 @@ jobs:
 
     - name: Setup Python
       uses: actions/setup-python@v2
-      with:
-         python-version: '3.x'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install -e .
 
     - name: Get tag and tracker versions
       id: version
       run: |
         echo ::set-output name=TAG_VERSION::${GITHUB_REF#refs/*/}
-        echo "##[set-output name=PYTHON_TRACKER_VERSION;]$(python -c 'from snowplow_tracker import _version;print(_version.__build_version__)')"
+        echo "##[set-output name=PYTHON_TRACKER_VERSION;]$(python setup.py --version)"
 
     - name: Fail if version mismatch
       if: ${{ steps.version.outputs.TAG_VERSION != steps.version.outputs.PYTHON_TRACKER_VERSION }}
