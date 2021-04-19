@@ -20,6 +20,8 @@
 """
 
 
+import json
+import base64
 import unittest
 from snowplow_tracker import payload
 
@@ -58,29 +60,82 @@ class TestPayload(unittest.TestCase):
 
     def test_object_generation(self):
         p = payload.Payload()
-        self.assertTrue(is_subset({}, p.nv_pairs))
+        self.assertDictEqual({}, p.nv_pairs)
 
     def test_object_generation_2(self):
         p = payload.Payload({"test1": "result1", "test2": "result2", })
         output = {"test1": "result1", "test2": "result2"}
-        self.assertTrue(is_subset(output, p.nv_pairs))
+        self.assertDictEqual(output, p.nv_pairs)
 
     def test_add(self):
         p = payload.Payload()
         p.add("name1", "value1")
         p.add("name2", "value2")
         output = {"name1": "value1", "name2": "value2", }
-        self.assertTrue(is_subset(output, p.nv_pairs))
+        self.assertDictEqual(output, p.nv_pairs)
+
+    def test_add_empty_val(self):
+        p = payload.Payload()
+        p.add("name", "")
+        output = {}
+        self.assertDictEqual(output, p.nv_pairs)
+
+    def test_add_none(self):
+        p = payload.Payload()
+        p.add("name", None)
+        output = {}
+        self.assertDictEqual(output, p.nv_pairs)
 
     def test_add_dict(self):
         p = payload.Payload({"n1": "v1", "n2": "v2", })
         p.add_dict({"name4": 4, "name3": 3})            # Order doesn't matter
         output = {"n1": "v1", "n2": "v2", "name3": 3, "name4": 4}
-        self.assertTrue(is_subset(output, p.nv_pairs))
+        self.assertDictEqual(output, p.nv_pairs)
+
+    def test_add_json_empty(self):
+        p = payload.Payload({'name': 'value'})
+        input = {}
+        p.add_json(input, False, 'ue_px', 'ue_pr')
+        output = {'name': 'value'}
+        self.assertDictEqual(output, p.nv_pairs)
+
+    def test_add_json_none(self):
+        p = payload.Payload({'name': 'value'})
+        input = None
+        p.add_json(input, False, 'ue_px', 'ue_pr')
+        output = {'name': 'value'}
+        self.assertDictEqual(output, p.nv_pairs)
+
+    def test_add_json_encode_false(self):
+        p = payload.Payload()
+        input = {'a': 1}
+        p.add_json(input, False, 'ue_px', 'ue_pr')
+        self.assertTrue('ue_pr' in p.nv_pairs.keys())
+        self.assertFalse('ue_px' in p.nv_pairs.keys())
+
+    def test_add_json_encode_true(self):
+        p = payload.Payload()
+        input = {'a': 1}
+        p.add_json(input, True, 'ue_px', 'ue_pr')
+        self.assertFalse('ue_pr' in p.nv_pairs.keys())
+        self.assertTrue('ue_px' in p.nv_pairs.keys())
+
+    def test_add_json_unicode_encode_false(self):
+        p = payload.Payload()
+        input = {'a': u'\u0107', u'\u0107': 'b'}
+        p.add_json(input, False, 'ue_px', 'ue_pr')
+        ue_pr = json.loads(p.nv_pairs["ue_pr"])
+        self.assertDictEqual(input, ue_pr)
+
+    def test_add_json_unicode_encode_true(self):
+        p = payload.Payload()
+        input = {'a': '\u0107', '\u0107': 'b'}
+        p.add_json(input, True, 'ue_px', 'ue_pr')
+        ue_px = json.loads(base64.urlsafe_b64decode(p.nv_pairs["ue_px"]).decode('utf-8'))
+        self.assertDictEqual(input, ue_px)
 
     def test_add_json_with_custom_enc(self):
         from datetime import date
-        import json
 
         p = payload.Payload()
 
@@ -90,3 +145,7 @@ class TestPayload(unittest.TestCase):
 
         results = json.loads(p.nv_pairs["name1"])
         self.assertTrue(is_subset({"key1": "2020-02-01"}, results))
+
+    def test_subject_get(self):
+        p = payload.Payload({'name1': 'val1'})
+        self.assertDictEqual(p.get(), p.nv_pairs)
