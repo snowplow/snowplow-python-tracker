@@ -358,3 +358,26 @@ class TestEmitters(unittest.TestCase):
         ae.send_events(evBuffer)
         mok_success.assert_not_called()
         mok_failure.assert_called_with(0, evBuffer)
+
+    ## Unicode
+    @mock.patch('snowplow_tracker.AsyncEmitter.flush')
+    def test_input_unicode_get(self, mok_flush):
+        mok_flush.side_effect = mocked_flush
+
+        payload = {"unicode": u'\u0107', "alsoAscii": "abc"}
+        ae = AsyncEmitter('0.0.0.0', method="get", buffer_size=2)
+        ae.input(payload)
+
+        self.assertEqual(len(ae.buffer), 1)
+        self.assertDictEqual(payload, ae.buffer[0])
+
+    @mock.patch('snowplow_tracker.AsyncEmitter.flush')
+    def test_input_unicode_post(self, mok_flush):
+        mok_flush.side_effect = mocked_flush
+
+        payload = {"unicode": u'\u0107', "alsoAscii": "abc"}
+        ae = AsyncEmitter('0.0.0.0', method="post", buffer_size=2)
+        ae.input(payload)
+
+        self.assertEqual(len(ae.buffer), 1)
+        self.assertDictEqual(payload, ae.buffer[0])
