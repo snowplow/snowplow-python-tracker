@@ -540,7 +540,7 @@ class Tracker:
             :param  currency:       The currency the price is expressed in
             :type   currency:       string_or_none
             :param  items:          The items in the transaction
-            :type   items:          list(dict(str:*))
+            :type   items:          list(dict(str:*)) | None
             :param  context:        Custom context for the event
             :type   context:        context_array | None
             :param  tstamp:         Optional event timestamp in milliseconds
@@ -565,6 +565,8 @@ class Tracker:
 
         self.complete_payload(pb, context, tstamp, event_subject)
 
+        if items is None:
+            items = []
         for item in items:
             item["tstamp"] = tstamp
             item["event_subject"] = event_subject
