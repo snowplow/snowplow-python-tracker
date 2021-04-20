@@ -239,6 +239,22 @@ class IntegrationTest(unittest.TestCase):
         for key in expected_fields:
             self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
 
+    def test_integration_event_subject(self):
+        s = subject.Subject()
+        s.set_domain_user_id("4616bfb38f872d16")
+        s.set_ip_address("255.255.255.255")
+
+        t = tracker.Tracker([emitters.Emitter("localhost")], s, "cf", app_id="angry-birds-android")
+        evSubject = subject.Subject().set_domain_user_id("1111aaa11a111a11").set_lang("EN")
+        with HTTMock(pass_response_content):
+            t.track_page_view("localhost", "local host", event_subject=evSubject)
+        expected_fields = {
+            "duid": "1111aaa11a111a11",
+            "lang": "EN"
+        }
+        for key in expected_fields:
+            self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
+
     def test_integration_redis_default(self):
         try:
             import redis
