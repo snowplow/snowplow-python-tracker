@@ -191,9 +191,15 @@ class Emitter(object):
         """
         logger.info("Sending POST request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % data)
-        r = requests.post(self.endpoint, data=data, headers={'Content-Type': 'application/json; charset=utf-8'})
-        getattr(logger, "info" if self.is_good_status_code(r.status_code) else "warning")("POST request finished with status code: " + str(r.status_code))
-        return r
+        post_succeeded = False
+        try:
+            r = requests.post(self.endpoint, data=data, headers={'Content-Type': 'application/json; charset=utf-8'})
+            post_succeeded= Emitter.is_good_status_code(r.status_code)
+            getattr(logger, "info" if post_succeeded else "warning")("POST request finished with status code: " + str(r.status_code))
+        except requests.RequestException as e:
+            logger.warning(e)
+
+        return post_succeeded
 
     @contract
     def http_get(self, payload):
@@ -203,9 +209,15 @@ class Emitter(object):
         """
         logger.info("Sending GET request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % payload)
-        r = requests.get(self.endpoint, params=payload)
-        getattr(logger, "info" if self.is_good_status_code(r.status_code) else "warning")("GET request finished with status code: " + str(r.status_code))
-        return r
+        get_succeeded = False
+        try:
+            r = requests.get(self.endpoint, params=payload)
+            get_succeeded = Emitter.is_good_status_code(r.status_code)
+            getattr(logger, "info" if get_succeeded else "warning")("GET request finished with status code: " + str(r.status_code))
+        except requests.RequestException as e:
+            logger.warning(e)
+
+        return get_succeeded
 
     def sync_flush(self):
         """
@@ -233,41 +245,33 @@ class Emitter(object):
             :type  evts: list(dict(string:*))
         """
         if len(evts) > 0:
-            logger.info("Attempting to send %s requests" % len(evts))
+            logger.info("Attempting to send %s events" % len(evts))
+
             Emitter.attach_sent_timestamp(evts)
+            success_events = []
+            failure_events = []
+
             if self.method == 'post':
                 data = SelfDescribingJson(PAYLOAD_DATA_SCHEMA, evts).to_string()
-                post_succeeded = False
-                try:
-                    status_code = self.http_post(data).status_code
-                    post_succeeded = self.is_good_status_code(status_code)
-                except requests.RequestException as e:
-                    logger.warning(e)
-                if post_succeeded:
-                    if self.on_success is not None:
-                        self.on_success(len(evts))
-                elif self.on_failure is not None:
-                    self.on_failure(0, evts)
+                request_succeeded = self.http_post(data)
+                if request_succeeded:
+                    success_events += evts
+                else:
+                    failure_events += evts
 
             elif self.method == 'get':
-                success_count = 0
-                unsent_requests = []
                 for evt in evts:
-                    get_succeeded = False
-                    try:
-                        status_code = self.http_get(evt).status_code
-                        get_succeeded = self.is_good_status_code(status_code)
-                    except requests.RequestException as e:
-                        logger.warning(e)
-                    if get_succeeded:
-                        success_count += 1
+                    request_succeeded = self.http_get(evt)
+                    if request_succeeded:
+                        success_events += [evt]
                     else:
-                        unsent_requests.append(evt)
-                if len(unsent_requests) == 0:
-                    if self.on_success is not None:
-                        self.on_success(success_count)
-                elif self.on_failure is not None:
-                    self.on_failure(success_count, unsent_requests)
+                        failure_events += [evt]
+
+            if self.on_success is not None and len(success_events) > 0:
+                self.on_success(success_events)
+            if self.on_failure is not None and len(failure_events) > 0:
+                self.on_failure(len(success_events), failure_events)
+
         else:
             logger.info("Skipping flush since buffer is empty")
 
