@@ -745,7 +745,7 @@ class TestTracker(unittest.TestCase):
             t = Tracker(e)
             ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
             evTstamp = 1399021242030
-            t.track_ecommerce_transaction("1234", 10, "transAffiliation", 2.5, 1.5, "transCity", "transState", "transCountry", "transCurrency", items=[], context=[ctx], tstamp=evTstamp)
+            t.track_ecommerce_transaction("1234", 10, "transAffiliation", 2.5, 1.5, "transCity", "transState", "transCountry", "transCurrency", context=[ctx], tstamp=evTstamp)
             self.assertEqual(mok_complete_payload.call_count, 1)
             completeArgsList = mok_complete_payload.call_args_list[0][0]
             self.assertEqual(len(completeArgsList), 4)
