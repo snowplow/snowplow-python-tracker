@@ -120,6 +120,9 @@ class Emitter(object):
             :type  method:    method
             :rtype:           string
         """
+        if len(endpoint) < 1:
+            raise ValueError("No endpoint provided.")
+
         if method == "get":
             path = "/i"
         else:
