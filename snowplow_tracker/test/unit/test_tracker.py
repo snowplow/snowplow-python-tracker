@@ -39,7 +39,6 @@ from snowplow_tracker.emitters import Emitter
 from snowplow_tracker.subject import Subject
 from snowplow_tracker.payload import Payload
 from snowplow_tracker.self_describing_json import SelfDescribingJson
-from snowplow_tracker.timestamp import DeviceTimestamp, TrueTimestamp
 
 UNSTRUCT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0"
 CONTEXT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1"
@@ -137,22 +136,22 @@ class TestTracker(unittest.TestCase):
 
     @freeze_time("1970-01-01 00:00:01")
     def test_get_timestamp(self):
-        dtm = Tracker.get_timestamp()
-        self.assertEqual(dtm, 1000)   # 1970-01-01 00:00:01 in ms
+        tstamp = Tracker.get_timestamp()
+        self.assertEqual(tstamp, 1000)   # 1970-01-01 00:00:01 in ms
 
     def test_get_timestamp_1(self):
-        dtm = Tracker.get_timestamp(1399021242030)
-        self.assertEqual(dtm, 1399021242030)
+        tstamp = Tracker.get_timestamp(1399021242030)
+        self.assertEqual(tstamp, 1399021242030)
 
     def test_get_timestamp_2(self):
-        dtm = Tracker.get_timestamp(1399021242240.0303)
-        self.assertEqual(dtm, 1399021242240)
+        tstamp = Tracker.get_timestamp(1399021242240.0303)
+        self.assertEqual(tstamp, 1399021242240)
 
     @freeze_time("1970-01-01 00:00:01")
     def test_get_timestamp_3(self):
         with ContractsDisabled():
-            dtm = Tracker.get_timestamp("1399021242030")   # test wrong arg type
-            self.assertEqual(dtm, 1000)                    # 1970-01-01 00:00:01 in ms
+            tstamp = Tracker.get_timestamp("1399021242030")   # test wrong arg type
+            self.assertEqual(tstamp, 1000)                    # 1970-01-01 00:00:01 in ms
 
     @mock.patch('snowplow_tracker.Tracker.track')
     def test_alias_of_track_unstruct_event(self, mok_track):
@@ -326,8 +325,8 @@ class TestTracker(unittest.TestCase):
 
             t = Tracker(e)
             p = Payload()
-            evTstamp = 1000
-            t.complete_payload(p, None, evTstamp, None)
+            time_in_millis = 100010001000
+            t.complete_payload(p, None, time_in_millis, None)
 
             self.assertEqual(mok_track.call_count, 1)
             trackArgsTuple = mok_track.call_args_list[0][0]
@@ -336,7 +335,8 @@ class TestTracker(unittest.TestCase):
 
             expected = {
                 "eid": _TEST_UUID,
-                "dtm": evTstamp,
+                "dtm": 1618790401000,
+                "ttm": time_in_millis,
                 "tv": TRACKER_VERSION,
                 "p": "pc"
             }
@@ -355,9 +355,8 @@ class TestTracker(unittest.TestCase):
 
             t = Tracker(e)
             p = Payload()
-            _time = 1000
-            evTstamp = DeviceTimestamp(_time)
-            t.complete_payload(p, None, evTstamp, None)
+            time_in_millis = 100010001000
+            t.complete_payload(p, None, time_in_millis, None)
 
             self.assertEqual(mok_track.call_count, 1)
             trackArgsTuple = mok_track.call_args_list[0][0]
@@ -366,7 +365,8 @@ class TestTracker(unittest.TestCase):
 
             expected = {
                 "eid": _TEST_UUID,
-                "dtm": _time,
+                "dtm": 1618790401000,
+                "ttm": time_in_millis,
                 "tv": TRACKER_VERSION,
                 "p": "pc"
             }
@@ -385,9 +385,8 @@ class TestTracker(unittest.TestCase):
 
             t = Tracker(e)
             p = Payload()
-            _time = 1000
-            evTstamp = TrueTimestamp(_time)
-            t.complete_payload(p, None, evTstamp, None)
+            time_in_millis = 100010001000
+            t.complete_payload(p, None, time_in_millis, None)
 
             self.assertEqual(mok_track.call_count, 1)
             trackArgsTuple = mok_track.call_args_list[0][0]
@@ -396,7 +395,8 @@ class TestTracker(unittest.TestCase):
 
             expected = {
                 "eid": _TEST_UUID,
-                "ttm": _time,
+                "dtm": 1618790401000,
+                "ttm": time_in_millis,
                 "tv": TRACKER_VERSION,
                 "p": "pc"
             }

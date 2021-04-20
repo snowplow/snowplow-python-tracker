@@ -27,7 +27,6 @@ from contracts import contract, new_contract
 
 from snowplow_tracker import payload, _version, SelfDescribingJson
 from snowplow_tracker import subject as _subject
-from snowplow_tracker.timestamp import Timestamp, TrueTimestamp, DeviceTimestamp
 
 
 """
@@ -74,8 +73,6 @@ class Tracker:
     new_contract("form_node_name", lambda s: s in FORM_NODE_NAMES)
 
     new_contract("form_type", lambda s: s.lower() in FORM_TYPES)
-
-    new_contract("timestamp", lambda x: (isinstance(x, Timestamp)))
 
     new_contract("form_element", lambda x: Tracker.check_form_element(x))
 
@@ -167,20 +164,17 @@ class Tracker:
             :type   pb:              payload
             :param  context:         Custom context for the event
             :type   context:         context_array | None
-            :param  tstamp:          Optional user-provided timestamp for the event
-            :type   tstamp:          timestamp | int | float | None
+            :param  tstamp:          Optional event timestamp in milliseconds
+            :type   tstamp:          int | float | None
             :param  event_subject:   Optional per event subject
             :type   event_subject:   subject | None
             :rtype:                  tracker
         """
         pb.add("eid", Tracker.get_uuid())
 
-        if isinstance(tstamp, TrueTimestamp):
-            pb.add("ttm", tstamp.value)
-        if isinstance(tstamp, DeviceTimestamp):
-            pb.add("dtm", Tracker.get_timestamp(tstamp.value))
-        elif isinstance(tstamp, (int, float, type(None))):
-            pb.add("dtm", Tracker.get_timestamp(tstamp))
+        pb.add("dtm", Tracker.get_timestamp())
+        if tstamp is not None:
+            pb.add("ttm", Tracker.get_timestamp(tstamp))
 
         if context is not None:
             context_jsons = list(map(lambda c: c.to_json(), context))
@@ -205,8 +199,8 @@ class Tracker:
             :type   referrer:       string_or_none
             :param  context:        Custom context for the event
             :type   context:        context_array | None
-            :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         timestamp | int | float | None
+            :param  tstamp:         Optional event timestamp in milliseconds
+            :type   tstamp:         int | float | None
             :param  event_subject:  Optional per event subject
             :type   event_subject:  subject | None
             :rtype:                 tracker
@@ -238,8 +232,8 @@ class Tracker:
             :type   max_y:          int | None
             :param  context:        Custom context for the event
             :type   context:        context_array | None
-            :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         timestamp | int | float | None
+            :param  tstamp:         Optional event timestamp in milliseconds
+            :type   tstamp:         int | float | None
             :param  event_subject:  Optional per event subject
             :type   event_subject:  subject | None
             :rtype:                 tracker
@@ -274,8 +268,8 @@ class Tracker:
             :type   element_content:    string_or_none
             :param  context:        Custom context for the event
             :type   context:        context_array | None
-            :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         timestamp | int | float | None
+            :param  tstamp:         Optional event timestamp in milliseconds
+            :type   tstamp:         int | float | None
             :param  event_subject:  Optional per event subject
             :type   event_subject:  subject | None
             :rtype:                 tracker
@@ -314,8 +308,8 @@ class Tracker:
             :type   currency:       string_or_none
             :param  context:        Custom context for the event
             :type   context:        context_array | None
-            :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         timestamp | int | float | None
+            :param  tstamp:         Optional event timestamp in milliseconds
+            :type   tstamp:         int | float | None
             :param  event_subject:  Optional per event subject
             :type   event_subject:  subject | None
             :rtype:                 tracker
@@ -355,8 +349,8 @@ class Tracker:
             :type   currency:       string_or_none
             :param  context:        Custom context for the event
             :type   context:        context_array | None
-            :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         timestamp | int | float | None
+            :param  tstamp:         Optional event timestamp in milliseconds
+            :type   tstamp:         int | float | None
             :param  event_subject:  Optional per event subject
             :type   event_subject:  subject | None
             :rtype:                 tracker
@@ -396,8 +390,8 @@ class Tracker:
             :type   element_classes:    list(str) | tuple(str,*) | None
             :param  context:        Custom context for the event
             :type   context:        context_array | None
-            :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         timestamp | int | float | None
+            :param  tstamp:         Optional event timestamp in milliseconds
+            :type   tstamp:         int | float | None
             :param  event_subject:  Optional per event subject
             :type   event_subject:  subject | None
             :rtype:                 tracker
@@ -428,8 +422,8 @@ class Tracker:
             :type   elements:       list(form_element) | None
             :param  context:        Custom context for the event
             :type   context:        context_array | None
-            :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         timestamp | int | float | None
+            :param  tstamp:         Optional event timestamp in milliseconds
+            :type   tstamp:         int | float | None
             :param  event_subject:  Optional per event subject
             :type   event_subject:  subject | None
             :rtype:                 tracker
@@ -460,8 +454,8 @@ class Tracker:
             :type   page_results:   int | None
             :param  context:        Custom context for the event
             :type   context:        context_array | None
-            :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         timestamp | int | float | None
+            :param  tstamp:         Optional event timestamp in milliseconds
+            :type   tstamp:         int | float | None
             :param  event_subject:  Optional per event subject
             :type   event_subject:  subject | None
             :rtype:                 tracker
@@ -503,8 +497,8 @@ class Tracker:
             :type   currency:    string_or_none
             :param  context:     Custom context for the event
             :type   context:     context_array | None
-            :param  tstamp:      Optional user-provided timestamp for the event
-            :type   tstamp:      timestamp | int | float | None
+            :param  tstamp:      Optional event timestamp in milliseconds
+            :type   tstamp:      int | float | None
             :param  event_subject:  Optional per event subject
             :type   event_subject:  subject | None
             :rtype:              tracker
@@ -549,8 +543,8 @@ class Tracker:
             :type   items:          list(dict(str:*))
             :param  context:        Custom context for the event
             :type   context:        context_array | None
-            :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         timestamp | int | float | None
+            :param  tstamp:         Optional event timestamp in milliseconds
+            :type   tstamp:         int | float | None
             :param  event_subject:  Optional per event subject
             :type   event_subject:  subject | None
             :rtype:                 tracker
@@ -589,8 +583,8 @@ class Tracker:
             :type   id_:            string_or_none
             :param  context:        Custom context for the event
             :type   context:        context_array | None
-            :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         timestamp | int | float | None
+            :param  tstamp:         Optional event timestamp in milliseconds
+            :type   tstamp:         int | float | None
             :param  event_subject:  Optional per event subject
             :type   event_subject:  subject | None
             :rtype:                 tracker
@@ -623,8 +617,8 @@ class Tracker:
             :type   value:          int | float | None
             :param  context:        Custom context for the event
             :type   context:        context_array | None
-            :param  tstamp:         Optional user-provided timestamp for the event
-            :type   tstamp:         timestamp | int | float | None
+            :param  tstamp:         Optional event timestamp in milliseconds
+            :type   tstamp:         int | float | None
             :param  event_subject:  Optional per event subject
             :type   event_subject:  subject | None
             :rtype:                 tracker
@@ -648,8 +642,8 @@ class Tracker:
             :type   event_json:      self_describing_json
             :param  context:         Custom context for the event
             :type   context:         context_array | None
-            :param  tstamp:          User-set timestamp
-            :type   tstamp:          timestamp | int | None
+            :param  tstamp:          Optional event timestamp in milliseconds
+            :type   tstamp:          int | float | None
             :param  event_subject:   Optional per event subject
             :type   event_subject:   subject | None
             :rtype:                  tracker

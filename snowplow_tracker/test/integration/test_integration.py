@@ -33,7 +33,6 @@ from httmock import all_requests, HTTMock
 from freezegun import freeze_time
 
 from snowplow_tracker import tracker, _version, emitters, subject
-from snowplow_tracker.timestamp import DeviceTimestamp, TrueTimestamp
 from snowplow_tracker.self_describing_json import SelfDescribingJson
 from snowplow_tracker.redis import redis_emitter, redis_worker
 
@@ -121,7 +120,7 @@ class IntegrationTest(unittest.TestCase):
         for key in expected_fields:
             self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
 
-        self.assertEqual(from_querystring("dtm", querystrings[-3]), from_querystring("dtm", querystrings[-2]))
+        self.assertEqual(from_querystring("ttm", querystrings[-3]), from_querystring("ttm", querystrings[-2]))
 
     def test_integration_screen_view(self):
         t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
@@ -328,22 +327,19 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(querystrings[-1]["data"][0]["se_ac"], "A")
         self.assertEqual(querystrings[-1]["data"][1]["se_ac"], "B")
 
+    @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
     def test_timestamps(self):
-        emitter = emitters.Emitter("localhost", protocol="http", port=80, method='post', buffer_size=4)
+        emitter = emitters.Emitter("localhost", protocol="http", port=80, method='post', buffer_size=3)
         t = tracker.Tracker([emitter], default_subject)
         with HTTMock(pass_post_response_content):
-            with freeze_time("2013-01-14 03:21:34"):
-                t.track_page_view("localhost", "stamp0", None, tstamp=None)
-                t.track_page_view("localhost", "stamp1", None, tstamp=1358933694000)
-            with freeze_time("2013-01-14 03:22:36"):
-                t.track_page_view("localhost", "stamp2", None, tstamp=DeviceTimestamp(1458133694000))
-                t.track_page_view("localhost", "stamp3", None, tstamp=TrueTimestamp(1458033694000))
+            t.track_page_view("localhost", "stamp0", None, tstamp=None)
+            t.track_page_view("localhost", "stamp1", None, tstamp=1358933694000)
+            t.track_page_view("localhost", "stamp2", None, tstamp=1358933694000.00)
 
         expected_timestamps = [
-            {"dtm": "1358133694000", "ttm": None, "stm": "1358133756000"},
-            {"dtm": "1358933694000", "ttm": None, "stm": "1358133756000"},
-            {"dtm": "1458133694000", "ttm": None, "stm": "1358133756000"},
-            {"dtm": None, "ttm": "1458033694000", "stm": "1358133756000"},
+            {"dtm": "1618790401000", "ttm": None, "stm": "1618790401000"},
+            {"dtm": "1618790401000", "ttm": "1358933694000", "stm": "1618790401000"},
+            {"dtm": "1618790401000", "ttm": "1358933694000", "stm": "1618790401000"}
         ]
         request = querystrings[-1]
 
@@ -351,7 +347,6 @@ class IntegrationTest(unittest.TestCase):
             self.assertEqual(request["data"][i].get("dtm"), expected_timestamps[i]["dtm"])
             self.assertEqual(request["data"][i].get("ttm"), expected_timestamps[i]["ttm"])
             self.assertEqual(request["data"][i].get("stm"), expected_timestamps[i]["stm"])
-            self.assertEqual(request["data"][i].get("page"), "stamp" + str(i))
 
     def test_bytelimit(self):
         post_emitter = emitters.Emitter("localhost", protocol="http", port=80, method='post', buffer_size=5, byte_limit=420)
