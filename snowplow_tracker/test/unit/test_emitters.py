@@ -39,15 +39,11 @@ def mocked_flush(*args):
 def mocked_send_events(*args):
     pass
 
-class MockRequest():
-    def __init__(self, code):
-        self.status_code = code
-
 def mocked_http_success(*args):
-    return MockRequest(200)
+    return True
 
 def mocked_http_failure(*args):
-    return MockRequest(404)
+    return False
 
 
 class TestEmitters(unittest.TestCase):
@@ -229,7 +225,7 @@ class TestEmitters(unittest.TestCase):
 
         evBuffer = [{"a":"aa"}, {"b": "bb"}, {"c": "cc"}]
         e.send_events(evBuffer)
-        mok_success.assert_called_once_with(3)
+        mok_success.assert_called_once_with(evBuffer)
         mok_failure.assert_not_called()
 
     @mock.patch('snowplow_tracker.Emitter.http_get')
@@ -255,7 +251,7 @@ class TestEmitters(unittest.TestCase):
 
         evBuffer = [{"a":"aa"}, {"b": "bb"}, {"c": "cc"}]
         e.send_events(evBuffer)
-        mok_success.assert_called_once_with(3)
+        mok_success.assert_called_once_with(evBuffer)
         mok_failure.assert_not_called()
 
     @mock.patch('snowplow_tracker.Emitter.http_post')
@@ -318,7 +314,7 @@ class TestEmitters(unittest.TestCase):
 
         evBuffer = [{"a":"aa"}, {"b": "bb"}, {"c": "cc"}]
         ae.send_events(evBuffer)
-        mok_success.assert_called_once_with(3)
+        mok_success.assert_called_once_with(evBuffer)
         mok_failure.assert_not_called()
 
     @mock.patch('snowplow_tracker.Emitter.http_get')
@@ -344,7 +340,7 @@ class TestEmitters(unittest.TestCase):
 
         evBuffer = [{"a":"aa"}, {"b": "bb"}, {"c": "cc"}]
         ae.send_events(evBuffer)
-        mok_success.assert_called_once_with(3)
+        mok_success.assert_called_once_with(evBuffer)
         mok_failure.assert_not_called()
 
     @mock.patch('snowplow_tracker.Emitter.http_post')

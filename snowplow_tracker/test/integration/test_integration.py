@@ -289,7 +289,13 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker([callback_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_page_view("http://www.example.com")
-        self.assertEqual(callback_success_queue[0], 1)
+        expected = {
+            "e": "pv",
+            "url": "http://www.example.com",
+        }
+        self.assertEqual(len(callback_success_queue), 1)
+        for k in expected.keys():
+            self.assertEqual(callback_success_queue[0][0][k], expected[k])
         self.assertEqual(callback_failure_queue, [])
 
     def test_integration_failure_callback(self):
