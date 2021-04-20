@@ -95,8 +95,9 @@ class TestEmitters(unittest.TestCase):
         uri = Emitter.as_collector_uri('0.0.0.0', protocol="https")
         self.assertEqual(uri, 'https://0.0.0.0/i')
 
-
-
+    def test_as_collector_uri_empty_string(self):
+        with self.assertRaises(ValueError):
+            uri = Emitter.as_collector_uri('')
 
     @mock.patch('snowplow_tracker.Emitter.flush')
     def test_input_no_flush(self, mok_flush):
