@@ -297,7 +297,7 @@ class TestTracker(unittest.TestCase):
 
             t = Tracker(e)
             p = Payload()
-            t.complete_payload(p, None, None)
+            t.complete_payload(p, None, None, None)
 
             self.assertEqual(mok_track.call_count, 1)
             trackArgsTuple = mok_track.call_args_list[0][0]
@@ -327,7 +327,7 @@ class TestTracker(unittest.TestCase):
             t = Tracker(e)
             p = Payload()
             evTstamp = 1000
-            t.complete_payload(p, None, tstamp=evTstamp)
+            t.complete_payload(p, None, evTstamp, None)
 
             self.assertEqual(mok_track.call_count, 1)
             trackArgsTuple = mok_track.call_args_list[0][0]
@@ -357,7 +357,7 @@ class TestTracker(unittest.TestCase):
             p = Payload()
             _time = 1000
             evTstamp = DeviceTimestamp(_time)
-            t.complete_payload(p, None, tstamp=evTstamp)
+            t.complete_payload(p, None, evTstamp, None)
 
             self.assertEqual(mok_track.call_count, 1)
             trackArgsTuple = mok_track.call_args_list[0][0]
@@ -387,7 +387,7 @@ class TestTracker(unittest.TestCase):
             p = Payload()
             _time = 1000
             evTstamp = TrueTimestamp(_time)
-            t.complete_payload(p, None, tstamp=evTstamp)
+            t.complete_payload(p, None, evTstamp, None)
 
             self.assertEqual(mok_track.call_count, 1)
             trackArgsTuple = mok_track.call_args_list[0][0]
@@ -419,7 +419,7 @@ class TestTracker(unittest.TestCase):
             geo_ctx = SelfDescribingJson(geoSchema, geoData)
             mov_ctx = SelfDescribingJson(movSchema, movData)
             ctx_array = [geo_ctx, mov_ctx]
-            t.complete_payload(p, ctx_array, None)
+            t.complete_payload(p, ctx_array, None, None)
 
             self.assertEqual(mok_track.call_count, 1)
             trackArgsTuple = mok_track.call_args_list[0][0]
@@ -459,7 +459,7 @@ class TestTracker(unittest.TestCase):
             geo_ctx = SelfDescribingJson(geoSchema, geoData)
             mov_ctx = SelfDescribingJson(movSchema, movData)
             ctx_array = [geo_ctx, mov_ctx]
-            t.complete_payload(p, ctx_array, None)
+            t.complete_payload(p, ctx_array, None, None)
 
             self.assertEqual(mok_track.call_count, 1)
             trackArgsTuple = mok_track.call_args_list[0][0]
@@ -468,6 +468,36 @@ class TestTracker(unittest.TestCase):
 
             self.assertIn("cx", passed_nv_pairs)
 
+    @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
+    @mock.patch('snowplow_tracker.Tracker.track')
+    @mock.patch('snowplow_tracker.Tracker.get_uuid')
+    def test_complete_payload_event_subject(self, mok_uuid, mok_track):
+        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
+        e = mokEmitter()
+
+        with ContractsDisabled():
+            mok_uuid.side_effect = mocked_uuid
+            mok_track.side_effect = mocked_track
+
+            t = Tracker(e)
+            p = Payload()
+            evSubject = Subject().set_lang('EN').set_user_id("tester")
+            t.complete_payload(p, None, None, evSubject)
+
+            self.assertEqual(mok_track.call_count, 1)
+            trackArgsTuple = mok_track.call_args_list[0][0]
+            self.assertEqual(len(trackArgsTuple), 1)
+            passed_nv_pairs = trackArgsTuple[0].nv_pairs
+
+            expected = {
+                "eid": _TEST_UUID,
+                "dtm": 1618790401000,
+                "tv": TRACKER_VERSION,
+                "p": "pc",
+                "lang": "EN",
+                "uid": "tester"
+            }
+            self.assertDictEqual(passed_nv_pairs, expected)
 
     ###
     # test track_x methods
@@ -486,7 +516,7 @@ class TestTracker(unittest.TestCase):
             t.track_unstruct_event(evJson)
             self.assertEqual(mok_complete_payload.call_count, 1)
             completeArgsList = mok_complete_payload.call_args_list[0][0]
-            self.assertEqual(len(completeArgsList), 3)
+            self.assertEqual(len(completeArgsList), 4)
 
             # payload
             actualPayloadArg = completeArgsList[0]
@@ -526,7 +556,7 @@ class TestTracker(unittest.TestCase):
             t.track_unstruct_event(evJson, evContext, evTstamp)
             self.assertEqual(mok_complete_payload.call_count, 1)
             completeArgsList = mok_complete_payload.call_args_list[0][0]
-            self.assertEqual(len(completeArgsList), 3)
+            self.assertEqual(len(completeArgsList), 4)
 
             # payload
             actualPayloadArg = completeArgsList[0]
@@ -563,7 +593,7 @@ class TestTracker(unittest.TestCase):
             t.track_unstruct_event(evJson)
             self.assertEqual(mok_complete_payload.call_count, 1)
             completeArgsList = mok_complete_payload.call_args_list[0][0]
-            self.assertEqual(len(completeArgsList), 3)
+            self.assertEqual(len(completeArgsList), 4)
 
             actualPayloadArg = completeArgsList[0]
             actualPairs = actualPayloadArg.nv_pairs
@@ -583,7 +613,7 @@ class TestTracker(unittest.TestCase):
             t.track_struct_event("Mixes","Play","Test","TestProp",value=3.14,context=[ctx],tstamp=evTstamp)
             self.assertEqual(mok_complete_payload.call_count, 1)
             completeArgsList = mok_complete_payload.call_args_list[0][0]
-            self.assertEqual(len(completeArgsList), 3)
+            self.assertEqual(len(completeArgsList), 4)
 
             actualPayloadArg = completeArgsList[0]
             actualContextArg = completeArgsList[1]
@@ -616,7 +646,7 @@ class TestTracker(unittest.TestCase):
             t.track_page_view("example.com", "Example", "docs.snowplowanalytics.com", context=[ctx], tstamp=evTstamp)
             self.assertEqual(mok_complete_payload.call_count, 1)
             completeArgsList = mok_complete_payload.call_args_list[0][0]
-            self.assertEqual(len(completeArgsList), 3)
+            self.assertEqual(len(completeArgsList), 4)
 
             actualPayloadArg = completeArgsList[0]
             actualContextArg = completeArgsList[1]
@@ -647,7 +677,7 @@ class TestTracker(unittest.TestCase):
             t.track_page_ping("example.com", "Example", "docs.snowplowanalytics.com", 0, 1, 2, 3, context=[ctx], tstamp=evTstamp)
             self.assertEqual(mok_complete_payload.call_count, 1)
             completeArgsList = mok_complete_payload.call_args_list[0][0]
-            self.assertEqual(len(completeArgsList), 3)
+            self.assertEqual(len(completeArgsList), 4)
 
             actualPayloadArg = completeArgsList[0]
             actualContextArg = completeArgsList[1]
@@ -682,7 +712,7 @@ class TestTracker(unittest.TestCase):
             t.track_ecommerce_transaction_item("1234", "sku1234", 3.14, 1, "itemName", "itemCategory", "itemCurrency", context=[ctx], tstamp=evTstamp)
             self.assertEqual(mok_complete_payload.call_count, 1)
             completeArgsList = mok_complete_payload.call_args_list[0][0]
-            self.assertEqual(len(completeArgsList), 3)
+            self.assertEqual(len(completeArgsList), 4)
 
             actualPayloadArg = completeArgsList[0]
             actualContextArg = completeArgsList[1]
@@ -718,7 +748,7 @@ class TestTracker(unittest.TestCase):
             t.track_ecommerce_transaction("1234", 10, "transAffiliation", 2.5, 1.5, "transCity", "transState", "transCountry", "transCurrency", items=[], context=[ctx], tstamp=evTstamp)
             self.assertEqual(mok_complete_payload.call_count, 1)
             completeArgsList = mok_complete_payload.call_args_list[0][0]
-            self.assertEqual(len(completeArgsList), 3)
+            self.assertEqual(len(completeArgsList), 4)
             actualPayloadArg = completeArgsList[0]
             actualContextArg = completeArgsList[1]
             actualTstampArg = completeArgsList[2]
@@ -759,7 +789,7 @@ class TestTracker(unittest.TestCase):
             # Transaction
             callCompleteArgsList = mok_complete_payload.call_args_list
             firstCallArgsList = callCompleteArgsList[0][0]
-            self.assertEqual(len(firstCallArgsList), 3)
+            self.assertEqual(len(firstCallArgsList), 4)
             actualPayloadArg =firstCallArgsList[0]
             actualContextArg = firstCallArgsList[1]
             actualTstampArg = firstCallArgsList[2]
@@ -795,7 +825,8 @@ class TestTracker(unittest.TestCase):
                 'order_id': '1234',
                 'currency': 'transCurrency',
                 'sku': 'sku1234',
-                'quantity': 3
+                'quantity': 3,
+                'event_subject': None
             }
             self.assertDictEqual(firstItemCallKwargs, expectedFirstItemPairs)
             # 2nd item
@@ -808,7 +839,8 @@ class TestTracker(unittest.TestCase):
                 'order_id': '1234',
                 'currency': 'transCurrency',
                 'sku': 'sku5678',
-                'quantity': 1
+                'quantity': 1,
+                'event_subject': None
             }
             self.assertDictEqual(secItemCallKwargs, expectedSecItemPairs)
 
@@ -838,7 +870,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertIs(callArgs[1][0], ctx)
             self.assertEqual(callArgs[2], evTstamp)
@@ -863,7 +895,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertTrue(callArgs[1] is None)
             self.assertTrue(callArgs[2] is None)
@@ -895,7 +927,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertIs(callArgs[1][0], ctx)
             self.assertEqual(callArgs[2], evTstamp)
@@ -921,7 +953,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertTrue(callArgs[1] is None)
             self.assertTrue(callArgs[2] is None)
@@ -953,7 +985,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertIs(callArgs[1][0], ctx)
             self.assertEqual(callArgs[2], evTstamp)
@@ -979,7 +1011,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertTrue(callArgs[1] is None)
             self.assertTrue(callArgs[2] is None)
@@ -1011,7 +1043,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertIs(callArgs[1][0], ctx)
             self.assertEqual(callArgs[2], evTstamp)
@@ -1038,7 +1070,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertTrue(callArgs[1] is None)
             self.assertTrue(callArgs[2] is None)
@@ -1075,7 +1107,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertIs(callArgs[1][0], ctx)
             self.assertEqual(callArgs[2], evTstamp)
@@ -1099,7 +1131,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertTrue(callArgs[1] is None)
             self.assertTrue(callArgs[2] is None)
@@ -1123,7 +1155,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
 
     @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
@@ -1151,7 +1183,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertIs(callArgs[1][0], ctx)
             self.assertEqual(callArgs[2], evTstamp)
@@ -1175,7 +1207,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertTrue(callArgs[1] is None)
             self.assertTrue(callArgs[2] is None)
@@ -1203,7 +1235,7 @@ class TestTracker(unittest.TestCase):
             }
 
             callArgs = mok_track_unstruct.call_args_list[0][0]
-            self.assertEqual(len(callArgs), 3)
+            self.assertEqual(len(callArgs), 4)
             self.assertDictEqual(callArgs[0].to_json(), expected)
             self.assertIs(callArgs[1][0], ctx)
             self.assertEqual(callArgs[2], evTstamp)
