@@ -15,7 +15,7 @@ eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
 function deploy {
-  # pyenv install 2.7.15
+  # pyenv install 2.7.18
   if [ ! -e ~/.pyenv/versions/tracker27 ]; then
     pyenv virtualenv 2.7.18 tracker27
     pyenv activate tracker27
@@ -49,9 +49,9 @@ function deploy {
     source deactivate
   fi
 
-  # pyenv install 3.6.12
+  # pyenv install 3.6.14
   if [ ! -e ~/.pyenv/versions/tracker36 ]; then
-    pyenv virtualenv 3.6.12 tracker36
+    pyenv virtualenv 3.6.14 tracker36
     pyenv activate tracker36
     pip install .
     pip install -r requirements-test.txt
@@ -59,16 +59,16 @@ function deploy {
   fi
 
   if [ ! -e ~/.pyenv/versions/tracker36redis ]; then
-    pyenv virtualenv 3.6.12 tracker36redis
+    pyenv virtualenv 3.6.14 tracker36redis
     pyenv activate tracker36redis
     pip install .[redis]
     pip install -r requirements-test.txt
     source deactivate
   fi
 
-  # pyenv install 3.7.9
+  # pyenv install 3.7.11
   if [ ! -e ~/.pyenv/versions/tracker37 ]; then
-    pyenv virtualenv 3.7.9 tracker37
+    pyenv virtualenv 3.7.11 tracker37
     pyenv activate tracker37
     pip install .
     pip install -r requirements-test.txt
@@ -76,16 +76,16 @@ function deploy {
   fi
 
   if [ ! -e ~/.pyenv/versions/tracker37redis ]; then
-    pyenv virtualenv 3.7.9 tracker37redis
+    pyenv virtualenv 3.7.11 tracker37redis
     pyenv activate tracker37redis
     pip install .[redis]
     pip install -r requirements-test.txt
     source deactivate
   fi
 
-  # pyenv install 3.8.6
+  # pyenv install 3.8.11
   if [ ! -e ~/.pyenv/versions/tracker38 ]; then
-    pyenv virtualenv 3.8.6 tracker38
+    pyenv virtualenv 3.8.11 tracker38
     pyenv activate tracker38
     pip install .
     pip install -r requirements-test.txt
@@ -93,16 +93,16 @@ function deploy {
   fi
 
   if [ ! -e ~/.pyenv/versions/tracker38redis ]; then
-    pyenv virtualenv 3.8.6 tracker38redis
+    pyenv virtualenv 3.8.11 tracker38redis
     pyenv activate tracker38redis
     pip install .[redis]
     pip install -r requirements-test.txt
     source deactivate
   fi
 
-  # pyenv install 3.9.0
+  # pyenv install 3.9.6
   if [ ! -e ~/.pyenv/versions/tracker39 ]; then
-    pyenv virtualenv 3.9.0 tracker39
+    pyenv virtualenv 3.9.6 tracker39
     pyenv activate tracker39
     pip install .
     pip install -r requirements-test.txt
@@ -110,7 +110,7 @@ function deploy {
   fi
 
   if [ ! -e ~/.pyenv/versions/tracker39redis ]; then
-    pyenv virtualenv 3.9.0 tracker39redis
+    pyenv virtualenv 3.9.6 tracker39redis
     pyenv activate tracker39redis
     pip install .[redis]
     pip install -r requirements-test.txt
