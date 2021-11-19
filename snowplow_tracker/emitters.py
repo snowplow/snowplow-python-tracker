@@ -20,12 +20,11 @@
 """
 
 
-import sys
 import logging
 import time
 import threading
 import requests
-from typing import Optional, Any
+from typing import Optional, Union, Tuple
 from queue import Queue
 
 from snowplow_tracker.self_describing_json import SelfDescribingJson
@@ -58,7 +57,8 @@ class Emitter(object):
             buffer_size: Optional[int] = None,
             on_success: Optional[SuccessCallback] = None,
             on_failure: Optional[FailureCallback] = None,
-            byte_limit: Optional[int] = None) -> None:
+            byte_limit: Optional[int] = None,
+            request_timeout: Optional[Union[float, Tuple[float, float]]] = None) -> None:
         """
             :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
             :type  endpoint:    string
@@ -81,6 +81,10 @@ class Emitter(object):
             :type  on_failure:  function | None
             :param byte_limit:  The size event list after reaching which queued events will be flushed
             :type  byte_limit:  int | None
+            :param request_timeout: Timeout for the HTTP requests. Can be set either as single float value which
+                                     applies to both "connect" AND "read" timeout, or as tuple with two float values
+                                     which specify the "connect" and "read" timeouts separately
+            :type request_timeout:  float | tuple | None
         """
         one_of(protocol, PROTOCOLS)
         one_of(method, METHODS)
@@ -98,6 +102,7 @@ class Emitter(object):
         self.buffer = []
         self.byte_limit = byte_limit
         self.bytes_queued = None if byte_limit is None else 0
+        self.request_timeout = request_timeout
 
         self.on_success = on_success
         self.on_failure = on_failure
@@ -187,7 +192,11 @@ class Emitter(object):
         logger.debug("Payload: %s" % data)
         post_succeeded = False
         try:
-            r = requests.post(self.endpoint, data=data, headers={'Content-Type': 'application/json; charset=utf-8'})
+            r = requests.post(
+                self.endpoint,
+                data=data,
+                headers={'Content-Type': 'application/json; charset=utf-8'},
+                timeout=self.request_timeout)
             post_succeeded = Emitter.is_good_status_code(r.status_code)
             getattr(logger, "info" if post_succeeded else "warning")("POST request finished with status code: " + str(r.status_code))
         except requests.RequestException as e:
@@ -204,7 +213,7 @@ class Emitter(object):
         logger.debug("Payload: %s" % payload)
         get_succeeded = False
         try:
-            r = requests.get(self.endpoint, params=payload)
+            r = requests.get(self.endpoint, params=payload, timeout=self.request_timeout)
             get_succeeded = Emitter.is_good_status_code(r.status_code)
             getattr(logger, "info" if get_succeeded else "warning")("GET request finished with status code: " + str(r.status_code))
         except requests.RequestException as e:
@@ -219,7 +228,7 @@ class Emitter(object):
         """
         logger.debug("Starting synchronous flush...")
         Emitter.flush(self)
-        logger.info("Finished synchrous flush")
+        logger.info("Finished synchronous flush")
 
     @staticmethod
     def is_good_status_code(status_code: int) -> bool:

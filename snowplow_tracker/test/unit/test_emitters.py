@@ -25,6 +25,7 @@ import unittest
 import unittest.mock as mock
 from freezegun import freeze_time
 from typing import Any
+from requests import ConnectTimeout
 
 from snowplow_tracker.emitters import Emitter, AsyncEmitter, DEFAULT_MAX_LENGTH
 
@@ -62,6 +63,7 @@ class TestEmitters(unittest.TestCase):
         self.assertIsNone(e.on_success)
         self.assertIsNone(e.on_failure)
         self.assertIsNone(e.timer)
+        self.assertIsNone(e.request_timeout)
 
     def test_init_buffer_size(self) -> None:
         e = Emitter('0.0.0.0', buffer_size=10)
@@ -74,6 +76,10 @@ class TestEmitters(unittest.TestCase):
     def test_init_byte_limit(self) -> None:
         e = Emitter('0.0.0.0', byte_limit=512)
         self.assertEqual(e.bytes_queued, 0)
+
+    def test_init_requests_timeout(self) -> None:
+        e = Emitter('0.0.0.0', request_timeout=(2.5, 5))
+        self.assertEqual(e.request_timeout, (2.5, 5))
 
     def test_as_collector_uri(self) -> None:
         uri = Emitter.as_collector_uri('0.0.0.0')
@@ -266,6 +272,22 @@ class TestEmitters(unittest.TestCase):
         e.send_events(evBuffer)
         mok_success.assert_not_called()
         mok_failure.assert_called_with(0, evBuffer)
+
+    @mock.patch('snowplow_tracker.emitters.requests.post')
+    def test_http_post_connect_timeout_error(self, mok_post_request: Any) -> None:
+        mok_post_request.side_effect = ConnectTimeout
+        e = Emitter('0.0.0.0')
+        post_succeeded = e.http_post("dummy_string")
+
+        self.assertFalse(post_succeeded)
+
+    @mock.patch('snowplow_tracker.emitters.requests.post')
+    def test_http_get_connect_timeout_error(self, mok_post_request: Any) -> None:
+        mok_post_request.side_effect = ConnectTimeout
+        e = Emitter('0.0.0.0')
+        get_succeeded = e.http_get({"a": "b"})
+
+        self.assertFalse(get_succeeded)
 
     ###
     # AsyncEmitter
