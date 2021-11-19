@@ -59,7 +59,8 @@ class Emitter(object):
     """
 
     @contract
-    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, on_success=None, on_failure=None, byte_limit=None):
+    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, on_success=None,
+                 on_failure=None, byte_limit=None, request_timeout=None):
         """
             :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
             :type  endpoint:    string
@@ -82,6 +83,10 @@ class Emitter(object):
             :type  on_failure:  function | None
             :param byte_limit:  The size event list after reaching which queued events will be flushed
             :type  byte_limit:  int | None
+            :param request_timeout: Timeout for the HTTP requests. Can be set either as single float value which
+                                     applies to both "connect" AND "read" timeout, or as tuple with two float values
+                                     which specify the "connect" and "read" timeouts separately
+            :type request_timeout:  float | tuple | None
         """
         self.endpoint = Emitter.as_collector_uri(endpoint, protocol, port, method)
 
@@ -96,6 +101,7 @@ class Emitter(object):
         self.buffer = []
         self.byte_limit = byte_limit
         self.bytes_queued = None if byte_limit is None else 0
+        self.request_timeout = request_timeout
 
         self.on_success = on_success
         self.on_failure = on_failure
@@ -193,8 +199,9 @@ class Emitter(object):
         logger.debug("Payload: %s" % data)
         post_succeeded = False
         try:
-            r = requests.post(self.endpoint, data=data, headers={'Content-Type': 'application/json; charset=utf-8'})
-            post_succeeded= Emitter.is_good_status_code(r.status_code)
+            r = requests.post(self.endpoint, data=data, headers={'Content-Type': 'application/json; charset=utf-8'},
+                              timeout=self.request_timeout)
+            post_succeeded = Emitter.is_good_status_code(r.status_code)
             getattr(logger, "info" if post_succeeded else "warning")("POST request finished with status code: " + str(r.status_code))
         except requests.RequestException as e:
             logger.warning(e)
@@ -211,7 +218,7 @@ class Emitter(object):
         logger.debug("Payload: %s" % payload)
         get_succeeded = False
         try:
-            r = requests.get(self.endpoint, params=payload)
+            r = requests.get(self.endpoint, params=payload, timeout=self.request_timeout)
             get_succeeded = Emitter.is_good_status_code(r.status_code)
             getattr(logger, "info" if get_succeeded else "warning")("GET request finished with status code: " + str(r.status_code))
         except requests.RequestException as e:
@@ -226,7 +233,7 @@ class Emitter(object):
         """
         logger.debug("Starting synchronous flush...")
         Emitter.flush(self)
-        logger.info("Finished synchrous flush")
+        logger.info("Finished synchronous flush")
 
     @staticmethod
     @contract
