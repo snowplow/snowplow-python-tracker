@@ -19,16 +19,15 @@
     License: Apache License Version 2.0
 """
 
-import random
-import time
 import json
 import base64
-from contracts import contract
+from typing import Any, Optional
+from snowplow_tracker.typing import PayloadDict, JsonEncoderFunction
 
 
 class Payload:
 
-    def __init__(self, dict_=None):
+    def __init__(self, dict_: Optional[PayloadDict] = None) -> None:
         """
             Constructor
         """
@@ -39,20 +38,18 @@ class Payload:
             for f in dict_:
                 self.nv_pairs[f] = dict_[f]
 
-
     """
     Methods to add to the payload
     """
 
-    def add(self, name, value):
+    def add(self, name: str, value: Any) -> None:
         """
             Add a name value pair to the Payload object
         """
         if not (value == "" or value is None):
             self.nv_pairs[name] = value
 
-    @contract
-    def add_dict(self, dict_, base64=False):
+    def add_dict(self, dict_: PayloadDict, base64: bool = False) -> None:
         """
             Add a dict of name value pairs to the Payload object
 
@@ -62,8 +59,13 @@ class Payload:
         for f in dict_:
             self.add(f, dict_[f])
 
-    @contract
-    def add_json(self, dict_, encode_base64, type_when_encoded, type_when_not_encoded, json_encoder=None):
+    def add_json(
+            self,
+            dict_: Optional[PayloadDict],
+            encode_base64: bool,
+            type_when_encoded: str,
+            type_when_not_encoded: str,
+            json_encoder: Optional[JsonEncoderFunction] = None) -> None:
         """
             Add an encoded or unencoded JSON to the payload
 
@@ -92,7 +94,7 @@ class Payload:
             else:
                 self.add(type_when_not_encoded, json_dict)
 
-    def get(self):
+    def get(self) -> PayloadDict:
         """
             Returns the context dictionary from the Payload object
         """

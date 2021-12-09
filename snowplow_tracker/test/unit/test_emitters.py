@@ -22,36 +22,36 @@
 
 import time
 import unittest
-try:
-    import unittest.mock as mock  # py3
-except ImportError:
-    import mock                   # py2
-
+import unittest.mock as mock
 from freezegun import freeze_time
+from typing import Any
 
 from snowplow_tracker.emitters import Emitter, AsyncEmitter, DEFAULT_MAX_LENGTH
-from snowplow_tracker.payload import Payload
+
 
 # helpers
-def mocked_flush(*args):
+def mocked_flush(*args: Any) -> None:
     pass
 
-def mocked_send_events(*args):
+
+def mocked_send_events(*args: Any) -> None:
     pass
 
-def mocked_http_success(*args):
+
+def mocked_http_success(*args: Any) -> bool:
     return True
 
-def mocked_http_failure(*args):
+
+def mocked_http_failure(*args: Any) -> bool:
     return False
 
 
 class TestEmitters(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         pass
 
-    def test_init(self):
+    def test_init(self) -> None:
         e = Emitter('0.0.0.0')
         self.assertEqual(e.endpoint, 'http://0.0.0.0/i')
         self.assertEqual(e.method, 'get')
@@ -63,40 +63,40 @@ class TestEmitters(unittest.TestCase):
         self.assertIsNone(e.on_failure)
         self.assertIsNone(e.timer)
 
-    def test_init_buffer_size(self):
+    def test_init_buffer_size(self) -> None:
         e = Emitter('0.0.0.0', buffer_size=10)
         self.assertEqual(e.buffer_size, 10)
 
-    def test_init_post(self):
+    def test_init_post(self) -> None:
         e = Emitter('0.0.0.0', method="post")
         self.assertEqual(e.buffer_size, DEFAULT_MAX_LENGTH)
 
-    def test_init_byte_limit(self):
+    def test_init_byte_limit(self) -> None:
         e = Emitter('0.0.0.0', byte_limit=512)
         self.assertEqual(e.bytes_queued, 0)
 
-    def test_as_collector_uri(self):
+    def test_as_collector_uri(self) -> None:
         uri = Emitter.as_collector_uri('0.0.0.0')
         self.assertEqual(uri, 'http://0.0.0.0/i')
 
-    def test_as_collector_uri_post(self):
+    def test_as_collector_uri_post(self) -> None:
         uri = Emitter.as_collector_uri('0.0.0.0', method="post")
         self.assertEqual(uri, 'http://0.0.0.0/com.snowplowanalytics.snowplow/tp2')
 
-    def test_as_collector_uri_port(self):
+    def test_as_collector_uri_port(self) -> None:
         uri = Emitter.as_collector_uri('0.0.0.0', port=9090, method="post")
         self.assertEqual(uri, 'http://0.0.0.0:9090/com.snowplowanalytics.snowplow/tp2')
 
-    def test_as_collector_uri_https(self):
+    def test_as_collector_uri_https(self) -> None:
         uri = Emitter.as_collector_uri('0.0.0.0', protocol="https")
         self.assertEqual(uri, 'https://0.0.0.0/i')
 
-    def test_as_collector_uri_empty_string(self):
+    def test_as_collector_uri_empty_string(self) -> None:
         with self.assertRaises(ValueError):
-            uri = Emitter.as_collector_uri('')
+            Emitter.as_collector_uri('')
 
     @mock.patch('snowplow_tracker.Emitter.flush')
-    def test_input_no_flush(self, mok_flush):
+    def test_input_no_flush(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
         e = Emitter('0.0.0.0', method="get", buffer_size=2)
@@ -110,7 +110,7 @@ class TestEmitters(unittest.TestCase):
         mok_flush.assert_not_called()
 
     @mock.patch('snowplow_tracker.Emitter.flush')
-    def test_input_flush_byte_limit(self, mok_flush):
+    def test_input_flush_byte_limit(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
         e = Emitter('0.0.0.0', method="get", buffer_size=2, byte_limit=16)
@@ -123,7 +123,7 @@ class TestEmitters(unittest.TestCase):
         self.assertEqual(mok_flush.call_count, 1)
 
     @mock.patch('snowplow_tracker.Emitter.flush')
-    def test_input_flush_buffer(self, mok_flush):
+    def test_input_flush_buffer(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
         e = Emitter('0.0.0.0', method="get", buffer_size=2, byte_limit=1024)
@@ -142,7 +142,7 @@ class TestEmitters(unittest.TestCase):
         self.assertEqual(mok_flush.call_count, 1)
 
     @mock.patch('snowplow_tracker.Emitter.flush')
-    def test_input_bytes_queued(self, mok_flush):
+    def test_input_bytes_queued(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
         e = Emitter('0.0.0.0', method="get", buffer_size=2, byte_limit=1024)
@@ -156,7 +156,7 @@ class TestEmitters(unittest.TestCase):
         self.assertEqual(e.bytes_queued, 48)
 
     @mock.patch('snowplow_tracker.Emitter.flush')
-    def test_input_bytes_post(self, mok_flush):
+    def test_input_bytes_post(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
         e = Emitter('0.0.0.0', method="post")
@@ -166,11 +166,11 @@ class TestEmitters(unittest.TestCase):
         self.assertEqual(e.buffer, [{"testString": "test", "testNum": "2.72"}])
 
     @mock.patch('snowplow_tracker.Emitter.send_events')
-    def test_flush(self, mok_send_events):
+    def test_flush(self, mok_send_events: Any) -> None:
         mok_send_events.side_effect = mocked_send_events
 
         e = Emitter('0.0.0.0', buffer_size=2, byte_limit=None)
-        nvPairs = {"n":"v"}
+        nvPairs = {"n": "v"}
         e.input(nvPairs)
         e.input(nvPairs)
 
@@ -178,11 +178,11 @@ class TestEmitters(unittest.TestCase):
         self.assertEqual(len(e.buffer), 0)
 
     @mock.patch('snowplow_tracker.Emitter.send_events')
-    def test_flush_bytes_queued(self, mok_send_events):
+    def test_flush_bytes_queued(self, mok_send_events: Any) -> None:
         mok_send_events.side_effect = mocked_send_events
 
         e = Emitter('0.0.0.0', buffer_size=2, byte_limit=256)
-        nvPairs = {"n":"v"}
+        nvPairs = {"n": "v"}
         e.input(nvPairs)
         e.input(nvPairs)
 
@@ -191,22 +191,22 @@ class TestEmitters(unittest.TestCase):
         self.assertEqual(e.bytes_queued, 0)
 
     @freeze_time("2021-04-14 00:00:02")  # unix: 1618358402000
-    def test_attach_sent_tstamp(self):
+    def test_attach_sent_tstamp(self) -> None:
         e = Emitter('0.0.0.0')
-        ev_list = [{"a": "aa"},{"b": "bb"},{"c": "cc"}]
+        ev_list = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
 
         e.attach_sent_timestamp(ev_list)
         reduced = True
-        for e in ev_list:
-            reduced = reduced and "stm" in e.keys() and e["stm"] == "1618358402000"
+        for ev in ev_list:
+            reduced = reduced and "stm" in ev.keys() and ev["stm"] == "1618358402000"
         self.assertTrue(reduced)
 
     @mock.patch('snowplow_tracker.Emitter.flush')
-    def test_flush_timer(self, mok_flush):
+    def test_flush_timer(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
         e = Emitter('0.0.0.0', method="post", buffer_size=10)
-        ev_list = [{"a": "aa"},{"b": "bb"},{"c": "cc"}]
+        ev_list = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         for i in ev_list:
             e.input(i)
 
@@ -216,53 +216,53 @@ class TestEmitters(unittest.TestCase):
         self.assertEqual(mok_flush.call_count, 1)
 
     @mock.patch('snowplow_tracker.Emitter.http_get')
-    def test_send_events_get_success(self, mok_http_get):
+    def test_send_events_get_success(self, mok_http_get: Any) -> None:
         mok_http_get.side_effect = mocked_http_success
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
         e = Emitter('0.0.0.0', method="get", buffer_size=10, on_success=mok_success, on_failure=mok_failure)
 
-        evBuffer = [{"a":"aa"}, {"b": "bb"}, {"c": "cc"}]
+        evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         e.send_events(evBuffer)
         mok_success.assert_called_once_with(evBuffer)
         mok_failure.assert_not_called()
 
     @mock.patch('snowplow_tracker.Emitter.http_get')
-    def test_send_events_get_failure(self, mok_http_get):
+    def test_send_events_get_failure(self, mok_http_get: Any) -> None:
         mok_http_get.side_effect = mocked_http_failure
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
         e = Emitter('0.0.0.0', method="get", buffer_size=10, on_success=mok_success, on_failure=mok_failure)
 
-        evBuffer = [{"a":"aa"}, {"b": "bb"}, {"c": "cc"}]
+        evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         e.send_events(evBuffer)
         mok_success.assert_not_called()
         mok_failure.assert_called_once_with(0, evBuffer)
 
     @mock.patch('snowplow_tracker.Emitter.http_post')
-    def test_send_events_post_success(self, mok_http_post):
+    def test_send_events_post_success(self, mok_http_post: Any) -> None:
         mok_http_post.side_effect = mocked_http_success
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
         e = Emitter('0.0.0.0', method="post", buffer_size=10, on_success=mok_success, on_failure=mok_failure)
 
-        evBuffer = [{"a":"aa"}, {"b": "bb"}, {"c": "cc"}]
+        evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         e.send_events(evBuffer)
         mok_success.assert_called_once_with(evBuffer)
         mok_failure.assert_not_called()
 
     @mock.patch('snowplow_tracker.Emitter.http_post')
-    def test_send_events_post_failure(self, mok_http_post):
+    def test_send_events_post_failure(self, mok_http_post: Any) -> None:
         mok_http_post.side_effect = mocked_http_failure
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
         e = Emitter('0.0.0.0', method="post", buffer_size=10, on_success=mok_success, on_failure=mok_failure)
 
-        evBuffer = [{"a":"aa"}, {"b": "bb"}, {"c": "cc"}]
+        evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         e.send_events(evBuffer)
         mok_success.assert_not_called()
         mok_failure.assert_called_with(0, evBuffer)
@@ -271,30 +271,30 @@ class TestEmitters(unittest.TestCase):
     # AsyncEmitter
     ###
     @mock.patch('snowplow_tracker.AsyncEmitter.flush')
-    def test_async_emitter_input(self, mok_flush):
+    def test_async_emitter_input(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
         ae = AsyncEmitter('0.0.0.0', port=9090, method="get", buffer_size=3, thread_count=5)
         self.assertTrue(ae.queue.empty())
 
-        ae.input({"a":"aa"})
-        ae.input({"b":"bb"})
+        ae.input({"a": "aa"})
+        ae.input({"b": "bb"})
         self.assertEqual(len(ae.buffer), 2)
         self.assertTrue(ae.queue.empty())
         mok_flush.assert_not_called()
 
-        ae.input({"c":"cc"})  # meet buffer size
+        ae.input({"c": "cc"})  # meet buffer size
         self.assertEqual(mok_flush.call_count, 1)
 
     @mock.patch('snowplow_tracker.AsyncEmitter.send_events')
-    def test_async_emitter_sync_flash(self, mok_send_events):
+    def test_async_emitter_sync_flash(self, mok_send_events: Any) -> None:
         mok_send_events.side_effect = mocked_send_events
 
         ae = AsyncEmitter('0.0.0.0', port=9090, method="get", buffer_size=3, thread_count=5, byte_limit=1024)
         self.assertTrue(ae.queue.empty())
 
-        ae.input({"a":"aa"})
-        ae.input({"b":"bb"})
+        ae.input({"a": "aa"})
+        ae.input({"b": "bb"})
         self.assertEqual(len(ae.buffer), 2)
         self.assertTrue(ae.queue.empty())
         mok_send_events.assert_not_called()
@@ -305,60 +305,60 @@ class TestEmitters(unittest.TestCase):
         self.assertEqual(mok_send_events.call_count, 1)
 
     @mock.patch('snowplow_tracker.Emitter.http_get')
-    def test_async_send_events_get_success(self, mok_http_get):
+    def test_async_send_events_get_success(self, mok_http_get: Any) -> None:
         mok_http_get.side_effect = mocked_http_success
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
         ae = AsyncEmitter('0.0.0.0', method="get", buffer_size=10, on_success=mok_success, on_failure=mok_failure)
 
-        evBuffer = [{"a":"aa"}, {"b": "bb"}, {"c": "cc"}]
+        evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         ae.send_events(evBuffer)
         mok_success.assert_called_once_with(evBuffer)
         mok_failure.assert_not_called()
 
     @mock.patch('snowplow_tracker.Emitter.http_get')
-    def test_async_send_events_get_failure(self, mok_http_get):
+    def test_async_send_events_get_failure(self, mok_http_get: Any) -> None:
         mok_http_get.side_effect = mocked_http_failure
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
         ae = AsyncEmitter('0.0.0.0', method="get", buffer_size=10, on_success=mok_success, on_failure=mok_failure)
 
-        evBuffer = [{"a":"aa"}, {"b": "bb"}, {"c": "cc"}]
+        evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         ae.send_events(evBuffer)
         mok_success.assert_not_called()
         mok_failure.assert_called_once_with(0, evBuffer)
 
     @mock.patch('snowplow_tracker.Emitter.http_post')
-    def test_async_send_events_post_success(self, mok_http_post):
+    def test_async_send_events_post_success(self, mok_http_post: Any) -> None:
         mok_http_post.side_effect = mocked_http_success
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
         ae = Emitter('0.0.0.0', method="post", buffer_size=10, on_success=mok_success, on_failure=mok_failure)
 
-        evBuffer = [{"a":"aa"}, {"b": "bb"}, {"c": "cc"}]
+        evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         ae.send_events(evBuffer)
         mok_success.assert_called_once_with(evBuffer)
         mok_failure.assert_not_called()
 
     @mock.patch('snowplow_tracker.Emitter.http_post')
-    def test_async_send_events_post_failure(self, mok_http_post):
+    def test_async_send_events_post_failure(self, mok_http_post: Any) -> None:
         mok_http_post.side_effect = mocked_http_failure
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
         ae = Emitter('0.0.0.0', method="post", buffer_size=10, on_success=mok_success, on_failure=mok_failure)
 
-        evBuffer = [{"a":"aa"}, {"b": "bb"}, {"c": "cc"}]
+        evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         ae.send_events(evBuffer)
         mok_success.assert_not_called()
         mok_failure.assert_called_with(0, evBuffer)
 
-    ## Unicode
+    # Unicode
     @mock.patch('snowplow_tracker.AsyncEmitter.flush')
-    def test_input_unicode_get(self, mok_flush):
+    def test_input_unicode_get(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
         payload = {"unicode": u'\u0107', "alsoAscii": "abc"}
@@ -369,7 +369,7 @@ class TestEmitters(unittest.TestCase):
         self.assertDictEqual(payload, ae.buffer[0])
 
     @mock.patch('snowplow_tracker.AsyncEmitter.flush')
-    def test_input_unicode_post(self, mok_flush):
+    def test_input_unicode_post(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
         payload = {"unicode": u'\u0107', "alsoAscii": "abc"}

@@ -1,5 +1,5 @@
 """
-    self_describing_json.py
+    typing.py
 
     Copyright (c) 2013-2021 Snowplow Analytics Ltd. All rights reserved.
 
@@ -14,28 +14,30 @@
     express or implied. See the Apache License Version 2.0 for the specific
     language governing permissions and limitations there under.
 
-    Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
+    Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock, Matus Tomlein
     Copyright: Copyright (c) 2013-2021 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
 
-import json
-from typing import Union
+from typing import Dict, List, Callable, Any, Optional
+from typing_extensions import Protocol, Literal
 
-from snowplow_tracker.typing import PayloadDict, PayloadDictList
+PayloadDict = Dict[str, Any]
+PayloadDictList = List[PayloadDict]
+JsonEncoderFunction = Callable[[Any], Any]
+
+HttpProtocol = Literal["http", "https"]
+Method = Literal["get", "post"]
 
 
-class SelfDescribingJson(object):
+class EmitterProtocol(Protocol):
+    def input(self, payload: PayloadDict) -> None:
+        ...
 
-    def __init__(self, schema: str, data: Union[PayloadDict, PayloadDictList]) -> None:
-        self.schema = schema
-        self.data = data
 
-    def to_json(self) -> PayloadDict:
-        return {
-            "schema": self.schema,
-            "data": self.data
-        }
+class RedisProtocol(Protocol):
+    def rpush(self, name: Any, *values: Any) -> int:
+        ...
 
-    def to_string(self) -> str:
-        return json.dumps(self.to_json())
+    def lpop(self, name: Any, count: Optional[int] = ...) -> Any:
+        ...

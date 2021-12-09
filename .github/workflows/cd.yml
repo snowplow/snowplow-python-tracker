@@ -36,7 +36,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [2.7, 3.8]
+        python-version: [3.8]
 
     steps:
     - name: Checkout code
@@ -47,13 +47,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Ensure pip version for python 2
+    - name: Pin pip version
       run: |
-        if [ "${{ matrix.python-version}}" == "2.7" ] ; then
-            echo "pip_v=pip < 21.0" >> $GITHUB_ENV
-        else
-            echo "pip_v=pip" >> $GITHUB_ENV
-        fi
+        echo "pip_v=pip" >> $GITHUB_ENV
 
     - name: Build
       run: |
