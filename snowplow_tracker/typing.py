@@ -19,15 +19,34 @@
     License: Apache License Version 2.0
 """
 
-from typing import Dict, List, Callable, Any, Optional
+from typing import Dict, List, Callable, Any, Optional, Union, Tuple
 from typing_extensions import Protocol, Literal
 
 PayloadDict = Dict[str, Any]
 PayloadDictList = List[PayloadDict]
 JsonEncoderFunction = Callable[[Any], Any]
 
+# tracker
+FORM_NODE_NAMES = {"INPUT", "TEXTAREA", "SELECT"}
+FORM_TYPES = {
+    "button", "checkbox", "color", "date", "datetime",
+    "datetime-local", "email", "file", "hidden", "image", "month",
+    "number", "password", "radio", "range", "reset", "search",
+    "submit", "tel", "text", "time", "url", "week"
+}
+FormNodeName = Literal["INPUT", "TEXTAREA", "SELECT"]
+ElementClasses = Union[List[str], Tuple[str, Any]]
+FormClasses = Union[List[str], Tuple[str, Any]]
+
+# emitters
 HttpProtocol = Literal["http", "https"]
 Method = Literal["get", "post"]
+SuccessCallback = Callable[[PayloadDictList], None]
+FailureCallback = Callable[[int, PayloadDictList], None]
+
+# subject
+SUPPORTED_PLATFORMS = {"pc", "tv", "mob", "cnsl", "iot", "web", "srv", "app"}
+SupportedPlatform = Literal["pc", "tv", "mob", "cnsl", "iot", "web", "srv", "app"]
 
 
 class EmitterProtocol(Protocol):

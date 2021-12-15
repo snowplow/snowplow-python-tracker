@@ -21,7 +21,8 @@
 
 import traceback
 import re
-from typing import Any, Iterable, Callable, Sized
+from typing import Any, Dict, Iterable, Callable, Sized
+from snowplow_tracker.typing import FORM_TYPES, FORM_NODE_NAMES
 
 _CONTRACTS_ENABLED = True
 _MATCH_FIRST_PARAMETER_REGEX = re.compile(r"\(([\w.]+)[,)]")
@@ -67,11 +68,31 @@ def satisfies(value: Any, check: Callable[[Any], bool]) -> None:
         raise ValueError("{0} is not allowed.".format(_get_parameter_name()))
 
 
+def form_element(element: Dict[str, Any]) -> None:
+    satisfies(element, lambda x: _check_form_element(x))
+
+
 def _get_parameter_name() -> str:
     stack = traceback.extract_stack()
     _, _, _, code = stack[-3]
 
     match = _MATCH_FIRST_PARAMETER_REGEX.search(code)
     if not match:
-        raise Exception("The call to the validation had an unexpected format.")
+        return 'Unnamed parameter'
     return match.groups(0)[0]
+
+
+def _check_form_element(element: Dict[str, Any]) -> bool:
+    """
+        Helper method to check that dictionary conforms element
+        in sumbit_form and change_form schemas
+    """
+    all_present = isinstance(element, dict) and 'name' in element and 'value' in element and 'nodeName' in element
+    try:
+        if element['type'] in FORM_TYPES:
+            type_valid = True
+        else:
+            type_valid = False
+    except KeyError:
+        type_valid = True
+    return all_present and element['nodeName'] in FORM_NODE_NAMES and type_valid

@@ -21,15 +21,13 @@
 
 import time
 import uuid
-from typing import Any, Optional, Tuple, Union, List, Dict, Sequence
-from typing_extensions import Literal
+from typing import Any, Optional, Union, List, Dict, Sequence
 
 from snowplow_tracker import payload, _version, SelfDescribingJson
 from snowplow_tracker import subject as _subject
-from snowplow_tracker.contracts import non_empty_string, one_of, satisfies, non_empty
-from snowplow_tracker.typing import JsonEncoderFunction, EmitterProtocol
-
-FormNodeName = Literal["INPUT", "TEXTAREA", "SELECT"]
+from snowplow_tracker.contracts import non_empty_string, one_of, non_empty, form_element
+from snowplow_tracker.typing import JsonEncoderFunction, EmitterProtocol,\
+    FORM_NODE_NAMES, FORM_TYPES, FormNodeName, ElementClasses, FormClasses
 
 """
 Constants & config
@@ -41,13 +39,6 @@ BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow"
 SCHEMA_TAG = "jsonschema"
 CONTEXT_SCHEMA = "%s/contexts/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
 UNSTRUCT_EVENT_SCHEMA = "%s/unstruct_event/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
-FORM_NODE_NAMES = {"INPUT", "TEXTAREA", "SELECT"}
-FORM_TYPES = {
-    "button", "checkbox", "color", "date", "datetime",
-    "datetime-local", "email", "file", "hidden", "image", "month",
-    "number", "password", "radio", "range", "reset", "search",
-    "submit", "tel", "text", "time", "url", "week"
-}
 ContextArray = List[SelfDescribingJson]
 
 """
@@ -260,7 +251,7 @@ class Tracker:
             self,
             target_url: str,
             element_id: Optional[str] = None,
-            element_classes: Optional[Union[List[str], Tuple[str]]] = None,
+            element_classes: Optional[ElementClasses] = None,
             element_target: Optional[str] = None,
             element_content: Optional[str] = None,
             context: Optional[List[SelfDescribingJson]] = None,
@@ -409,7 +400,7 @@ class Tracker:
             node_name: FormNodeName,
             value: Optional[str],
             type_: Optional[str] = None,
-            element_classes: Optional[Union[List[str], Tuple[str]]] = None,
+            element_classes: Optional[ElementClasses] = None,
             context: Optional[List[SelfDescribingJson]] = None,
             tstamp: Optional[float] = None,
             event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
@@ -456,7 +447,7 @@ class Tracker:
     def track_form_submit(
             self,
             form_id: str,
-            form_classes: Optional[Union[List[str], Tuple[str]]] = None,
+            form_classes: Optional[FormClasses] = None,
             elements: Optional[List[Dict[str, Any]]] = None,
             context: Optional[List[SelfDescribingJson]] = None,
             tstamp: Optional[float] = None,
@@ -477,8 +468,8 @@ class Tracker:
             :rtype:                 tracker
         """
         non_empty_string(form_id)
-        for form_element in elements or []:
-            satisfies(form_element, lambda x: Tracker.check_form_element(x))
+        for element in elements or []:
+            form_element(element)
 
         properties = dict()
         properties['formId'] = form_id
@@ -802,19 +793,3 @@ class Tracker:
         """
         self.emitters.append(emitter)
         return self
-
-    @staticmethod
-    def check_form_element(element: Dict[str, Any]) -> bool:
-        """
-            Helper method to check that dictionary conforms element
-            in sumbit_form and change_form schemas
-        """
-        all_present = isinstance(element, dict) and 'name' in element and 'value' in element and 'nodeName' in element
-        try:
-            if element['type'] in FORM_TYPES:
-                type_valid = True
-            else:
-                type_valid = False
-        except KeyError:
-            type_valid = True
-        return all_present and element['nodeName'] in FORM_NODE_NAMES and type_valid

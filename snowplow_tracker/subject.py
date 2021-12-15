@@ -20,11 +20,8 @@
 """
 
 from snowplow_tracker.contracts import one_of, greater_than
-from typing_extensions import Literal
+from snowplow_tracker.typing import SupportedPlatform, SUPPORTED_PLATFORMS
 
-SupportedPlatform = Literal["pc", "tv", "mob", "cnsl", "iot", "web", "srv", "app"]
-
-SUPPORTED_PLATFORMS = {"pc", "tv", "mob", "cnsl", "iot", "web", "srv", "app"}
 DEFAULT_PLATFORM = "pc"
 
 

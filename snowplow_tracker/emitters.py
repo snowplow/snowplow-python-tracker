@@ -25,11 +25,11 @@ import logging
 import time
 import threading
 import requests
-from typing import Optional, Any, Callable
+from typing import Optional, Any
 from queue import Queue
 
 from snowplow_tracker.self_describing_json import SelfDescribingJson
-from snowplow_tracker.typing import PayloadDict, PayloadDictList, HttpProtocol, Method
+from snowplow_tracker.typing import PayloadDict, PayloadDictList, HttpProtocol, Method, SuccessCallback, FailureCallback
 from snowplow_tracker.contracts import one_of
 
 # logging
@@ -41,9 +41,6 @@ DEFAULT_MAX_LENGTH = 10
 PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4"
 PROTOCOLS = {"http", "https"}
 METHODS = {"get", "post"}
-
-SuccessCallback = Callable[[PayloadDictList], None]
-FailureCallback = Callable[[int, PayloadDictList], None]
 
 
 class Emitter(object):
@@ -153,21 +150,12 @@ class Emitter(object):
                 self.bytes_queued += len(str(payload))
 
             if self.method == "post":
-                self.buffer.append({key: Emitter.to_str(payload[key]) for key in payload})
+                self.buffer.append({key: str(payload[key]) for key in payload})
             else:
                 self.buffer.append(payload)
 
             if self.reached_limit():
                 self.flush()
-
-    @staticmethod
-    def to_str(x: Any) -> str:
-        pyVersion = sys.version_info[0]
-        if pyVersion < 3:
-            if isinstance(x, str):
-                return x
-            return str(x)
-        return str(x)
 
     def reached_limit(self) -> bool:
         """
