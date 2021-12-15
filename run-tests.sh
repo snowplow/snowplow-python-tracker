@@ -100,9 +100,9 @@ function deploy {
     source deactivate
   fi
 
-  # pyenv install 3.10.0
+  # pyenv install 3.10.1
   if [ ! -e ~/.pyenv/versions/tracker310 ]; then
-    pyenv virtualenv 3.10.0 tracker310
+    pyenv virtualenv 3.10.1 tracker310
     pyenv activate tracker310
     pip install .
     pip install -r requirements-test.txt
@@ -110,7 +110,7 @@ function deploy {
   fi
 
   if [ ! -e ~/.pyenv/versions/tracker310redis ]; then
-    pyenv virtualenv 3.10.0 tracker310redis
+    pyenv virtualenv 3.10.1 tracker310redis
     pyenv activate tracker310redis
     pip install .[redis]
     pip install -r requirements-test.txt
