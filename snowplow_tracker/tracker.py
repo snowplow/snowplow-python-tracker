@@ -21,13 +21,13 @@
 
 import time
 import uuid
-import six
-
-from contracts import contract, new_contract
+from typing import Any, Optional, Union, List, Dict, Sequence
 
 from snowplow_tracker import payload, _version, SelfDescribingJson
 from snowplow_tracker import subject as _subject
-
+from snowplow_tracker.contracts import non_empty_string, one_of, non_empty, form_element
+from snowplow_tracker.typing import JsonEncoderFunction, EmitterProtocol,\
+    FORM_NODE_NAMES, FORM_TYPES, FormNodeName, ElementClasses, FormClasses
 
 """
 Constants & config
@@ -39,13 +39,7 @@ BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow"
 SCHEMA_TAG = "jsonschema"
 CONTEXT_SCHEMA = "%s/contexts/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
 UNSTRUCT_EVENT_SCHEMA = "%s/unstruct_event/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
-FORM_NODE_NAMES = ("INPUT", "TEXTAREA", "SELECT")
-FORM_TYPES = (
-    "button", "checkbox", "color", "date", "datetime",
-    "datetime-local", "email", "file", "hidden", "image", "month",
-    "number", "password", "radio", "range", "reset", "search",
-    "submit", "tel", "text", "time", "url", "week"
-)
+ContextArray = List[SelfDescribingJson]
 
 """
 Tracker class
@@ -54,32 +48,14 @@ Tracker class
 
 class Tracker:
 
-    new_contract("not_none", lambda s: s is not None)
-
-    new_contract("non_empty_string", lambda s: isinstance(s, six.string_types)
-                 and len(s) > 0)
-    new_contract("string_or_none", lambda s: isinstance(s, six.string_types)
-                 or s is None)
-    new_contract("payload", lambda s: isinstance(s, payload.Payload))
-
-    new_contract("tracker", lambda s: isinstance(s, Tracker))
-
-    new_contract("emitter", lambda s: hasattr(s, "input"))
-
-    new_contract("self_describing_json", lambda s: isinstance(s, SelfDescribingJson))
-
-    new_contract("context_array", "list(self_describing_json)")
-
-    new_contract("form_node_name", lambda s: s in FORM_NODE_NAMES)
-
-    new_contract("form_type", lambda s: s.lower() in FORM_TYPES)
-
-    new_contract("form_element", lambda x: Tracker.check_form_element(x))
-
-    @contract
-    def __init__(self, emitters, subject=None,
-                 namespace=None, app_id=None,
-                 encode_base64=DEFAULT_ENCODE_BASE64, json_encoder=None):
+    def __init__(
+            self,
+            emitters: Union[List[EmitterProtocol], EmitterProtocol],
+            subject: Optional[_subject.Subject] = None,
+            namespace: Optional[str] = None,
+            app_id: Optional[str] = None,
+            encode_base64: bool = DEFAULT_ENCODE_BASE64,
+            json_encoder: Optional[JsonEncoderFunction] = None) -> None:
         """
             :param emitters:         Emitters to which events will be sent
             :type  emitters:         list[>0](emitter) | emitter
@@ -98,6 +74,7 @@ class Tracker:
             subject = _subject.Subject()
 
         if type(emitters) is list:
+            non_empty(emitters)
             self.emitters = emitters
         else:
             self.emitters = [emitters]
@@ -114,8 +91,7 @@ class Tracker:
         self.timer = None
 
     @staticmethod
-    @contract
-    def get_uuid():
+    def get_uuid() -> str:
         """
             Set transaction ID for the payload once during the lifetime of the
             event.
@@ -125,8 +101,7 @@ class Tracker:
         return str(uuid.uuid4())
 
     @staticmethod
-    @contract
-    def get_timestamp(tstamp=None):
+    def get_timestamp(tstamp: Optional[float] = None) -> int:
         """
             :param tstamp:    User-input timestamp or None
             :type  tstamp:    int | float | None
@@ -136,13 +111,11 @@ class Tracker:
             return int(tstamp)
         return int(time.time() * 1000)
 
-
     """
     Tracking methods
     """
 
-    @contract
-    def track(self, pb):
+    def track(self, pb: payload.Payload) -> 'Tracker':
         """
             Send the payload to a emitter
 
@@ -154,8 +127,12 @@ class Tracker:
             emitter.input(pb.nv_pairs)
         return self
 
-    @contract
-    def complete_payload(self, pb, context, tstamp, event_subject):
+    def complete_payload(
+            self,
+            pb: payload.Payload,
+            context: Optional[List[SelfDescribingJson]],
+            tstamp: Optional[float],
+            event_subject: Optional[_subject.Subject]) -> 'Tracker':
         """
             Called by all tracking events to add the standard name-value pairs
             to the Payload object irrespective of the tracked event.
@@ -188,8 +165,14 @@ class Tracker:
 
         return self.track(pb)
 
-    @contract
-    def track_page_view(self, page_url, page_title=None, referrer=None, context=None, tstamp=None, event_subject=None):
+    def track_page_view(
+            self,
+            page_url: str,
+            page_title: Optional[str] = None,
+            referrer: Optional[str] = None,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             :param  page_url:       URL of the viewed page
             :type   page_url:       non_empty_string
@@ -205,6 +188,8 @@ class Tracker:
             :type   event_subject:  subject | None
             :rtype:                 tracker
         """
+        non_empty_string(page_url)
+
         pb = payload.Payload()
         pb.add("e", "pv")           # pv: page view
         pb.add("url", page_url)
@@ -213,8 +198,18 @@ class Tracker:
 
         return self.complete_payload(pb, context, tstamp, event_subject)
 
-    @contract
-    def track_page_ping(self, page_url, page_title=None, referrer=None, min_x=None, max_x=None, min_y=None, max_y=None, context=None, tstamp=None, event_subject=None):
+    def track_page_ping(
+            self,
+            page_url: str,
+            page_title: Optional[str] = None,
+            referrer: Optional[str] = None,
+            min_x: Optional[int] = None,
+            max_x: Optional[int] = None,
+            min_y: Optional[int] = None,
+            max_y: Optional[int] = None,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             :param  page_url:       URL of the viewed page
             :type   page_url:       non_empty_string
@@ -238,6 +233,8 @@ class Tracker:
             :type   event_subject:  subject | None
             :rtype:                 tracker
         """
+        non_empty_string(page_url)
+
         pb = payload.Payload()
         pb.add("e", "pp")           # pp: page ping
         pb.add("url", page_url)
@@ -250,11 +247,16 @@ class Tracker:
 
         return self.complete_payload(pb, context, tstamp, event_subject)
 
-    @contract
-    def track_link_click(self, target_url, element_id=None,
-                         element_classes=None, element_target=None,
-                         element_content=None, context=None, tstamp=None,
-                         event_subject=None):
+    def track_link_click(
+            self,
+            target_url: str,
+            element_id: Optional[str] = None,
+            element_classes: Optional[ElementClasses] = None,
+            element_target: Optional[str] = None,
+            element_content: Optional[str] = None,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             :param  target_url:     Target URL of the link
             :type   target_url:     non_empty_string
@@ -274,6 +276,8 @@ class Tracker:
             :type   event_subject:  subject | None
             :rtype:                 tracker
         """
+        non_empty_string(target_url)
+
         properties = {}
         properties["targetUrl"] = target_url
         if element_id is not None:
@@ -289,10 +293,17 @@ class Tracker:
 
         return self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    @contract
-    def track_add_to_cart(self, sku, quantity, name=None, category=None,
-                          unit_price=None, currency=None, context=None,
-                          tstamp=None, event_subject=None):
+    def track_add_to_cart(
+            self,
+            sku: str,
+            quantity: int,
+            name: Optional[str] = None,
+            category: Optional[str] = None,
+            unit_price: Optional[float] = None,
+            currency: Optional[str] = None,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             :param  sku:            Item SKU or ID
             :type   sku:            non_empty_string
@@ -314,6 +325,8 @@ class Tracker:
             :type   event_subject:  subject | None
             :rtype:                 tracker
         """
+        non_empty_string(sku)
+
         properties = {}
         properties["sku"] = sku
         properties["quantity"] = quantity
@@ -330,10 +343,17 @@ class Tracker:
 
         return self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    @contract
-    def track_remove_from_cart(self, sku, quantity, name=None, category=None,
-                               unit_price=None, currency=None, context=None,
-                               tstamp=None, event_subject=None):
+    def track_remove_from_cart(
+            self,
+            sku: str,
+            quantity: int,
+            name: Optional[str] = None,
+            category: Optional[str] = None,
+            unit_price: Optional[float] = None,
+            currency: Optional[str] = None,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             :param  sku:            Item SKU or ID
             :type   sku:            non_empty_string
@@ -355,6 +375,8 @@ class Tracker:
             :type   event_subject:  subject | None
             :rtype:                 tracker
         """
+        non_empty_string(sku)
+
         properties = {}
         properties["sku"] = sku
         properties["quantity"] = quantity
@@ -371,10 +393,17 @@ class Tracker:
 
         return self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    @contract
-    def track_form_change(self, form_id, element_id, node_name, value, type_=None,
-                          element_classes=None, context=None, tstamp=None,
-                          event_subject=None):
+    def track_form_change(
+            self,
+            form_id: str,
+            element_id: Optional[str],
+            node_name: FormNodeName,
+            value: Optional[str],
+            type_: Optional[str] = None,
+            element_classes: Optional[ElementClasses] = None,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             :param  form_id:        ID attribute of the HTML form
             :type   form_id:        non_empty_string
@@ -396,6 +425,11 @@ class Tracker:
             :type   event_subject:  subject | None
             :rtype:                 tracker
         """
+        non_empty_string(form_id)
+        one_of(node_name, FORM_NODE_NAMES)
+        if type_ is not None:
+            one_of(type_.lower(), FORM_TYPES)
+
         properties = dict()
         properties["formId"] = form_id
         properties["elementId"] = element_id
@@ -410,9 +444,14 @@ class Tracker:
 
         return self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    @contract
-    def track_form_submit(self, form_id, form_classes=None, elements=None,
-                          context=None, tstamp=None, event_subject=None):
+    def track_form_submit(
+            self,
+            form_id: str,
+            form_classes: Optional[FormClasses] = None,
+            elements: Optional[List[Dict[str, Any]]] = None,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             :param  form_id:        ID attribute of the HTML form
             :type   form_id:        non_empty_string
@@ -428,6 +467,9 @@ class Tracker:
             :type   event_subject:  subject | None
             :rtype:                 tracker
         """
+        non_empty_string(form_id)
+        for element in elements or []:
+            form_element(element)
 
         properties = dict()
         properties['formId'] = form_id
@@ -440,9 +482,15 @@ class Tracker:
 
         return self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    @contract
-    def track_site_search(self, terms, filters=None, total_results=None,
-                          page_results=None, context=None, tstamp=None, event_subject=None):
+    def track_site_search(
+            self,
+            terms: Sequence[str],
+            filters: Optional[Dict[str, Union[str, bool]]] = None,
+            total_results: Optional[int] = None,
+            page_results: Optional[int] = None,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             :param  terms:          Search terms
             :type   terms:          seq[>=1](str)
@@ -460,6 +508,8 @@ class Tracker:
             :type   event_subject:  subject | None
             :rtype:                 tracker
         """
+        non_empty(terms)
+
         properties = {}
         properties["terms"] = terms
         if filters is not None:
@@ -473,10 +523,18 @@ class Tracker:
 
         return self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    @contract
-    def track_ecommerce_transaction_item(self, order_id, sku, price, quantity,
-                                         name=None, category=None, currency=None,
-                                         context=None, tstamp=None, event_subject=None):
+    def track_ecommerce_transaction_item(
+            self,
+            order_id: str,
+            sku: str,
+            price: float,
+            quantity: int,
+            name: Optional[str] = None,
+            category: Optional[str] = None,
+            currency: Optional[str] = None,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             This is an internal method called by track_ecommerce_transaction.
             It is not for public use.
@@ -503,6 +561,9 @@ class Tracker:
             :type   event_subject:  subject | None
             :rtype:              tracker
         """
+        non_empty_string(order_id)
+        non_empty_string(sku)
+
         pb = payload.Payload()
         pb.add("e", "ti")
         pb.add("ti_id", order_id)
@@ -515,11 +576,21 @@ class Tracker:
 
         return self.complete_payload(pb, context, tstamp, event_subject)
 
-    @contract
-    def track_ecommerce_transaction(self, order_id, total_value, affiliation=None,
-                                    tax_value=None, shipping=None, city=None, state=None,
-                                    country=None,  currency=None, items=None,
-                                    context=None, tstamp=None, event_subject=None):
+    def track_ecommerce_transaction(
+            self,
+            order_id: str,
+            total_value: float,
+            affiliation: Optional[str] = None,
+            tax_value: Optional[float] = None,
+            shipping: Optional[float] = None,
+            city: Optional[str] = None,
+            state: Optional[str] = None,
+            country: Optional[str] = None,
+            currency: Optional[str] = None,
+            items: Optional[List[Dict[str, Any]]] = None,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             :param  order_id:       ID of the eCommerce transaction
             :type   order_id:       non_empty_string
@@ -549,6 +620,8 @@ class Tracker:
             :type   event_subject:  subject | None
             :rtype:                 tracker
         """
+        non_empty_string(order_id)
+
         pb = payload.Payload()
         pb.add("e", "tr")
         pb.add("tr_id", order_id)
@@ -576,8 +649,13 @@ class Tracker:
 
         return self
 
-    @contract
-    def track_screen_view(self, name=None, id_=None, context=None, tstamp=None, event_subject=None):
+    def track_screen_view(
+            self,
+            name: Optional[str] = None,
+            id_: Optional[str] = None,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             :param  name:           The name of the screen view event
             :type   name:           string_or_none
@@ -601,9 +679,16 @@ class Tracker:
 
         return self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    @contract
-    def track_struct_event(self, category, action, label=None, property_=None, value=None,
-                           context=None, tstamp=None, event_subject=None):
+    def track_struct_event(
+            self,
+            category: str,
+            action: str,
+            label: Optional[str] = None,
+            property_: Optional[str] = None,
+            value: Optional[float] = None,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             :param  category:       Category of the event
             :type   category:       non_empty_string
@@ -625,6 +710,9 @@ class Tracker:
             :type   event_subject:  subject | None
             :rtype:                 tracker
         """
+        non_empty_string(category)
+        non_empty_string(action)
+
         pb = payload.Payload()
         pb.add("e", "se")
         pb.add("se_ca", category)
@@ -635,8 +723,12 @@ class Tracker:
 
         return self.complete_payload(pb, context, tstamp, event_subject)
 
-    @contract
-    def track_unstruct_event(self, event_json, context=None, tstamp=None, event_subject=None):
+    def track_unstruct_event(
+            self,
+            event_json: SelfDescribingJson,
+            context: Optional[List[SelfDescribingJson]] = None,
+            tstamp: Optional[float] = None,
+            event_subject: Optional[_subject.Subject] = None) -> 'Tracker':
         """
             :param  event_json:      The properties of the event. Has two field:
                                      A "data" field containing the event properties and
@@ -663,8 +755,7 @@ class Tracker:
     # Alias
     track_self_describing_event = track_unstruct_event
 
-    @contract
-    def flush(self, is_async=False):
+    def flush(self, is_async: bool = False) -> 'Tracker':
         """
             Flush the emitter
 
@@ -674,13 +765,14 @@ class Tracker:
         """
         for emitter in self.emitters:
             if is_async:
-                emitter.flush()
+                if hasattr(emitter, 'flush'):
+                    emitter.flush()
             else:
-                emitter.sync_flush()
+                if hasattr(emitter, 'sync_flush'):
+                    emitter.sync_flush()
         return self
 
-    @contract
-    def set_subject(self, subject):
+    def set_subject(self, subject: Optional[_subject.Subject]) -> 'Tracker':
         """
             Set the subject of the events fired by the tracker
 
@@ -691,8 +783,7 @@ class Tracker:
         self.subject = subject
         return self
 
-    @contract
-    def add_emitter(self, emitter):
+    def add_emitter(self, emitter: EmitterProtocol) -> 'Tracker':
         """
             Add a new emitter to which events should be passed
 
@@ -702,19 +793,3 @@ class Tracker:
         """
         self.emitters.append(emitter)
         return self
-
-    @staticmethod
-    def check_form_element(element):
-        """
-            PyContracts helper method to check that dictionary conforms element
-            in sumbit_form and change_form schemas
-        """
-        all_present = isinstance(element, dict) and 'name' in element and 'value' in element and 'nodeName' in element
-        try:
-            if element['type'] in FORM_TYPES:
-                type_valid = True
-            else:
-                type_valid = False
-        except KeyError:
-            type_valid = True
-        return all_present and element['nodeName'] in FORM_NODE_NAMES and type_valid

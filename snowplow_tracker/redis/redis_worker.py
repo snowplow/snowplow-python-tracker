@@ -22,6 +22,9 @@
 
 import json
 import signal
+from typing import Any, Optional
+
+from snowplow_tracker.typing import EmitterProtocol, PayloadDict, RedisProtocol
 
 _REDIS_OPT = True
 try:
@@ -31,8 +34,8 @@ try:
 except ImportError:
     _REDIS_OPT = False
 
-
 DEFAULT_KEY = "snowplow"
+
 
 class RedisWorker(object):
     """
@@ -40,7 +43,7 @@ class RedisWorker(object):
     """
     if _REDIS_OPT:
 
-        def __init__(self, emitter, rdb=None, key=DEFAULT_KEY):
+        def __init__(self, emitter: EmitterProtocol, rdb: Optional[RedisProtocol] = None, key: str = DEFAULT_KEY) -> None:
             self.emitter = emitter
             self.key = key
             if rdb is None:
@@ -52,13 +55,13 @@ class RedisWorker(object):
             signal.signal(signal.SIGINT, self.request_shutdown)
             signal.signal(signal.SIGQUIT, self.request_shutdown)
 
-        def send(self, payload):
+        def send(self, payload: PayloadDict) -> None:
             """
                 Send an event to an emitter
             """
             self.emitter.input(payload)
 
-        def pop_payload(self):
+        def pop_payload(self) -> None:
             """
                 Get a single event from Redis and send it
                 If the Redis queue is empty, sleep to avoid making continual requests
@@ -69,7 +72,7 @@ class RedisWorker(object):
             else:
                 gevent.sleep(5)
 
-        def run(self):
+        def run(self) -> None:
             """
                 Run indefinitely
             """
@@ -79,7 +82,7 @@ class RedisWorker(object):
                 self.pop_payload()
             self.pool.join(timeout=20)
 
-        def request_shutdown(self, *args):
+        def request_shutdown(self, *args: Any) -> None:
             """
                 Halt the worker
             """
@@ -87,5 +90,5 @@ class RedisWorker(object):
 
     else:
 
-        def __new__(cls, *args, **kwargs):
+        def __new__(cls, *args: Any, **kwargs: Any) -> 'RedisWorker':
             raise RuntimeError('RedisWorker is not available. To use: `pip install snowplow-tracker[redis]`')

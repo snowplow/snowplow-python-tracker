@@ -21,12 +21,12 @@
 
 import json
 import logging
-from contracts import contract, new_contract
+from typing import Any, Optional
+from snowplow_tracker.typing import PayloadDict, RedisProtocol
 
 _REDIS_OPT = True
 try:
     import redis
-    new_contract("redis", lambda x: isinstance(x, (redis.Redis, redis.StrictRedis)))
 except ImportError:
     _REDIS_OPT = False
 
@@ -42,8 +42,7 @@ class RedisEmitter(object):
     """
     if _REDIS_OPT:
 
-        @contract
-        def __init__(self, rdb=None, key="snowplow"):
+        def __init__(self, rdb: Optional[RedisProtocol] = None, key: str = "snowplow") -> None:
             """
                 :param rdb:  Optional custom Redis database
                 :type  rdb:  redis | None
@@ -56,8 +55,7 @@ class RedisEmitter(object):
             self.rdb = rdb
             self.key = key
 
-        @contract
-        def input(self, payload):
+        def input(self, payload: PayloadDict) -> None:
             """
                 :param payload:  The event properties
                 :type  payload:  dict(string:*)
@@ -66,14 +64,14 @@ class RedisEmitter(object):
             self.rdb.rpush(self.key, json.dumps(payload))
             logger.info("Finished sending event to Redis.")
 
-        def flush(self):
+        def flush(self) -> None:
             logger.warning("The RedisEmitter class does not need to be flushed")
 
-        def sync_flush(self):
+        def sync_flush(self) -> None:
             self.flush()
 
     else:
 
-        def __new__(cls, *args, **kwargs):
+        def __new__(cls, *args: Any, **kwargs: Any) -> 'RedisEmitter':
             logger.error("RedisEmitter is not available. Please install snowplow-tracker with redis extra dependency.")
             raise RuntimeError('RedisEmitter is not available. To use: `pip install snowplow-tracker[redis]`')

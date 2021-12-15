@@ -19,14 +19,10 @@
     License: Apache License Version 2.0
 """
 
-from contracts import contract, new_contract
+from snowplow_tracker.contracts import one_of, greater_than
+from snowplow_tracker.typing import SupportedPlatform, SUPPORTED_PLATFORMS
 
-SUPPORTED_PLATFORMS = set(["pc", "tv", "mob", "cnsl", "iot", "web", "srv", "app"])
 DEFAULT_PLATFORM = "pc"
-
-new_contract("subject", lambda x: isinstance(x, Subject))
-
-new_contract("supported_platform", lambda x: x in SUPPORTED_PLATFORMS)
 
 
 class Subject(object):
@@ -35,22 +31,22 @@ class Subject(object):
 
         (Subject) -> (Verb) -> (Object)
     """
-    def __init__(self):
+    def __init__(self) -> None:
 
         self.standard_nv_pairs = {"p": DEFAULT_PLATFORM}
 
-    @contract
-    def set_platform(self, value):
+    def set_platform(self, value: SupportedPlatform) -> 'Subject':
         """
             :param  value:          One of ["pc", "tv", "mob", "cnsl", "iot", "web", "srv", "app"]
             :type   value:          supported_platform
             :rtype:                 subject
         """
+        one_of(value, SUPPORTED_PLATFORMS)
+
         self.standard_nv_pairs["p"] = value
         return self
 
-    @contract
-    def set_user_id(self, user_id):
+    def set_user_id(self, user_id: str) -> 'Subject':
         """
             :param  user_id:        User ID
             :type   user_id:        string
@@ -59,8 +55,7 @@ class Subject(object):
         self.standard_nv_pairs["uid"] = user_id
         return self
 
-    @contract
-    def set_screen_resolution(self, width, height):
+    def set_screen_resolution(self, width: int, height: int) -> 'Subject':
         """
             :param  width:          Width of the screen
             :param  height:         Height of the screen
@@ -68,11 +63,13 @@ class Subject(object):
             :type   height:         int,>0
             :rtype:                 subject
         """
+        greater_than(width, 0)
+        greater_than(height, 0)
+
         self.standard_nv_pairs["res"] = "".join([str(width), "x", str(height)])
         return self
 
-    @contract
-    def set_viewport(self, width, height):
+    def set_viewport(self, width: int, height: int) -> 'Subject':
         """
             :param  width:          Width of the viewport
             :param  height:         Height of the viewport
@@ -80,11 +77,13 @@ class Subject(object):
             :type   height:         int,>0
             :rtype:                 subject
         """
+        greater_than(width, 0)
+        greater_than(height, 0)
+
         self.standard_nv_pairs["vp"] = "".join([str(width), "x", str(height)])
         return self
 
-    @contract
-    def set_color_depth(self, depth):
+    def set_color_depth(self, depth: int) -> 'Subject':
         """
             :param  depth:          Depth of the color on the screen
             :type   depth:          int
@@ -93,8 +92,7 @@ class Subject(object):
         self.standard_nv_pairs["cd"] = depth
         return self
 
-    @contract
-    def set_timezone(self, timezone):
+    def set_timezone(self, timezone: str) -> 'Subject':
         """
             :param  timezone:       Timezone as a string
             :type   timezone:       string
@@ -103,8 +101,7 @@ class Subject(object):
         self.standard_nv_pairs["tz"] = timezone
         return self
 
-    @contract
-    def set_lang(self, lang):
+    def set_lang(self, lang: str) -> 'Subject':
         """
             Set language.
 
@@ -115,8 +112,7 @@ class Subject(object):
         self.standard_nv_pairs["lang"] = lang
         return self
 
-    @contract
-    def set_domain_user_id(self, duid):
+    def set_domain_user_id(self, duid: str) -> 'Subject':
         """
             Set the domain user ID
 
@@ -127,8 +123,7 @@ class Subject(object):
         self.standard_nv_pairs["duid"] = duid
         return self
 
-    @contract
-    def set_ip_address(self, ip):
+    def set_ip_address(self, ip: str) -> 'Subject':
         """
             Set the domain user ID
 
@@ -139,8 +134,7 @@ class Subject(object):
         self.standard_nv_pairs["ip"] = ip
         return self
 
-    @contract
-    def set_useragent(self, ua):
+    def set_useragent(self, ua: str) -> 'Subject':
         """
             Set the user agent
 
@@ -151,8 +145,7 @@ class Subject(object):
         self.standard_nv_pairs["ua"] = ua
         return self
 
-    @contract
-    def set_network_user_id(self, nuid):
+    def set_network_user_id(self, nuid: str) -> 'Subject':
         """
             Set the network user ID field
             This overwrites the nuid field set by the collector

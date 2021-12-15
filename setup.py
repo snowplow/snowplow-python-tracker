@@ -19,7 +19,6 @@
     License: Apache License Version 2.0
 """
 
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -28,19 +27,17 @@ try:
 except ImportError:
     from distutils.core import setup
 
-import os
-
 authors_list = [
     'Anuj More',
     'Alexander Dean',
     'Fred Blundun',
     'Paul Boocock'
-    ]
+]
 authors_str = ', '.join(authors_list)
 
 authors_email_list = [
     'support@snowplowanalytics.com',
-    ]
+]
 authors_email_str = ', '.join(authors_email_list)
 
 setup(
@@ -60,22 +57,19 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Operating System :: OS Independent",
     ],
 
     install_requires=[
         "requests>=2.25.1,<3.0",
-        "pycontracts>=1.8.12;python_version<'3.0'",
-        "pycontracts3>=3.0.2;python_version>='3.0'",
-        "six>=1.9.0,<2.0"
+        "typing_extensions>=3.7.4"
     ],
 
     extras_require={

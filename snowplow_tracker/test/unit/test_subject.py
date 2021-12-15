@@ -19,20 +19,18 @@
     License: Apache License Version 2.0
 """
 
-
 import unittest
 import pytest
 
-from contracts.interface import ContractNotRespected
-
 from snowplow_tracker import subject as _subject
+
 
 class TestSubject(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         pass
 
-    def test_subject_0(self):
+    def test_subject_0(self) -> None:
         s = _subject.Subject()
         self.assertDictEqual(s.standard_nv_pairs, {"p": _subject.DEFAULT_PLATFORM})
 
@@ -63,7 +61,7 @@ class TestSubject(unittest.TestCase):
         }
         self.assertDictEqual(s.standard_nv_pairs, exp)
 
-    def test_subject_1(self):
+    def test_subject_1(self) -> None:
         s = _subject.Subject().set_platform("srv").set_user_id("1234").set_lang("EN")
 
         exp = {

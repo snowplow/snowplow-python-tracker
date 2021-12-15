@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [2.7, 3.6, 3.7, 3.8, 3.9]
+        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
         extras-required: [".", ".[redis]"]
 
     services:
@@ -35,13 +35,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Pin pip version for python 2
+    - name: Pin pip version
       run: |
-        if [ "${{ matrix.python-version}}" == "2.7" ] ; then
-            echo "pip_v=pip < 21.0" >> $GITHUB_ENV
-        else
-            echo "pip_v=pip" >> $GITHUB_ENV
-        fi
+        echo "pip_v=pip" >> $GITHUB_ENV
 
     - name: Install dependencies
       run: |
