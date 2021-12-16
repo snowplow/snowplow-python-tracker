@@ -58,6 +58,17 @@ Find out more
 .. _`Setup Guide`: https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/python-tracker/setup/
 .. _`Contributing`: https://github.com/snowplow/snowplow-python-tracker/blob/master/CONTRIBUTING.md
 
+Python Support
+##############
+
++----------------+--------------------------+
+| Python version | snowplow-tracker version |
++================+==========================+
+| >=3.5          |           0.10.0         |
++----------------+--------------------------+
+| 2.7            |           0.9.1          |
++----------------+--------------------------+
+
 Maintainer Quickstart
 #######################
 
