@@ -20,7 +20,10 @@
 """
 
 import logging
+from typing import Any, Optional
+
 from snowplow_tracker.emitters import Emitter
+from snowplow_tracker.typing import HttpProtocol, Method
 
 _CELERY_OPT = True
 try:
@@ -33,6 +36,7 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 class CeleryEmitter(Emitter):
     """
         Uses a Celery worker to send HTTP requests asynchronously.
@@ -43,7 +47,14 @@ class CeleryEmitter(Emitter):
 
         celery_app = None
 
-        def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, byte_limit=None):
+        def __init__(
+                self,
+                endpoint: str,
+                protocol: HttpProtocol = "http",
+                port: Optional[int] = None,
+                method: Method = "get",
+                buffer_size: Optional[int] = None,
+                byte_limit: Optional[int] = None) -> None:
             super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, None, None, byte_limit)
 
             try:
@@ -57,18 +68,18 @@ class CeleryEmitter(Emitter):
 
             self.async_flush = self.celery_app.task(self.async_flush)
 
-        def flush(self):
+        def flush(self) -> None:
             """
             Schedules a flush task
             """
             self.async_flush.delay()
             logger.info("Scheduled a Celery task to flush the event queue")
 
-        def async_flush(self):
+        def async_flush(self) -> None:
             super(CeleryEmitter, self).flush()
 
     else:
 
-        def __new__(cls, *args, **kwargs):
+        def __new__(cls, *args: Any, **kwargs: Any) -> 'CeleryEmitter':
             logger.error("CeleryEmitter is not available. Please install snowplow-tracker with celery extra dependency.")
             raise RuntimeError('CeleryEmitter is not available. To use: `pip install snowplow-tracker[celery]`')

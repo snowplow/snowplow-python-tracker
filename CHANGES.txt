@@ -1,3 +1,8 @@
+Version 0.10.0 (2021-12-16)
+--------------------------
+Add Python 3.10 support (#254)
+Add configurable timeout for HTTP requests (#258)
+
 Version 0.9.1 (2021-10-26)
 --------------------------
 Update python versions in run-tests script (#256)

@@ -20,21 +20,16 @@
 """
 
 
-import sys
-import json
 import logging
 import time
 import threading
 import requests
-from contracts import contract, new_contract
-from snowplow_tracker.self_describing_json import SelfDescribingJson
+from typing import Optional, Union, Tuple
+from queue import Queue
 
-try:
-    # Python 2
-    from Queue import Queue
-except ImportError:
-    # Python 3
-    from queue import Queue
+from snowplow_tracker.self_describing_json import SelfDescribingJson
+from snowplow_tracker.typing import PayloadDict, PayloadDictList, HttpProtocol, Method, SuccessCallback, FailureCallback
+from snowplow_tracker.contracts import one_of
 
 # logging
 logging.basicConfig()
@@ -43,13 +38,8 @@ logger.setLevel(logging.INFO)
 
 DEFAULT_MAX_LENGTH = 10
 PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4"
-
-# contracts
-new_contract("protocol", lambda x: x == "http" or x == "https")
-
-new_contract("method", lambda x: x == "get" or x == "post")
-
-new_contract("function", lambda x: hasattr(x, "__call__"))
+PROTOCOLS = {"http", "https"}
+METHODS = {"get", "post"}
 
 
 class Emitter(object):
@@ -58,8 +48,17 @@ class Emitter(object):
         Supports both GET and POST requests
     """
 
-    @contract
-    def __init__(self, endpoint, protocol="http", port=None, method="get", buffer_size=None, on_success=None, on_failure=None, byte_limit=None):
+    def __init__(
+            self,
+            endpoint: str,
+            protocol: HttpProtocol = "http",
+            port: Optional[int] = None,
+            method: Method = "get",
+            buffer_size: Optional[int] = None,
+            on_success: Optional[SuccessCallback] = None,
+            on_failure: Optional[FailureCallback] = None,
+            byte_limit: Optional[int] = None,
+            request_timeout: Optional[Union[float, Tuple[float, float]]] = None) -> None:
         """
             :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
             :type  endpoint:    string
@@ -82,7 +81,14 @@ class Emitter(object):
             :type  on_failure:  function | None
             :param byte_limit:  The size event list after reaching which queued events will be flushed
             :type  byte_limit:  int | None
+            :param request_timeout: Timeout for the HTTP requests. Can be set either as single float value which
+                                     applies to both "connect" AND "read" timeout, or as tuple with two float values
+                                     which specify the "connect" and "read" timeouts separately
+            :type request_timeout:  float | tuple | None
         """
+        one_of(protocol, PROTOCOLS)
+        one_of(method, METHODS)
+
         self.endpoint = Emitter.as_collector_uri(endpoint, protocol, port, method)
 
         self.method = method
@@ -96,6 +102,7 @@ class Emitter(object):
         self.buffer = []
         self.byte_limit = byte_limit
         self.bytes_queued = None if byte_limit is None else 0
+        self.request_timeout = request_timeout
 
         self.on_success = on_success
         self.on_failure = on_failure
@@ -107,8 +114,11 @@ class Emitter(object):
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
     @staticmethod
-    @contract
-    def as_collector_uri(endpoint, protocol="http", port=None, method="get"):
+    def as_collector_uri(
+            endpoint: str,
+            protocol: HttpProtocol = "http",
+            port: Optional[int] = None,
+            method: Method = "get") -> str:
         """
             :param endpoint:  The raw endpoint provided by the user
             :type  endpoint:  string
@@ -132,8 +142,7 @@ class Emitter(object):
         else:
             return protocol + "://" + endpoint + ":" + str(port) + path
 
-    @contract
-    def input(self, payload):
+    def input(self, payload: PayloadDict) -> None:
         """
             Adds an event to the buffer.
             If the maximum size has been reached, flushes the buffer.
@@ -146,23 +155,14 @@ class Emitter(object):
                 self.bytes_queued += len(str(payload))
 
             if self.method == "post":
-                self.buffer.append({key: Emitter.to_str(payload[key]) for key in payload})
+                self.buffer.append({key: str(payload[key]) for key in payload})
             else:
                 self.buffer.append(payload)
 
             if self.reached_limit():
                 self.flush()
 
-    @staticmethod
-    def to_str(x):
-        pyVersion = sys.version_info[0]
-        if pyVersion < 3:
-            if isinstance(x, basestring):
-                return x
-            return str(x)
-        return str(x)
-
-    def reached_limit(self):
+    def reached_limit(self) -> bool:
         """
             Checks if event-size or bytes limit are reached
 
@@ -171,9 +171,9 @@ class Emitter(object):
         if self.byte_limit is None:
             return len(self.buffer) >= self.buffer_size
         else:
-            return self.bytes_queued >= self.byte_limit or len(self.buffer) >= self.buffer_size
+            return (self.bytes_queued or 0) >= self.byte_limit or len(self.buffer) >= self.buffer_size
 
-    def flush(self):
+    def flush(self) -> None:
         """
             Sends all events in the buffer to the collector.
         """
@@ -183,8 +183,7 @@ class Emitter(object):
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
 
-    @contract
-    def http_post(self, data):
+    def http_post(self, data: str) -> bool:
         """
             :param data:  The array of JSONs to be sent
             :type  data:  string
@@ -193,16 +192,19 @@ class Emitter(object):
         logger.debug("Payload: %s" % data)
         post_succeeded = False
         try:
-            r = requests.post(self.endpoint, data=data, headers={'Content-Type': 'application/json; charset=utf-8'})
-            post_succeeded= Emitter.is_good_status_code(r.status_code)
+            r = requests.post(
+                self.endpoint,
+                data=data,
+                headers={'Content-Type': 'application/json; charset=utf-8'},
+                timeout=self.request_timeout)
+            post_succeeded = Emitter.is_good_status_code(r.status_code)
             getattr(logger, "info" if post_succeeded else "warning")("POST request finished with status code: " + str(r.status_code))
         except requests.RequestException as e:
             logger.warning(e)
 
         return post_succeeded
 
-    @contract
-    def http_get(self, payload):
+    def http_get(self, payload: PayloadDict) -> bool:
         """
             :param payload:  The event properties
             :type  payload:  dict(string:*)
@@ -211,7 +213,7 @@ class Emitter(object):
         logger.debug("Payload: %s" % payload)
         get_succeeded = False
         try:
-            r = requests.get(self.endpoint, params=payload)
+            r = requests.get(self.endpoint, params=payload, timeout=self.request_timeout)
             get_succeeded = Emitter.is_good_status_code(r.status_code)
             getattr(logger, "info" if get_succeeded else "warning")("GET request finished with status code: " + str(r.status_code))
         except requests.RequestException as e:
@@ -219,18 +221,17 @@ class Emitter(object):
 
         return get_succeeded
 
-    def sync_flush(self):
+    def sync_flush(self) -> None:
         """
             Calls the flush method of the base Emitter class.
             This is guaranteed to be blocking, not asynchronous.
         """
         logger.debug("Starting synchronous flush...")
         Emitter.flush(self)
-        logger.info("Finished synchrous flush")
+        logger.info("Finished synchronous flush")
 
     @staticmethod
-    @contract
-    def is_good_status_code(status_code):
+    def is_good_status_code(status_code: int) -> bool:
         """
             :param status_code:  HTTP status code
             :type  status_code:  int
@@ -238,8 +239,7 @@ class Emitter(object):
         """
         return 200 <= status_code < 400
 
-    @contract
-    def send_events(self, evts):
+    def send_events(self, evts: PayloadDictList) -> None:
         """
             :param evts: Array of events to be sent
             :type  evts: list(dict(string:*))
@@ -275,8 +275,7 @@ class Emitter(object):
         else:
             logger.info("Skipping flush since buffer is empty")
 
-    @contract
-    def set_flush_timer(self, timeout, flush_now=False):
+    def set_flush_timer(self, timeout: float, flush_now: bool = False) -> None:
         """
             Set an interval at which the buffer will be flushed
 
@@ -293,7 +292,7 @@ class Emitter(object):
         self.timer.daemon = True
         self.timer.start()
 
-    def cancel_flush_timer(self):
+    def cancel_flush_timer(self) -> None:
         """
             Abort automatic async flushing
         """
@@ -302,7 +301,7 @@ class Emitter(object):
             self.timer.cancel()
 
     @staticmethod
-    def attach_sent_timestamp(events):
+    def attach_sent_timestamp(events: PayloadDictList) -> None:
         """
             Attach (by mutating in-place) current timestamp in milliseconds
             as `stm` param
@@ -311,10 +310,11 @@ class Emitter(object):
             :type  events: list(dict(string:*))
             :rtype: None
         """
-        def update(e):
+        def update(e: PayloadDict) -> None:
             e.update({'stm': str(int(time.time()) * 1000)})
 
-        [update(event) for event in events]
+        for event in events:
+            update(event)
 
 
 class AsyncEmitter(Emitter):
@@ -322,18 +322,17 @@ class AsyncEmitter(Emitter):
         Uses threads to send HTTP requests asynchronously
     """
 
-    @contract
     def __init__(
-        self,
-        endpoint,
-        protocol="http",
-        port=None,
-        method="get",
-        buffer_size=None,
-        on_success=None,
-        on_failure=None,
-        thread_count=1,
-        byte_limit=None):
+            self,
+            endpoint: str,
+            protocol: HttpProtocol = "http",
+            port: Optional[int] = None,
+            method: Method = "get",
+            buffer_size: Optional[int] = None,
+            on_success: Optional[SuccessCallback] = None,
+            on_failure: Optional[FailureCallback] = None,
+            thread_count: int = 1,
+            byte_limit: Optional[int] = None) -> None:
         """
             :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
             :type  endpoint:    string
@@ -366,14 +365,14 @@ class AsyncEmitter(Emitter):
             t.daemon = True
             t.start()
 
-    def sync_flush(self):
+    def sync_flush(self) -> None:
         while True:
             self.flush()
             self.queue.join()
             if len(self.buffer) < 1:
                 break
 
-    def flush(self):
+    def flush(self) -> None:
         """
             Removes all dead threads, then creates a new thread which
             executes the flush method of the base Emitter class
@@ -384,7 +383,7 @@ class AsyncEmitter(Emitter):
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
 
-    def consume(self):
+    def consume(self) -> None:
         while True:
             evts = self.queue.get()
             self.send_events(evts)

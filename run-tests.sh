@@ -15,23 +15,6 @@ eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
 function deploy {
-  # pyenv install 2.7.18
-  if [ ! -e ~/.pyenv/versions/tracker27 ]; then
-    pyenv virtualenv 2.7.18 tracker27
-    pyenv activate tracker27
-    pip install .
-    pip install -r requirements-test.txt
-    source deactivate
-  fi
-
-  if [ ! -e ~/.pyenv/versions/tracker27redis ]; then
-    pyenv virtualenv 2.7.18 tracker27redis
-    pyenv activate tracker27redis
-    pip install .[redis]
-    pip install -r requirements-test.txt
-    source deactivate
-  fi
-
   # pyenv install 3.5.10
   if [ ! -e ~/.pyenv/versions/tracker35 ]; then
     pyenv virtualenv 3.5.10 tracker35
@@ -116,18 +99,27 @@ function deploy {
     pip install -r requirements-test.txt
     source deactivate
   fi
+
+  # pyenv install 3.10.1
+  if [ ! -e ~/.pyenv/versions/tracker310 ]; then
+    pyenv virtualenv 3.10.1 tracker310
+    pyenv activate tracker310
+    pip install .
+    pip install -r requirements-test.txt
+    source deactivate
+  fi
+
+  if [ ! -e ~/.pyenv/versions/tracker310redis ]; then
+    pyenv virtualenv 3.10.1 tracker310redis
+    pyenv activate tracker310redis
+    pip install .[redis]
+    pip install -r requirements-test.txt
+    source deactivate
+  fi
 }
 
 
 function run_tests {
-  pyenv activate tracker27
-  pytest -s
-  source deactivate
-
-  pyenv activate tracker27redis
-  pytest -s
-  source deactivate
-
   pyenv activate tracker35
   pytest
   source deactivate
@@ -167,11 +159,17 @@ function run_tests {
   pyenv activate tracker39redis
   pytest
   source deactivate
+
+  pyenv activate tracker310
+  pytest
+  source deactivate
+
+  pyenv activate tracker310redis
+  pytest
+  source deactivate
 }
 
 function refresh_deploy {
-  pyenv uninstall -f tracker27
-  pyenv uninstall -f tracker27redis
   pyenv uninstall -f tracker35
   pyenv uninstall -f tracker35redis
   pyenv uninstall -f tracker36
@@ -182,6 +180,8 @@ function refresh_deploy {
   pyenv uninstall -f tracker38redis
   pyenv uninstall -f tracker39
   pyenv uninstall -f tracker39redis
+  pyenv uninstall -f tracker310
+  pyenv uninstall -f tracker310redis
 }
 
 
