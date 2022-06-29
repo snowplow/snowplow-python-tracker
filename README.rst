@@ -72,17 +72,16 @@ Python Support
 Maintainer Quickstart
 #######################
 
-Assuming pyenv_ is installed
+Assuming `docker`_ is installed
 
 ::
 
    host$ git clone git@github.com:snowplow/snowplow-python-tracker.git
    host$ cd snowplow-python-tracker
-   host$ pyenv install 2.7.18 && pyenv install 3.5.10 && pyenv install 3.6.14 && pyenv install 3.7.11 && pyenv install 3.8.11 && pyenv install 3.9.6
-   host$ ./run-tests.sh deploy
-   host$ ./run-tests.sh test
+   host$ docker build -t snowplow-python-tracker . && docker run snowplow-python-tracker
 
-.. _pyenv: https://github.com/pyenv/pyenv
+.. _docker: https://www.docker.com/
+
 
 Copyright and license
 #####################
