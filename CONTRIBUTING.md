@@ -8,7 +8,7 @@ For support requests, please use our community support Discourse forum: https://
 
 ## Setting up an Environment
 
-Instructions on how to build and run tests are available in the [README.md](README.md). The README will also list any requirements that you will need to install first before being able to build and run the tests.
+Instructions on how to build and run tests are available in the [README.md](README.rst). The README will also list any requirements that you will need to install first before being able to build and run the tests.
 
 You should ensure you are comfortable building and testing the existing release before adding new functionality or fixing issues.
 
@@ -68,7 +68,7 @@ If your pull request is fairly chunky, there might be a non-trivial delay betwee
 ### Contributor license agreement
 
 We require outside contributors to sign a Contributor license agreement (or CLA) before we can merge their pull requests.  
-You can find more information on the topic in [the dedicated wiki page](https://github.com/snowplow/snowplow/wiki/CLA).  
+You can find more information on the topic in [the dedicated wiki page](https://docs.snowplowanalytics.com/docs/contributing/contributor-license-agreement/).  
 The @snowplowcla bot will guide you through the process.
 
 ## Getting in touch
