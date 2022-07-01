@@ -19,6 +19,6 @@
     License: Apache License Version 2.0
 """
 
-__version_info__ = (1, 0, 0, 'a1')
+__version_info__ = (1, 0, '0a1')
 __version__ = ".".join(str(x) for x in __version_info__)
 __build_version__ = __version__ + ''
