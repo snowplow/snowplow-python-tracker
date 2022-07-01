@@ -8,7 +8,7 @@ For support requests, please use our community support Discourse forum: https://
 
 ## Setting up an Environment
 
-Instructions on how to build and run tests are available in the [README.md](README.rst). The README will also list any requirements that you will need to install first before being able to build and run the tests.
+Instructions on how to build and run tests are available in the [README.md](README.md). The README will also list any requirements that you will need to install first before being able to build and run the tests.
 
 You should ensure you are comfortable building and testing the existing release before adding new functionality or fixing issues.
 
