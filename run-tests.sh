@@ -15,39 +15,6 @@ eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
 function deploy {
-  # pyenv install 3.5.10
-  if [ ! -e ~/.pyenv/versions/tracker35 ]; then
-    pyenv virtualenv 3.5.10 tracker35
-    pyenv activate tracker35
-    pip install .
-    pip install -r requirements-test.txt
-    source deactivate
-  fi
-
-  if [ ! -e ~/.pyenv/versions/tracker35redis ]; then
-    pyenv virtualenv 3.5.10 tracker35redis
-    pyenv activate tracker35redis
-    pip install .[redis]
-    pip install -r requirements-test.txt
-    source deactivate
-  fi
-
-  # pyenv install 3.6.14
-  if [ ! -e ~/.pyenv/versions/tracker36 ]; then
-    pyenv virtualenv 3.6.14 tracker36
-    pyenv activate tracker36
-    pip install .
-    pip install -r requirements-test.txt
-    source deactivate
-  fi
-
-  if [ ! -e ~/.pyenv/versions/tracker36redis ]; then
-    pyenv virtualenv 3.6.14 tracker36redis
-    pyenv activate tracker36redis
-    pip install .[redis]
-    pip install -r requirements-test.txt
-    source deactivate
-  fi
 
   # pyenv install 3.7.11
   if [ ! -e ~/.pyenv/versions/tracker37 ]; then
@@ -120,22 +87,6 @@ function deploy {
 
 
 function run_tests {
-  pyenv activate tracker35
-  pytest
-  source deactivate
-
-  pyenv activate tracker35redis
-  pytest
-  source deactivate
-
-  pyenv activate tracker36
-  pytest
-  source deactivate
-
-  pyenv activate tracker36redis
-  pytest
-  source deactivate
-
   pyenv activate tracker37
   pytest
   source deactivate
@@ -170,10 +121,6 @@ function run_tests {
 }
 
 function refresh_deploy {
-  pyenv uninstall -f tracker35
-  pyenv uninstall -f tracker35redis
-  pyenv uninstall -f tracker36
-  pyenv uninstall -f tracker36redis
   pyenv uninstall -f tracker37
   pyenv uninstall -f tracker37redis
   pyenv uninstall -f tracker38
