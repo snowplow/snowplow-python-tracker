@@ -1,3 +1,7 @@
+Version 1.0.0-a1 (2022-06-01)
+--------------------------
+Breaking: Drop support for Python < 3.7
+
 Version 0.10.0 (2021-12-16)
 --------------------------
 Add Python 3.10 support (#254)
