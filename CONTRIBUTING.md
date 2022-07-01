@@ -68,7 +68,7 @@ If your pull request is fairly chunky, there might be a non-trivial delay betwee
 ### Contributor license agreement
 
 We require outside contributors to sign a Contributor license agreement (or CLA) before we can merge their pull requests.  
-You can find more information on the topic in [the dedicated wiki page](https://github.com/snowplow/snowplow/wiki/CLA).  
+You can find more information on the topic in [the dedicated wiki page](https://docs.snowplowanalytics.com/docs/contributing/contributor-license-agreement/).  
 The @snowplowcla bot will guide you through the process.
 
 ## Getting in touch
