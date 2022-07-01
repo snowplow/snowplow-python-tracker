@@ -1,9 +1,12 @@
 FROM centos:8
+RUN cd /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
 
 RUN yum -y install wget
 RUN yum install -y epel-release
 RUN yum -y install git tar gcc make bzip2 openssl openssl-devel patch gcc-c++ libffi-devel sqlite-devel
-RUN git clone git://github.com/yyuu/pyenv.git ~/.pyenv
+RUN git clone https://github.com/yyuu/pyenv.git ~/.pyenv
 ENV HOME /root
 ENV PYENV_ROOT $HOME/.pyenv
 ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
