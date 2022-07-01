@@ -31,24 +31,26 @@ authors_list = [
     'Anuj More',
     'Alexander Dean',
     'Fred Blundun',
-    'Paul Boocock'
+    'Paul Boocock',
+    'Matt Miermans'
 ]
 authors_str = ', '.join(authors_list)
 
 authors_email_list = [
-    'support@snowplowanalytics.com',
+    'm.miermans@gmail.com',
 ]
 authors_email_str = ', '.join(authors_email_list)
 
 setup(
-    name='snowplow-tracker',
-    version='0.10.0',
+    name='aio-snowplow-tracker',
+    version='1.0.0-a1',
     author=authors_str,
     author_email=authors_email_str,
     packages=['snowplow_tracker', 'snowplow_tracker.test', 'snowplow_tracker.redis', 'snowplow_tracker.celery'],
-    url='http://snowplowanalytics.com',
+    url='https://github.com/miermans/aio-snowplow-python-tracker',
     license='Apache License 2.0',
-    description='Snowplow event tracker for Python. Add analytics to your Python and Django apps, webapps and games',
+    description='Asyncio Snowplow event tracker for Python. '
+                'Add analytics to your Python and Django apps, webapps and games',
     long_description=open('README.rst').read(),
     long_description_content_type='text/x-rst',
 
@@ -58,8 +60,6 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",

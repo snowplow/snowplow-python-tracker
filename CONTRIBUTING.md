@@ -25,9 +25,6 @@ It's also a good idea to log an issue before starting to work on a pull request 
 If you see an issue you would like to work on, please let us know in the issue! That will help us in terms of scheduling and
 not doubling the amount of work.
 
-If you don't know where to start contributing, you can look at
-[the issues labeled `good first issue`](https://github.com/snowplow/snowplow-python-tracker/labels/good%20first%20issue).
-
 ## Pull requests
 
 These are a few guidelines to keep in mind when opening pull requests.
