@@ -23,7 +23,7 @@
 import logging
 import time
 import threading
-import requests
+import aiohttp
 from typing import Optional, Union, Tuple
 from queue import Queue
 
@@ -142,7 +142,7 @@ class Emitter(object):
         else:
             return protocol + "://" + endpoint + ":" + str(port) + path
 
-    def input(self, payload: PayloadDict) -> None:
+    async def input(self, payload: PayloadDict) -> None:
         """
             Adds an event to the buffer.
             If the maximum size has been reached, flushes the buffer.
@@ -160,7 +160,7 @@ class Emitter(object):
                 self.buffer.append(payload)
 
             if self.reached_limit():
-                self.flush()
+                await self.flush()
 
     def reached_limit(self) -> bool:
         """
@@ -173,17 +173,17 @@ class Emitter(object):
         else:
             return (self.bytes_queued or 0) >= self.byte_limit or len(self.buffer) >= self.buffer_size
 
-    def flush(self) -> None:
+    async def flush(self) -> None:
         """
             Sends all events in the buffer to the collector.
         """
         with self.lock:
-            self.send_events(self.buffer)
+            await self.send_events(self.buffer)
             self.buffer = []
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
 
-    def http_post(self, data: str) -> bool:
+    async def http_post(self, data: str) -> bool:
         """
             :param data:  The array of JSONs to be sent
             :type  data:  string
@@ -192,42 +192,50 @@ class Emitter(object):
         logger.debug("Payload: %s" % data)
         post_succeeded = False
         try:
-            r = requests.post(
-                self.endpoint,
-                data=data,
-                headers={'Content-Type': 'application/json; charset=utf-8'},
-                timeout=self.request_timeout)
-            post_succeeded = Emitter.is_good_status_code(r.status_code)
-            getattr(logger, "info" if post_succeeded else "warning")("POST request finished with status code: " + str(r.status_code))
-        except requests.RequestException as e:
+            async with aiohttp.ClientSession() as session:
+                r = await session.post(
+                    self.endpoint,
+                    data=data,
+                    headers={'Content-Type': 'application/json; charset=utf-8'},
+                    timeout=self.request_timeout)
+                post_succeeded = Emitter.is_good_status_code(r.status)
+                logger.log(
+                    level=logging.INFO if post_succeeded else logging.WARNING,
+                    msg=f"GET request finished with status code: {r.status}"
+                )
+        except aiohttp.ClientError as e:
             logger.warning(e)
 
         return post_succeeded
 
-    def http_get(self, payload: PayloadDict) -> bool:
+    async def http_get(self, payload: PayloadDict) -> bool:
         """
             :param payload:  The event properties
             :type  payload:  dict(string:*)
         """
-        logger.info("Sending GET request to %s..." % self.endpoint)
-        logger.debug("Payload: %s" % payload)
+        logger.info(f"Sending GET request to {self.endpoint}...")
+        logger.debug(f"Payload: {payload}")
         get_succeeded = False
         try:
-            r = requests.get(self.endpoint, params=payload, timeout=self.request_timeout)
-            get_succeeded = Emitter.is_good_status_code(r.status_code)
-            getattr(logger, "info" if get_succeeded else "warning")("GET request finished with status code: " + str(r.status_code))
-        except requests.RequestException as e:
+            async with aiohttp.ClientSession() as session:
+                r = await session.get(self.endpoint, params=payload, timeout=self.request_timeout)
+                get_succeeded = Emitter.is_good_status_code(r.status)
+                logger.log(
+                    level=logging.INFO if get_succeeded else logging.WARNING,
+                    msg=f"GET request finished with status code: {r.status}"
+                )
+        except aiohttp.ClientError as e:
             logger.warning(e)
 
         return get_succeeded
 
-    def sync_flush(self) -> None:
+    async def sync_flush(self) -> None:
         """
             Calls the flush method of the base Emitter class.
             This is guaranteed to be blocking, not asynchronous.
         """
         logger.debug("Starting synchronous flush...")
-        Emitter.flush(self)
+        await Emitter.flush(self)
         logger.info("Finished synchronous flush")
 
     @staticmethod
@@ -239,7 +247,7 @@ class Emitter(object):
         """
         return 200 <= status_code < 400
 
-    def send_events(self, evts: PayloadDictList) -> None:
+    async def send_events(self, evts: PayloadDictList) -> None:
         """
             :param evts: Array of events to be sent
             :type  evts: list(dict(string:*))
@@ -253,7 +261,7 @@ class Emitter(object):
 
             if self.method == 'post':
                 data = SelfDescribingJson(PAYLOAD_DATA_SCHEMA, evts).to_string()
-                request_succeeded = self.http_post(data)
+                request_succeeded = await self.http_post(data)
                 if request_succeeded:
                     success_events += evts
                 else:
@@ -261,7 +269,7 @@ class Emitter(object):
 
             elif self.method == 'get':
                 for evt in evts:
-                    request_succeeded = self.http_get(evt)
+                    request_succeeded = await self.http_get(evt)
                     if request_succeeded:
                         success_events += [evt]
                     else:
@@ -275,7 +283,7 @@ class Emitter(object):
         else:
             logger.info("Skipping flush since buffer is empty")
 
-    def set_flush_timer(self, timeout: float, flush_now: bool = False) -> None:
+    async def set_flush_timer(self, timeout: float, flush_now: bool = False) -> None:
         """
             Set an interval at which the buffer will be flushed
 
@@ -287,7 +295,7 @@ class Emitter(object):
 
         # Repeatable create new timer
         if flush_now:
-            self.flush()
+            await self.flush()
         self.timer = threading.Timer(timeout, self.set_flush_timer, [timeout, True])
         self.timer.daemon = True
         self.timer.start()
@@ -383,8 +391,8 @@ class AsyncEmitter(Emitter):
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
 
-    def consume(self) -> None:
+    async def consume(self) -> None:
         while True:
             evts = self.queue.get()
-            self.send_events(evts)
+            await self.send_events(evts)
             self.queue.task_done()

@@ -75,8 +75,8 @@ class CeleryEmitter(Emitter):
             self.async_flush.delay()
             logger.info("Scheduled a Celery task to flush the event queue")
 
-        def async_flush(self) -> None:
-            super(CeleryEmitter, self).flush()
+        async def async_flush(self) -> None:
+            await super(CeleryEmitter, self).flush()
 
     else:
 
