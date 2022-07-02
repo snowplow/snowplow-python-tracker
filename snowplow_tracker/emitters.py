@@ -58,7 +58,9 @@ class Emitter(object):
             on_success: Optional[SuccessCallback] = None,
             on_failure: Optional[FailureCallback] = None,
             byte_limit: Optional[int] = None,
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = None) -> None:
+            request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+            client_session: aiohttp.ClientSession = None,
+    ) -> None:
         """
             :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
             :type  endpoint:    string
@@ -85,6 +87,9 @@ class Emitter(object):
                                      applies to both "connect" AND "read" timeout, or as tuple with two float values
                                      which specify the "connect" and "read" timeouts separately
             :type request_timeout:  float | tuple | None
+            :param client_session: Provide an aiohttp ClientSession to improve performance by reusing sessions.
+                                   By default, a new session will be created on every track call.
+            :type client_session:  aiohttp.ClientSession | None
         """
         one_of(protocol, PROTOCOLS)
         one_of(method, METHODS)
@@ -103,6 +108,7 @@ class Emitter(object):
         self.byte_limit = byte_limit
         self.bytes_queued = None if byte_limit is None else 0
         self.request_timeout = request_timeout
+        self.client_session = client_session
 
         self.on_success = on_success
         self.on_failure = on_failure
@@ -191,13 +197,14 @@ class Emitter(object):
         logger.info("Sending POST request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % data)
         post_succeeded = False
+        session = self.client_session if self.client_session else aiohttp.ClientSession()
         try:
-            async with aiohttp.ClientSession() as session:
-                r = await session.post(
+            async with session.post(
                     self.endpoint,
                     data=data,
                     headers={'Content-Type': 'application/json; charset=utf-8'},
-                    timeout=self.request_timeout)
+                    timeout=self.request_timeout,
+            ) as r:
                 post_succeeded = Emitter.is_good_status_code(r.status)
                 logger.log(
                     level=logging.INFO if post_succeeded else logging.WARNING,
@@ -205,6 +212,9 @@ class Emitter(object):
                 )
         except aiohttp.ClientError as e:
             logger.warning(e)
+        finally:
+            if session != self.client_session:
+                await session.close()
 
         return post_succeeded
 
@@ -216,9 +226,9 @@ class Emitter(object):
         logger.info(f"Sending GET request to {self.endpoint}...")
         logger.debug(f"Payload: {payload}")
         get_succeeded = False
+        session = self.client_session if self.client_session else aiohttp.ClientSession()
         try:
-            async with aiohttp.ClientSession() as session:
-                r = await session.get(self.endpoint, params=payload, timeout=self.request_timeout)
+            async with session.get(self.endpoint, params=payload, timeout=self.request_timeout) as r:
                 get_succeeded = Emitter.is_good_status_code(r.status)
                 logger.log(
                     level=logging.INFO if get_succeeded else logging.WARNING,
@@ -226,6 +236,9 @@ class Emitter(object):
                 )
         except aiohttp.ClientError as e:
             logger.warning(e)
+        finally:
+            if session != self.client_session:
+                await session.close()
 
         return get_succeeded
 

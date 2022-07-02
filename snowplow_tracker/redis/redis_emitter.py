@@ -55,7 +55,7 @@ class RedisEmitter(object):
             self.rdb = rdb
             self.key = key
 
-        def input(self, payload: PayloadDict) -> None:
+        async def input(self, payload: PayloadDict) -> None:
             """
                 :param payload:  The event properties
                 :type  payload:  dict(string:*)
@@ -64,11 +64,11 @@ class RedisEmitter(object):
             self.rdb.rpush(self.key, json.dumps(payload))
             logger.info("Finished sending event to Redis.")
 
-        def flush(self) -> None:
+        async def flush(self) -> None:
             logger.warning("The RedisEmitter class does not need to be flushed")
 
-        def sync_flush(self) -> None:
-            self.flush()
+        async def sync_flush(self) -> None:
+            await self.flush()
 
     else:
 
