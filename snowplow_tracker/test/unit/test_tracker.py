@@ -165,25 +165,25 @@ class TestTracker(unittest.TestCase):
         t.track_self_describing_event(evJson)
         self.assertEqual(mok_track.call_count, 1)
 
-    def test_flush(self) -> None:
+    async def test_flush(self) -> None:
         mokEmitter = self.create_patch('snowplow_tracker.Emitter')
         e1 = mokEmitter()
         e2 = mokEmitter()
 
         t = Tracker([e1, e2])
-        t.flush()
+        await t.flush()
         e1.flush.assert_not_called()
         self.assertEqual(e1.sync_flush.call_count, 1)
         e2.flush.assert_not_called()
         self.assertEqual(e2.sync_flush.call_count, 1)
 
-    def test_flush_async(self) -> None:
+    async def test_flush_async(self) -> None:
         mokEmitter = self.create_patch('snowplow_tracker.Emitter')
         e1 = mokEmitter()
         e2 = mokEmitter()
 
         t = Tracker([e1, e2])
-        t.flush(is_async=True)
+        await t.flush(is_async=True)
         self.assertEqual(e1.flush.call_count, 1)
         e1.sync_flush.assert_not_called()
         self.assertEqual(e2.flush.call_count, 1)

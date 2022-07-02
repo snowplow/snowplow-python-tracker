@@ -1,3 +1,7 @@
+Version 1.0.0a2 (2022-06-01)
+--------------------------
+Breaking: Remove AsyncEmitter. Use `asyncio.gather` instead.
+
 Version 1.0.0a1 (2022-06-01)
 --------------------------
 Breaking: Drop support for Python < 3.7

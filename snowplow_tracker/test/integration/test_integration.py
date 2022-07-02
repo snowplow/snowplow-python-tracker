@@ -76,28 +76,28 @@ def fail_response_content(url: str, request: Any) -> Dict[str, Any]:
     }
 
 
-class IntegrationTest(unittest.TestCase):
+class IntegrationTest(unittest.IsolatedAsyncioTestCase):
 
-    def test_integration_page_view(self) -> None:
+    async def test_integration_page_view(self) -> None:
         t = tracker.Tracker([default_emitter], default_subject)
         with HTTMock(pass_response_content):
-            t.track_page_view("http://savethearctic.org", "Save The Arctic", "http://referrer.com")
+            await t.track_page_view("http://savethearctic.org", "Save The Arctic", "http://referrer.com")
         expected_fields = {"e": "pv", "page": "Save+The+Arctic", "url": "http%3A%2F%2Fsavethearctic.org", "refr": "http%3A%2F%2Freferrer.com"}
         for key in expected_fields:
             self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
 
-    def test_integration_ecommerce_transaction_item(self) -> None:
+    async def test_integration_ecommerce_transaction_item(self) -> None:
         t = tracker.Tracker([default_emitter], default_subject)
         with HTTMock(pass_response_content):
-            t.track_ecommerce_transaction_item("12345", "pbz0025", 7.99, 2, "black-tarot", "tarot", currency="GBP")
+            await t.track_ecommerce_transaction_item("12345", "pbz0025", 7.99, 2, "black-tarot", "tarot", currency="GBP")
         expected_fields = {"ti_ca": "tarot", "ti_id": "12345", "ti_qu": "2", "ti_sk": "pbz0025", "e": "ti", "ti_nm": "black-tarot", "ti_pr": "7.99", "ti_cu": "GBP"}
         for key in expected_fields:
             self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
 
-    def test_integration_ecommerce_transaction(self) -> None:
+    async def test_integration_ecommerce_transaction(self) -> None:
         t = tracker.Tracker([default_emitter], default_subject)
         with HTTMock(pass_response_content):
-            t.track_ecommerce_transaction(
+            await t.track_ecommerce_transaction(
                 "6a8078be", 35, city="London", currency="GBP",
                 items=[
                     {
@@ -125,10 +125,10 @@ class IntegrationTest(unittest.TestCase):
 
         self.assertEqual(from_querystring("ttm", querystrings[-3]), from_querystring("ttm", querystrings[-2]))
 
-    def test_integration_screen_view(self) -> None:
+    async def test_integration_screen_view(self) -> None:
         t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
-            t.track_screen_view("Game HUD 2", id_="534")
+            await t.track_screen_view("Game HUD 2", id_="534")
         expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
@@ -145,18 +145,18 @@ class IntegrationTest(unittest.TestCase):
             }
         })
 
-    def test_integration_struct_event(self) -> None:
+    async def test_integration_struct_event(self) -> None:
         t = tracker.Tracker([default_emitter], default_subject)
         with HTTMock(pass_response_content):
-            t.track_struct_event("Ecomm", "add-to-basket", "dog-skateboarding-video", "hd", 13.99)
+            await t.track_struct_event("Ecomm", "add-to-basket", "dog-skateboarding-video", "hd", 13.99)
         expected_fields = {"se_ca": "Ecomm", "se_pr": "hd", "se_la": "dog-skateboarding-video", "se_va": "13.99", "se_ac": "add-to-basket", "e": "se"}
         for key in expected_fields:
             self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
 
-    def test_integration_unstruct_event_non_base64(self) -> None:
+    async def test_integration_unstruct_event_non_base64(self) -> None:
         t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
-            t.track_unstruct_event(SelfDescribingJson("iglu:com.acme/viewed_product/jsonschema/2-0-2", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}))
+            await t.track_unstruct_event(SelfDescribingJson("iglu:com.acme/viewed_product/jsonschema/2-0-2", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}))
         expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
@@ -167,10 +167,10 @@ class IntegrationTest(unittest.TestCase):
             "data": {"schema": "iglu:com.acme/viewed_product/jsonschema/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}}
         })
 
-    def test_integration_unstruct_event_base64(self) -> None:
+    async def test_integration_unstruct_event_base64(self) -> None:
         t = tracker.Tracker([default_emitter], default_subject, encode_base64=True)
         with HTTMock(pass_response_content):
-            t.track_unstruct_event(SelfDescribingJson("iglu:com.acme/viewed_product/jsonschema/2-0-2", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}))
+            await t.track_unstruct_event(SelfDescribingJson("iglu:com.acme/viewed_product/jsonschema/2-0-2", {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}))
         expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
@@ -181,10 +181,10 @@ class IntegrationTest(unittest.TestCase):
             "data": {"schema": "iglu:com.acme/viewed_product/jsonschema/2-0-2", "data": {"product_id": "ASO01043", "price$flt": 49.95, "walrus$tms": 1000}}
         })
 
-    def test_integration_context_non_base64(self) -> None:
+    async def test_integration_context_non_base64(self) -> None:
         t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
-            t.track_page_view("localhost", "local host", None, [SelfDescribingJson("iglu:com.example/user/jsonschema/2-0-3", {"user_type": "tester"})])
+            await t.track_page_view("localhost", "local host", None, [SelfDescribingJson("iglu:com.example/user/jsonschema/2-0-3", {"user_type": "tester"})])
         envelope_string = from_querystring("co", querystrings[-1])
         envelope = json.loads(unquote_plus(envelope_string))
         self.assertEqual(envelope, {
@@ -192,10 +192,10 @@ class IntegrationTest(unittest.TestCase):
             "data": [{"schema": "iglu:com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}]
         })
 
-    def test_integration_context_base64(self) -> None:
+    async def test_integration_context_base64(self) -> None:
         t = tracker.Tracker([default_emitter], default_subject, encode_base64=True)
         with HTTMock(pass_response_content):
-            t.track_page_view("localhost", "local host", None, [SelfDescribingJson("iglu:com.example/user/jsonschema/2-0-3", {"user_type": "tester"})])
+            await t.track_page_view("localhost", "local host", None, [SelfDescribingJson("iglu:com.example/user/jsonschema/2-0-3", {"user_type": "tester"})])
         envelope_string = unquote_plus(from_querystring("cx", querystrings[-1]))
         envelope = json.loads((base64.urlsafe_b64decode(bytearray(envelope_string, "utf-8"))).decode("utf-8"))
         self.assertEqual(envelope, {
@@ -203,7 +203,7 @@ class IntegrationTest(unittest.TestCase):
             "data": [{"schema": "iglu:com.example/user/jsonschema/2-0-3", "data": {"user_type": "tester"}}]
         })
 
-    def test_integration_standard_nv_pairs(self) -> None:
+    async def test_integration_standard_nv_pairs(self) -> None:
         s = subject.Subject()
         s.set_platform("mob")
         s.set_user_id("user12345")
@@ -214,7 +214,7 @@ class IntegrationTest(unittest.TestCase):
 
         t = tracker.Tracker([emitters.Emitter("localhost")], s, "cf", app_id="angry-birds-android")
         with HTTMock(pass_response_content):
-            t.track_page_view("localhost", "local host")
+            await t.track_page_view("localhost", "local host")
         expected_fields = {"tna": "cf", "res": "100x200",
                            "lang": "en", "aid": "angry-birds-android", "cd": "24", "tz": "Europe+London",
                            "p": "mob", "tv": "py-" + _version.__version__}
@@ -223,7 +223,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertIsNotNone(from_querystring("eid", querystrings[-1]))
         self.assertIsNotNone(from_querystring("dtm", querystrings[-1]))
 
-    def test_integration_identification_methods(self) -> None:
+    async def test_integration_identification_methods(self) -> None:
         s = subject.Subject()
         s.set_domain_user_id("4616bfb38f872d16")
         s.set_ip_address("255.255.255.255")
@@ -232,7 +232,7 @@ class IntegrationTest(unittest.TestCase):
 
         t = tracker.Tracker([emitters.Emitter("localhost")], s, "cf", app_id="angry-birds-android")
         with HTTMock(pass_response_content):
-            t.track_page_view("localhost", "local host")
+            await t.track_page_view("localhost", "local host")
         expected_fields = {
             "duid": "4616bfb38f872d16",
             "ip": "255.255.255.255",
@@ -242,7 +242,7 @@ class IntegrationTest(unittest.TestCase):
         for key in expected_fields:
             self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
 
-    def test_integration_event_subject(self) -> None:
+    async def test_integration_event_subject(self) -> None:
         s = subject.Subject()
         s.set_domain_user_id("4616bfb38f872d16")
         s.set_ip_address("255.255.255.255")
@@ -250,7 +250,7 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker([emitters.Emitter("localhost")], s, "cf", app_id="angry-birds-android")
         evSubject = subject.Subject().set_domain_user_id("1111aaa11a111a11").set_lang("EN")
         with HTTMock(pass_response_content):
-            t.track_page_view("localhost", "local host", event_subject=evSubject)
+            await t.track_page_view("localhost", "local host", event_subject=evSubject)
         expected_fields = {
             "duid": "1111aaa11a111a11",
             "lang": "EN"
@@ -258,12 +258,12 @@ class IntegrationTest(unittest.TestCase):
         for key in expected_fields:
             self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
 
-    def test_integration_redis_default(self) -> None:
+    async def test_integration_redis_default(self) -> None:
         try:
             import fakeredis
             r = fakeredis.FakeStrictRedis()
             t = tracker.Tracker([redis_emitter.RedisEmitter(rdb=r)], default_subject)
-            t.track_page_view("http://www.example.com")
+            await t.track_page_view("http://www.example.com")
             event_string = r.rpop("snowplow")
             event_dict = json.loads(event_string.decode("utf-8"))
             self.assertEqual(event_dict["e"], "pv")
@@ -271,12 +271,12 @@ class IntegrationTest(unittest.TestCase):
             with pytest.raises(RuntimeError):
                 redis_emitter.RedisEmitter()
 
-    def test_integration_redis_custom(self) -> None:
+    async def test_integration_redis_custom(self) -> None:
         try:
             import fakeredis
             r = fakeredis.FakeStrictRedis()
             t = tracker.Tracker([redis_emitter.RedisEmitter(rdb=r, key="custom_key")], default_subject)
-            t.track_page_view("http://www.example.com")
+            await t.track_page_view("http://www.example.com")
             event_string = r.rpop("custom_key")
             event_dict = json.loads(event_string.decode("utf-8"))
             self.assertEqual(event_dict["e"], "pv")
@@ -284,7 +284,7 @@ class IntegrationTest(unittest.TestCase):
             with pytest.raises(RuntimeError):
                 redis_emitter.RedisEmitter("arg", key="kwarg")
 
-    def test_integration_success_callback(self) -> None:
+    async def test_integration_success_callback(self) -> None:
         callback_success_queue = []
         callback_failure_queue = []
         callback_emitter = emitters.Emitter(
@@ -293,7 +293,7 @@ class IntegrationTest(unittest.TestCase):
             on_failure=lambda x, y: callback_failure_queue.append(x))
         t = tracker.Tracker([callback_emitter], default_subject)
         with HTTMock(pass_response_content):
-            t.track_page_view("http://www.example.com")
+            await t.track_page_view("http://www.example.com")
         expected = {
             "e": "pv",
             "url": "http://www.example.com",
@@ -303,7 +303,7 @@ class IntegrationTest(unittest.TestCase):
             self.assertEqual(callback_success_queue[0][0][k], expected[k])
         self.assertEqual(callback_failure_queue, [])
 
-    def test_integration_failure_callback(self) -> None:
+    async def test_integration_failure_callback(self) -> None:
         callback_success_queue = []
         callback_failure_queue = []
         callback_emitter = emitters.Emitter(
@@ -312,37 +312,37 @@ class IntegrationTest(unittest.TestCase):
             on_failure=lambda x, y: callback_failure_queue.append(x))
         t = tracker.Tracker([callback_emitter], default_subject)
         with HTTMock(fail_response_content):
-            t.track_page_view("http://www.example.com")
+            await t.track_page_view("http://www.example.com")
         self.assertEqual(callback_success_queue, [])
         self.assertEqual(callback_failure_queue[0], 0)
 
-    def test_post_page_view(self) -> None:
+    async def test_post_page_view(self) -> None:
         t = tracker.Tracker([post_emitter], default_subject)
         with HTTMock(pass_post_response_content):
-            t.track_page_view("localhost", "local host", None)
+            await t.track_page_view("localhost", "local host", None)
         expected_fields = {"e": "pv", "page": "local host", "url": "localhost"}
         request = querystrings[-1]
         self.assertEqual(request["schema"], "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4")
         for key in expected_fields:
             self.assertEqual(request["data"][0][key], expected_fields[key])
 
-    def test_post_batched(self) -> None:
+    async def test_post_batched(self) -> None:
         post_emitter = emitters.Emitter("localhost", protocol="http", port=80, method='post', buffer_size=2)
         t = tracker.Tracker(post_emitter, default_subject)
         with HTTMock(pass_post_response_content):
-            t.track_struct_event("Test", "A")
-            t.track_struct_event("Test", "B")
+            await t.track_struct_event("Test", "A")
+            await t.track_struct_event("Test", "B")
         self.assertEqual(querystrings[-1]["data"][0]["se_ac"], "A")
         self.assertEqual(querystrings[-1]["data"][1]["se_ac"], "B")
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    def test_timestamps(self) -> None:
+    async def test_timestamps(self) -> None:
         emitter = emitters.Emitter("localhost", protocol="http", port=80, method='post', buffer_size=3)
         t = tracker.Tracker([emitter], default_subject)
         with HTTMock(pass_post_response_content):
-            t.track_page_view("localhost", "stamp0", None, tstamp=None)
-            t.track_page_view("localhost", "stamp1", None, tstamp=1358933694000)
-            t.track_page_view("localhost", "stamp2", None, tstamp=1358933694000.00)
+            await t.track_page_view("localhost", "stamp0", None, tstamp=None)
+            await t.track_page_view("localhost", "stamp1", None, tstamp=1358933694000)
+            await t.track_page_view("localhost", "stamp2", None, tstamp=1358933694000.00)
 
         expected_timestamps = [
             {"dtm": "1618790401000", "ttm": None, "stm": "1618790401000"},
@@ -356,25 +356,25 @@ class IntegrationTest(unittest.TestCase):
             self.assertEqual(request["data"][i].get("ttm"), expected_timestamps[i]["ttm"])
             self.assertEqual(request["data"][i].get("stm"), expected_timestamps[i]["stm"])
 
-    def test_bytelimit(self) -> None:
+    async def test_bytelimit(self) -> None:
         post_emitter = emitters.Emitter("localhost", protocol="http", port=80, method='post', buffer_size=5, byte_limit=420)
         t = tracker.Tracker(post_emitter, default_subject)
         with HTTMock(pass_post_response_content):
-            t.track_struct_event("Test", "A")       # 140 bytes
-            t.track_struct_event("Test", "A")       # 280 bytes
-            t.track_struct_event("Test", "A")       # 420 bytes. Send
-            t.track_struct_event("Test", "AA")      # 141
+            await t.track_struct_event("Test", "A")       # 140 bytes
+            await t.track_struct_event("Test", "A")       # 280 bytes
+            await t.track_struct_event("Test", "A")       # 420 bytes. Send
+            await t.track_struct_event("Test", "AA")      # 141
         self.assertEqual(len(querystrings[-1]["data"]), 3)
         self.assertEqual(post_emitter.bytes_queued, 136 + len(_version.__version__))
 
-    def test_unicode_get(self) -> None:
+    async def test_unicode_get(self) -> None:
         t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
         unicode_a = u'\u0107'
         unicode_b = u'test.\u0107om'
         test_ctx = SelfDescribingJson('iglu:a.b/c/jsonschema/1-0-0', {'test': unicode_a})
         with HTTMock(pass_response_content):
-            t.track_page_view(unicode_b, context=[test_ctx])
-            t.track_screen_view(unicode_b, context=[test_ctx])
+            await t.track_page_view(unicode_b, context=[test_ctx])
+            await t.track_screen_view(unicode_b, context=[test_ctx])
 
         url_string = unquote_plus(from_querystring("url", querystrings[-2]))
         try:
@@ -391,14 +391,14 @@ class IntegrationTest(unittest.TestCase):
         actual_b = json.loads(uepr_string)['data']['data']['name']
         self.assertEqual(actual_b, unicode_b)
 
-    def test_unicode_post(self) -> None:
+    async def test_unicode_post(self) -> None:
         t = tracker.Tracker([post_emitter], default_subject, encode_base64=False)
         unicode_a = u'\u0107'
         unicode_b = u'test.\u0107om'
         test_ctx = SelfDescribingJson('iglu:a.b/c/jsonschema/1-0-0', {'test': unicode_a})
         with HTTMock(pass_post_response_content):
-            t.track_page_view(unicode_b, context=[test_ctx])
-            t.track_screen_view(unicode_b, context=[test_ctx])
+            await t.track_page_view(unicode_b, context=[test_ctx])
+            await t.track_screen_view(unicode_b, context=[test_ctx])
 
         pv_event = querystrings[-2]
         self.assertEqual(pv_event['data'][0]['url'], unicode_b)
