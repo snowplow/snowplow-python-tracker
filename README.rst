@@ -1,40 +1,55 @@
 ======================================================
-Python Analytics for Snowplow
+asyncio Python Analytics for Snowplow
 ======================================================
-.. image:: https://img.shields.io/static/v1?style=flat&label=Snowplow&message=Early%20Release&color=014477&labelColor=9ba0aa&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAeFBMVEVMaXGXANeYANeXANZbAJmXANeUANSQAM+XANeMAMpaAJhZAJeZANiXANaXANaOAM2WANVnAKWXANZ9ALtmAKVaAJmXANZaAJlXAJZdAJxaAJlZAJdbAJlbAJmQAM+UANKZANhhAJ+EAL+BAL9oAKZnAKVjAKF1ALNBd8J1AAAAKHRSTlMAa1hWXyteBTQJIEwRgUh2JjJon21wcBgNfmc+JlOBQjwezWF2l5dXzkW3/wAAAHpJREFUeNokhQOCA1EAxTL85hi7dXv/E5YPCYBq5DeN4pcqV1XbtW/xTVMIMAZE0cBHEaZhBmIQwCFofeprPUHqjmD/+7peztd62dWQRkvrQayXkn01f/gWp2CrxfjY7rcZ5V7DEMDQgmEozFpZqLUYDsNwOqbnMLwPAJEwCopZxKttAAAAAElFTkSuQmCC
-    :alt: Early Release
-    :target: https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/tracker-maintenance-classification/
-.. image:: https://github.com/snowplow/snowplow-python-tracker/actions/workflows/ci.yml/badge.svg
+.. image:: https://github.com/miermans/aio-snowplow-python-tracker/actions/workflows/ci.yml/badge.svg
     :alt: Build Status
-    :target: https://github.com/snowplow/snowplow-python-tracker/actions
-.. image:: https://img.shields.io/coveralls/github/snowplow/snowplow-python-tracker
+    :target: https://github.com/miermans/aio-snowplow-python-tracker/actions
+.. image:: https://coveralls.io/repos/github/miermans/aio-snowplow-python-tracker/badge.svg?branch=main
     :alt: Test Coverage
-    :target: https://coveralls.io/github/snowplow/snowplow-python-tracker?branch=master
+    :target: https://coveralls.io/github/miermans/aio-snowplow-python-tracker?branch=main
 .. image:: http://img.shields.io/badge/license-Apache--2-blue.svg?style=flat
     :target: http://www.apache.org/licenses/LICENSE-2.0
 
 |
 
-.. image:: https://img.shields.io/pypi/v/snowplow-tracker
+.. image:: https://img.shields.io/pypi/v/aio-snowplow-tracker
     :alt: Pypi Snowplow Tracker
-    :target: https://pypi.org/project/snowplow-tracker/
-.. image:: https://img.shields.io/pypi/pyversions/snowplow-tracker
+    :target: https://pypi.org/project/aio-snowplow-tracker/
+.. image:: https://img.shields.io/pypi/pyversions/aio-snowplow-tracker
     :alt: Python Versions
-    :target: https://pypi.org/project/snowplow-tracker/
-.. image:: https://img.shields.io/pypi/dm/snowplow-tracker
+    :target: https://pypi.org/project/aio-snowplow-tracker/
+.. image:: https://img.shields.io/pypi/dm/aio-snowplow-tracker
     :alt: Monthly Downloads
-    :target: https://pypi.org/project/snowplow-tracker/
+    :target: https://pypi.org/project/aio-snowplow-tracker/
 
 
 Overview
 ########
 
-Add analytics to your Python apps and Python games with the Snowplow_ event tracker for Python_.
+This is a fork of to the official `Snowplow Python Tracker`_ that applies asyncio_ for high-performance event tracking.
 
-.. _Snowplow: http://snowplowanalytics.com
-.. _Python: http://python.org
+.. _`Snowplow Python Tracker`: https://github.com/snowplow/snowplow-python-tracker
+.. _asyncio: https://realpython.com/async-io-python/
 
 With this tracker you can collect event data from your Python-based applications, games or Python web servers/frameworks.
+
+Example
+#############
+
+.. code-block:: python
+   :caption: Example usage
+
+    from snowplow_tracker import Tracker, Emitter, Subject
+    import asyncio
+
+    async def main():
+        e = Emitter('d3rkrsqld9gmqf.cloudfront.net')
+        s = Subject().set_user_id('5432')
+        t = Tracker(e, subject=s, app_id='example-app')
+        t.track_page_view('http://example.com', 'Example Page')
+
+    asyncio.run(main())
+
 
 Find out more
 #############
