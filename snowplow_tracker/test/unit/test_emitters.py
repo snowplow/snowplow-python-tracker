@@ -18,8 +18,7 @@
     Copyright: Copyright (c) 2013-2021 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
-
-
+import asyncio
 import time
 import unittest
 import unittest.mock as mock
@@ -47,7 +46,7 @@ async def mocked_http_failure(*args: Any) -> bool:
     return False
 
 
-class TestEmitters(unittest.TestCase):
+class TestEmitters(unittest.IsolatedAsyncioTestCase):
 
     def setUp(self) -> None:
         pass
@@ -218,7 +217,7 @@ class TestEmitters(unittest.TestCase):
 
         await e.set_flush_timer(3)
         self.assertEqual(len(e.buffer), 3)
-        time.sleep(5)
+        await asyncio.sleep(5)
         self.assertEqual(mok_flush.call_count, 1)
 
     @mock.patch('snowplow_tracker.Emitter.http_get')
@@ -273,7 +272,23 @@ class TestEmitters(unittest.TestCase):
         mok_success.assert_not_called()
         mok_failure.assert_called_with(0, evBuffer)
 
-    @mock.patch('snowplow_tracker.emitters.requests.post')
+    @mock.patch('snowplow_tracker.emitters.aiohttp.ClientSession.get')
+    async def test_http_get_successful(self, mok_get_request: Any) -> None:
+        mok_get_request.return_value.__aenter__.return_value = mock.Mock(status=200)
+        e = Emitter('0.0.0.0')
+        get_succeeded = await e.http_get({"a": "b"})
+
+        self.assertTrue(get_succeeded)
+
+    @mock.patch('snowplow_tracker.emitters.aiohttp.ClientSession.post')
+    async def test_http_get_successful(self, mok_post_request: Any) -> None:
+        mok_post_request.return_value.__aenter__.return_value = mock.Mock(status=200)
+        e = Emitter('0.0.0.0')
+        get_succeeded = await e.http_post({"a": "b"})
+
+        self.assertTrue(get_succeeded)
+
+    @mock.patch('snowplow_tracker.emitters.aiohttp.ClientSession.post')
     async def test_http_post_connect_timeout_error(self, mok_post_request: Any) -> None:
         mok_post_request.side_effect = ServerTimeoutError
         e = Emitter('0.0.0.0')
@@ -281,9 +296,9 @@ class TestEmitters(unittest.TestCase):
 
         self.assertFalse(post_succeeded)
 
-    @mock.patch('snowplow_tracker.emitters.requests.post')
-    async def test_http_get_connect_timeout_error(self, mok_post_request: Any) -> None:
-        mok_post_request.side_effect = ServerTimeoutError
+    @mock.patch('snowplow_tracker.emitters.aiohttp.ClientSession.get')
+    async def test_http_get_connect_timeout_error(self, mok_get_request: Any) -> None:
+        mok_get_request.side_effect = ServerTimeoutError
         e = Emitter('0.0.0.0')
         get_succeeded = await e.http_get({"a": "b"})
 

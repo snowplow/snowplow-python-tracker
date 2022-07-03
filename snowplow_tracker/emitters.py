@@ -18,18 +18,17 @@
     Copyright: Copyright (c) 2013-2021 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 """
-
-
+import asyncio
 import logging
 import time
 import threading
 import aiohttp
 from typing import Optional, Union, Tuple
-from queue import Queue
 
 from snowplow_tracker.self_describing_json import SelfDescribingJson
 from snowplow_tracker.typing import PayloadDict, PayloadDictList, HttpProtocol, Method, SuccessCallback, FailureCallback
 from snowplow_tracker.contracts import one_of
+from snowplow_tracker._timer import Timer
 
 # logging
 logging.basicConfig()
@@ -306,12 +305,10 @@ class Emitter(object):
             :type  flush_now: bool
         """
 
-        # Repeatable create new timer
         if flush_now:
             await self.flush()
-        self.timer = threading.Timer(timeout, self.set_flush_timer, [timeout, True])
-        self.timer.daemon = True
-        self.timer.start()
+        # Repeatable create new timer
+        self.timer = Timer(timeout, self.set_flush_timer, [timeout, True])
 
     def cancel_flush_timer(self) -> None:
         """

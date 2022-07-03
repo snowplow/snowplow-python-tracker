@@ -80,12 +80,12 @@ class ContractsDisabled(object):
         enable_contracts()
 
 
-class TestTracker(unittest.TestCase):
+class TestTracker(unittest.IsolatedAsyncioTestCase):
 
     def create_patch(self, name: str) -> Any:
         patcher = mock.patch(name)
         thing = patcher.start()
-        thing.side_effect = mock.MagicMock
+        thing.side_effect = mock.AsyncMock
         self.addCleanup(patcher.stop)
         return thing
 
