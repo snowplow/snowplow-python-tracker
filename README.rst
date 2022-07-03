@@ -37,7 +37,6 @@ Example
 #############
 
 .. code-block:: python
-   :caption: Example usage
 
     from snowplow_tracker import Tracker, Emitter, Subject
     import asyncio
@@ -46,7 +45,7 @@ Example
         e = Emitter('d3rkrsqld9gmqf.cloudfront.net')
         s = Subject().set_user_id('5432')
         t = Tracker(e, subject=s, app_id='example-app')
-        t.track_page_view('http://example.com', 'Example Page')
+        await t.track_page_view('http://example.com', 'Example Page')
 
     asyncio.run(main())
 
