@@ -59,7 +59,7 @@ async def snowplow_server(aiohttp_server) -> TestServer:
 
 
 @pytest.fixture
-async def snowplow_server_failure(aiohttp_server) -> TestServer:
+async def failing_snowplow_server(aiohttp_server) -> TestServer:
     async def successful_response(request):
         return aiohttp.web.Response(body=b'Simulating an internal server error', status=501)
 
@@ -290,11 +290,11 @@ async def test_integration_success_callback(snowplow_server: TestServer, default
     assert callback_failure_queue == []
 
 
-async def test_integration_failure_callback(snowplow_server_failure: TestServer, default_subject: subject.Subject):
+async def test_integration_failure_callback(failing_snowplow_server, default_subject: subject.Subject):
     callback_success_queue = []
     callback_failure_queue = []
     callback_emitter = create_emitter(
-        snowplow_server_failure,
+        failing_snowplow_server,
         on_success=lambda x: callback_success_queue.append(x),
         on_failure=lambda x, y: callback_failure_queue.append(x))
     t = tracker.Tracker([callback_emitter], default_subject)
