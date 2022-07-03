@@ -220,6 +220,22 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         await asyncio.sleep(5)
         self.assertEqual(mok_flush.call_count, 1)
 
+    @mock.patch('snowplow_tracker.Emitter.flush')
+    async def test_cancel_flush_timer(self, mok_flush: Any) -> None:
+        mok_flush.side_effect = mocked_flush
+
+        e = Emitter('0.0.0.0', method="post", buffer_size=10)
+        ev_list = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
+        for i in ev_list:
+            await e.input(i)
+
+        await e.set_flush_timer(3)
+        self.assertEqual(len(e.buffer), 3)
+        await asyncio.sleep(1)
+        e.cancel_flush_timer()
+        await asyncio.sleep(4)
+        self.assertEqual(mok_flush.call_count, 0)
+
     @mock.patch('snowplow_tracker.Emitter.http_get')
     async def test_send_events_get_success(self, mok_http_get: Any) -> None:
         mok_http_get.side_effect = mocked_http_success
