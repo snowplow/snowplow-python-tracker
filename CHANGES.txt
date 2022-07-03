@@ -1,5 +1,6 @@
 Version 1.0.0a2 (2022-06-01)
 --------------------------
+Breaking: Emitter and Tracker leverage asyncio. `Tracker.track_*` calls must now be awaited.
 Breaking: Remove AsyncEmitter. Use `asyncio.gather` instead.
 
 Version 1.0.0a1 (2022-06-01)
