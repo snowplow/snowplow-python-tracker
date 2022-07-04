@@ -80,11 +80,13 @@ class ContractsDisabled(object):
     def __exit__(self, type: Any, value: Any, traceback: Any) -> None:
         enable_contracts()
 
+
 try:
     AsyncTestCase = unittest.IsolatedAsyncioTestCase
     async_patch = mock.patch
     async_mock = mock.AsyncMock
 except AttributeError:
+    # Python 3.7 compatibility
     import asynctest  # noqa
     AsyncTestCase = asynctest.TestCase
     async_patch = asynctest.patch

@@ -46,7 +46,19 @@ async def mocked_http_failure(*args: Any) -> bool:
     return False
 
 
-class TestEmitters(unittest.IsolatedAsyncioTestCase):
+try:
+    AsyncTestCase = unittest.IsolatedAsyncioTestCase
+    async_patch = mock.patch
+    async_mock = mock.AsyncMock
+except AttributeError:
+    # Python 3.7 compatibility
+    import asynctest  # noqa
+    AsyncTestCase = asynctest.TestCase
+    async_patch = asynctest.patch
+    async_mock = asynctest.create_autospec
+
+
+class TestEmitters(AsyncTestCase):
 
     def setUp(self) -> None:
         pass
@@ -100,7 +112,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(ValueError):
             Emitter.as_collector_uri('')
 
-    @mock.patch('snowplow_tracker.Emitter.flush')
+    @async_patch('snowplow_tracker.Emitter.flush')
     async def test_input_no_flush(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
@@ -114,7 +126,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(e.reached_limit())
         mok_flush.assert_not_called()
 
-    @mock.patch('snowplow_tracker.Emitter.flush')
+    @async_patch('snowplow_tracker.Emitter.flush')
     async def test_input_flush_byte_limit(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
@@ -127,7 +139,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(e.reached_limit())
         self.assertEqual(mok_flush.call_count, 1)
 
-    @mock.patch('snowplow_tracker.Emitter.flush')
+    @async_patch('snowplow_tracker.Emitter.flush')
     async def test_input_flush_buffer(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
@@ -146,7 +158,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(e.reached_limit())
         self.assertEqual(mok_flush.call_count, 1)
 
-    @mock.patch('snowplow_tracker.Emitter.flush')
+    @async_patch('snowplow_tracker.Emitter.flush')
     async def test_input_bytes_queued(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
@@ -160,7 +172,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         await e.input(nvPairs)
         self.assertEqual(e.bytes_queued, 48)
 
-    @mock.patch('snowplow_tracker.Emitter.flush')
+    @async_patch('snowplow_tracker.Emitter.flush')
     async def test_input_bytes_post(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
@@ -170,7 +182,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(e.buffer, [{"testString": "test", "testNum": "2.72"}])
 
-    @mock.patch('snowplow_tracker.Emitter.send_events')
+    @async_patch('snowplow_tracker.Emitter.send_events')
     async def test_flush(self, mok_send_events: Any) -> None:
         mok_send_events.side_effect = mocked_send_events
 
@@ -182,7 +194,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(mok_send_events.call_count, 1)
         self.assertEqual(len(e.buffer), 0)
 
-    @mock.patch('snowplow_tracker.Emitter.send_events')
+    @async_patch('snowplow_tracker.Emitter.send_events')
     async def test_flush_bytes_queued(self, mok_send_events: Any) -> None:
         mok_send_events.side_effect = mocked_send_events
 
@@ -206,7 +218,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
             reduced = reduced and "stm" in ev.keys() and ev["stm"] == "1618358402000"
         self.assertTrue(reduced)
 
-    @mock.patch('snowplow_tracker.Emitter.flush')
+    @async_patch('snowplow_tracker.Emitter.flush')
     async def test_flush_timer(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
@@ -220,7 +232,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         await asyncio.sleep(5)
         self.assertEqual(mok_flush.call_count, 1)
 
-    @mock.patch('snowplow_tracker.Emitter.flush')
+    @async_patch('snowplow_tracker.Emitter.flush')
     async def test_cancel_flush_timer(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
@@ -236,7 +248,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         await asyncio.sleep(4)
         self.assertEqual(mok_flush.call_count, 0)
 
-    @mock.patch('snowplow_tracker.Emitter.http_get')
+    @async_patch('snowplow_tracker.Emitter.http_get')
     async def test_send_events_get_success(self, mok_http_get: Any) -> None:
         mok_http_get.side_effect = mocked_http_success
         mok_success = mock.Mock(return_value="success mocked")
@@ -249,7 +261,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         mok_success.assert_called_once_with(evBuffer)
         mok_failure.assert_not_called()
 
-    @mock.patch('snowplow_tracker.Emitter.http_get')
+    @async_patch('snowplow_tracker.Emitter.http_get')
     async def test_send_events_get_failure(self, mok_http_get: Any) -> None:
         mok_http_get.side_effect = mocked_http_failure
         mok_success = mock.Mock(return_value="success mocked")
@@ -262,7 +274,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         mok_success.assert_not_called()
         mok_failure.assert_called_once_with(0, evBuffer)
 
-    @mock.patch('snowplow_tracker.Emitter.http_post')
+    @async_patch('snowplow_tracker.Emitter.http_post')
     async def test_send_events_post_success(self, mok_http_post: Any) -> None:
         mok_http_post.side_effect = mocked_http_success
         mok_success = mock.Mock(return_value="success mocked")
@@ -275,7 +287,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         mok_success.assert_called_once_with(evBuffer)
         mok_failure.assert_not_called()
 
-    @mock.patch('snowplow_tracker.Emitter.http_post')
+    @async_patch('snowplow_tracker.Emitter.http_post')
     async def test_send_events_post_failure(self, mok_http_post: Any) -> None:
         mok_http_post.side_effect = mocked_http_failure
         mok_success = mock.Mock(return_value="success mocked")
@@ -288,7 +300,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         mok_success.assert_not_called()
         mok_failure.assert_called_with(0, evBuffer)
 
-    @mock.patch('snowplow_tracker.emitters.aiohttp.ClientSession.get')
+    @async_patch('snowplow_tracker.emitters.aiohttp.ClientSession.get')
     async def test_http_get_successful(self, mok_get_request: Any) -> None:
         mok_get_request.return_value.__aenter__.return_value = mock.Mock(status=200)
         e = Emitter('0.0.0.0')
@@ -296,7 +308,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
 
         self.assertTrue(get_succeeded)
 
-    @mock.patch('snowplow_tracker.emitters.aiohttp.ClientSession.post')
+    @async_patch('snowplow_tracker.emitters.aiohttp.ClientSession.post')
     async def test_http_get_successful(self, mok_post_request: Any) -> None:
         mok_post_request.return_value.__aenter__.return_value = mock.Mock(status=200)
         e = Emitter('0.0.0.0')
@@ -304,7 +316,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
 
         self.assertTrue(get_succeeded)
 
-    @mock.patch('snowplow_tracker.emitters.aiohttp.ClientSession.post')
+    @async_patch('snowplow_tracker.emitters.aiohttp.ClientSession.post')
     async def test_http_post_connect_timeout_error(self, mok_post_request: Any) -> None:
         mok_post_request.side_effect = ServerTimeoutError
         e = Emitter('0.0.0.0')
@@ -312,7 +324,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
 
         self.assertFalse(post_succeeded)
 
-    @mock.patch('snowplow_tracker.emitters.aiohttp.ClientSession.get')
+    @async_patch('snowplow_tracker.emitters.aiohttp.ClientSession.get')
     async def test_http_get_connect_timeout_error(self, mok_get_request: Any) -> None:
         mok_get_request.side_effect = ServerTimeoutError
         e = Emitter('0.0.0.0')
@@ -320,7 +332,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
 
         self.assertFalse(get_succeeded)
 
-    @mock.patch('snowplow_tracker.Emitter.http_post')
+    @async_patch('snowplow_tracker.Emitter.http_post')
     async def test_async_send_events_post_success(self, mok_http_post: Any) -> None:
         mok_http_post.side_effect = mocked_http_success
         mok_success = mock.Mock(return_value="success mocked")
@@ -333,7 +345,7 @@ class TestEmitters(unittest.IsolatedAsyncioTestCase):
         mok_success.assert_called_once_with(evBuffer)
         mok_failure.assert_not_called()
 
-    @mock.patch('snowplow_tracker.Emitter.http_post')
+    @async_patch('snowplow_tracker.Emitter.http_post')
     async def test_async_send_events_post_failure(self, mok_http_post: Any) -> None:
         mok_http_post.side_effect = mocked_http_failure
         mok_success = mock.Mock(return_value="success mocked")
