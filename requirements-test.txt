@@ -5,3 +5,4 @@ freezegun==1.1.0
 pytest-cov
 coveralls==3.3.1
 fakeredis==1.7.0
+asynctest==0.13.0; python_version < '3.8.0'
