@@ -93,8 +93,11 @@ except AttributeError:
     async_mock = asynctest.create_autospec
 
 
-def create_mock_emitter(endpoint: str = "localhost") -> snowplow_tracker.Emitter:
-    return async_mock(snowplow_tracker.Emitter)(endpoint)
+def create_mock_emitter() -> snowplow_tracker.Emitter:
+    try:
+        return mock.AsyncMock()
+    except AttributeError:
+        return asynctest.create_autospec(snowplow_tracker.Emitter)(endpoint=None)
 
 
 class TestTracker(AsyncTestCase):
@@ -182,8 +185,8 @@ class TestTracker(AsyncTestCase):
         self.assertEqual(mok_track.call_count, 1)
 
     async def test_flush(self) -> None:
-        e1 = create_mock_emitter('localhost')
-        e2 = create_mock_emitter('localhost')
+        e1 = create_mock_emitter()
+        e2 = create_mock_emitter()
 
         t = Tracker([e1, e2])
         await t.flush()
