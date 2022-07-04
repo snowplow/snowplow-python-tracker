@@ -27,13 +27,13 @@ import unittest.mock as mock
 from freezegun import freeze_time
 from typing import Any, Type
 
-import snowplow_tracker
-from snowplow_tracker.contracts import disable_contracts, enable_contracts
-from snowplow_tracker.tracker import Tracker
-from snowplow_tracker.tracker import VERSION as TRACKER_VERSION
-from snowplow_tracker.subject import Subject
-from snowplow_tracker.payload import Payload
-from snowplow_tracker.self_describing_json import SelfDescribingJson
+import aio_snowplow_tracker
+from aio_snowplow_tracker.contracts import disable_contracts, enable_contracts
+from aio_snowplow_tracker.tracker import Tracker
+from aio_snowplow_tracker.tracker import VERSION as TRACKER_VERSION
+from aio_snowplow_tracker.subject import Subject
+from aio_snowplow_tracker.payload import Payload
+from aio_snowplow_tracker.self_describing_json import SelfDescribingJson
 
 UNSTRUCT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0"
 CONTEXT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1"
@@ -93,11 +93,11 @@ except AttributeError:
     async_mock = asynctest.create_autospec
 
 
-def create_mock_emitter() -> snowplow_tracker.Emitter:
+def create_mock_emitter() -> aio_snowplow_tracker.Emitter:
     try:
         return mock.AsyncMock()
     except AttributeError:
-        return asynctest.create_autospec(snowplow_tracker.Emitter)(endpoint=None)
+        return asynctest.create_autospec(aio_snowplow_tracker.Emitter)(endpoint=None)
 
 
 class TestTracker(AsyncTestCase):
@@ -108,10 +108,10 @@ class TestTracker(AsyncTestCase):
         # try:
         #     emitter.side_effect = mock.AsyncMock
         # except AttributeError:
-        #     emitter.side_effect = asynctest.create_autospec(snowplow_tracker.Emitter)
+        #     emitter.side_effect = asynctest.create_autospec(aio_snowplow_tracker.Emitter)
         # self.addCleanup(patcher.stop)
         # return emitter
-        return asynctest.create_autospec(snowplow_tracker.Emitter)
+        return asynctest.create_autospec(aio_snowplow_tracker.Emitter)
 
     def setUp(self) -> None:
         pass
@@ -173,7 +173,7 @@ class TestTracker(AsyncTestCase):
         tstamp = Tracker.get_timestamp("1399021242030")   # test wrong arg type
         self.assertEqual(tstamp, 1000)                    # 1970-01-01 00:00:01 in ms
 
-    @async_patch('snowplow_tracker.Tracker.track')
+    @async_patch('aio_snowplow_tracker.Tracker.track')
     async def test_alias_of_track_unstruct_event(self, mok_track: Any) -> None:
         e = create_mock_emitter()
 
@@ -242,8 +242,8 @@ class TestTracker(AsyncTestCase):
         e3.input.assert_called_once_with({"test": "track"})
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @async_patch('snowplow_tracker.Tracker.track')
-    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    @async_patch('aio_snowplow_tracker.Tracker.track')
+    @async_patch('aio_snowplow_tracker.Tracker.get_uuid')
     async def test_complete_payload(self, mok_uuid: Any, mok_track: Any) -> None:
         e = create_mock_emitter()
 
@@ -268,8 +268,8 @@ class TestTracker(AsyncTestCase):
         self.assertDictEqual(passed_nv_pairs, expected)
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @async_patch('snowplow_tracker.Tracker.track')
-    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    @async_patch('aio_snowplow_tracker.Tracker.track')
+    @async_patch('aio_snowplow_tracker.Tracker.get_uuid')
     async def test_complete_payload_tstamp_int(self, mok_uuid: Any, mok_track: Any) -> None:
         e = create_mock_emitter()
 
@@ -296,8 +296,8 @@ class TestTracker(AsyncTestCase):
         self.assertDictEqual(passed_nv_pairs, expected)
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @async_patch('snowplow_tracker.Tracker.track')
-    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    @async_patch('aio_snowplow_tracker.Tracker.track')
+    @async_patch('aio_snowplow_tracker.Tracker.get_uuid')
     async def test_complete_payload_tstamp_dtm(self, mok_uuid: Any, mok_track: Any) -> None:
         e = create_mock_emitter()
 
@@ -324,8 +324,8 @@ class TestTracker(AsyncTestCase):
         self.assertDictEqual(passed_nv_pairs, expected)
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @async_patch('snowplow_tracker.Tracker.track')
-    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    @async_patch('aio_snowplow_tracker.Tracker.track')
+    @async_patch('aio_snowplow_tracker.Tracker.get_uuid')
     async def test_complete_payload_tstamp_ttm(self, mok_uuid: Any, mok_track: Any) -> None:
         e = create_mock_emitter()
 
@@ -352,8 +352,8 @@ class TestTracker(AsyncTestCase):
         self.assertDictEqual(passed_nv_pairs, expected)
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @async_patch('snowplow_tracker.Tracker.track')
-    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    @async_patch('aio_snowplow_tracker.Tracker.track')
+    @async_patch('aio_snowplow_tracker.Tracker.get_uuid')
     async def test_complete_payload_co(self, mok_uuid: Any, mok_track: Any) -> None:
         e = create_mock_emitter()
 
@@ -390,8 +390,8 @@ class TestTracker(AsyncTestCase):
         self.assertDictEqual(json.loads(passed_nv_pairs["co"]), expected_co)
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @async_patch('snowplow_tracker.Tracker.track')
-    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    @async_patch('aio_snowplow_tracker.Tracker.track')
+    @async_patch('aio_snowplow_tracker.Tracker.get_uuid')
     async def test_complete_payload_cx(self, mok_uuid: Any, mok_track: Any) -> None:
         e = create_mock_emitter()
 
@@ -414,8 +414,8 @@ class TestTracker(AsyncTestCase):
         self.assertIn("cx", passed_nv_pairs)
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @async_patch('snowplow_tracker.Tracker.track')
-    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    @async_patch('aio_snowplow_tracker.Tracker.track')
+    @async_patch('aio_snowplow_tracker.Tracker.get_uuid')
     async def test_complete_payload_event_subject(self, mok_uuid: Any, mok_track: Any) -> None:
         e = create_mock_emitter()
 
@@ -446,7 +446,7 @@ class TestTracker(AsyncTestCase):
     # test track_x methods
     ###
 
-    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    @async_patch('aio_snowplow_tracker.Tracker.complete_payload')
     async def test_track_unstruct_event(self, mok_complete_payload: Any) -> None:
         e = create_mock_emitter()
 
@@ -481,7 +481,7 @@ class TestTracker(AsyncTestCase):
         self.assertTrue(actualContextArg is None)
         self.assertTrue(actualTstampArg is None)
 
-    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    @async_patch('aio_snowplow_tracker.Tracker.complete_payload')
     async def test_track_unstruct_event_all_args(self, mok_complete_payload: Any) -> None:
         e = create_mock_emitter()
 
@@ -519,7 +519,7 @@ class TestTracker(AsyncTestCase):
         self.assertIs(actualContextArg[0], ctx)
         self.assertEqual(actualTstampArg, evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    @async_patch('aio_snowplow_tracker.Tracker.complete_payload')
     async def test_track_unstruct_event_encode(self, mok_complete_payload: Any) -> None:
         e = create_mock_emitter()
 
@@ -536,7 +536,7 @@ class TestTracker(AsyncTestCase):
         actualPairs = actualPayloadArg.nv_pairs
         self.assertTrue("ue_px" in actualPairs.keys())
 
-    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    @async_patch('aio_snowplow_tracker.Tracker.complete_payload')
     async def test_track_struct_event(self, mok_complete_payload: Any) -> None:
         e = create_mock_emitter()
 
@@ -567,7 +567,7 @@ class TestTracker(AsyncTestCase):
         self.assertIs(actualContextArg[0], ctx)
         self.assertEqual(actualTstampArg, evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    @async_patch('aio_snowplow_tracker.Tracker.complete_payload')
     async def test_track_page_view(self, mok_complete_payload: Any) -> None:
         e = create_mock_emitter()
 
@@ -596,7 +596,7 @@ class TestTracker(AsyncTestCase):
         self.assertIs(actualContextArg[0], ctx)
         self.assertEqual(actualTstampArg, evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    @async_patch('aio_snowplow_tracker.Tracker.complete_payload')
     async def test_track_page_ping(self, mok_complete_payload: Any) -> None:
         e = create_mock_emitter()
 
@@ -629,7 +629,7 @@ class TestTracker(AsyncTestCase):
         self.assertIs(actualContextArg[0], ctx)
         self.assertEqual(actualTstampArg, evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    @async_patch('aio_snowplow_tracker.Tracker.complete_payload')
     async def test_track_ecommerce_transaction_item(self, mok_complete_payload: Any) -> None:
         e = create_mock_emitter()
 
@@ -662,7 +662,7 @@ class TestTracker(AsyncTestCase):
         self.assertIs(actualContextArg[0], ctx)
         self.assertEqual(actualTstampArg, evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    @async_patch('aio_snowplow_tracker.Tracker.complete_payload')
     async def test_track_ecommerce_transaction_no_items(self, mok_complete_payload: Any) -> None:
         e = create_mock_emitter()
 
@@ -696,8 +696,8 @@ class TestTracker(AsyncTestCase):
         self.assertIs(actualContextArg[0], ctx)
         self.assertEqual(actualTstampArg, evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.track_ecommerce_transaction_item')
-    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    @async_patch('aio_snowplow_tracker.Tracker.track_ecommerce_transaction_item')
+    @async_patch('aio_snowplow_tracker.Tracker.complete_payload')
     async def test_track_ecommerce_transaction_with_items(self, mok_complete_payload: Any, mok_track_trans_item: Any) -> None:
         e = create_mock_emitter()
 
@@ -773,7 +773,7 @@ class TestTracker(AsyncTestCase):
         }
         self.assertDictEqual(secItemCallKwargs, expectedSecItemPairs)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_link_click(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -802,7 +802,7 @@ class TestTracker(AsyncTestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_link_click_optional_none(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -825,7 +825,7 @@ class TestTracker(AsyncTestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_add_to_cart(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -855,7 +855,7 @@ class TestTracker(AsyncTestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_add_to_cart_optional_none(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -879,7 +879,7 @@ class TestTracker(AsyncTestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_remove_from_cart(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -909,7 +909,7 @@ class TestTracker(AsyncTestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_remove_from_cart_optional_none(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -933,7 +933,7 @@ class TestTracker(AsyncTestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_form_change(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -963,7 +963,7 @@ class TestTracker(AsyncTestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_form_change_optional_none(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -988,7 +988,7 @@ class TestTracker(AsyncTestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_form_submit(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -1023,7 +1023,7 @@ class TestTracker(AsyncTestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_form_submit_invalid_element_type(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -1044,7 +1044,7 @@ class TestTracker(AsyncTestCase):
         with self.assertRaises(ValueError):
             await t.track_form_submit("testFormId", ["testClass1", "testClass2"], elems, context=[ctx], tstamp=evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_form_submit_invalid_element_type_disabled_contracts(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -1080,7 +1080,7 @@ class TestTracker(AsyncTestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_form_submit_optional_none(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -1102,7 +1102,7 @@ class TestTracker(AsyncTestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_form_submit_empty_elems(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -1122,7 +1122,7 @@ class TestTracker(AsyncTestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs[0].to_json(), expected)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_site_search(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -1150,7 +1150,7 @@ class TestTracker(AsyncTestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_site_search_optional_none(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 
@@ -1172,7 +1172,7 @@ class TestTracker(AsyncTestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    @async_patch('aio_snowplow_tracker.Tracker.track_unstruct_event')
     async def test_track_screen_view(self, mok_track_unstruct: Any) -> None:
         e = create_mock_emitter()
 

@@ -24,7 +24,7 @@ import json
 import signal
 from typing import Any, Optional
 
-from snowplow_tracker.typing import EmitterProtocol, PayloadDict, RedisProtocol
+from aio_snowplow_tracker.typing import EmitterProtocol, PayloadDict, RedisProtocol
 
 _REDIS_OPT = True
 try:

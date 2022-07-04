@@ -22,7 +22,7 @@
 import json
 import logging
 from typing import Any, Optional
-from snowplow_tracker.typing import PayloadDict, RedisProtocol
+from aio_snowplow_tracker.typing import PayloadDict, RedisProtocol
 
 _REDIS_OPT = True
 try:

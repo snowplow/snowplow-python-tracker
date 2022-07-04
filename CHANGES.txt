@@ -1,4 +1,8 @@
-Version 1.0.0a2 (2022-06-01)
+Version 1.0.0a3 (2022-06-03)
+--------------------------
+Breaking: Changed import from `snowplow_tracker` to `aio_snowplow_tracker` to support installing both libraries.
+
+Version 1.0.0a2 (2022-06-02)
 --------------------------
 Breaking: Emitter and Tracker leverage asyncio. `Tracker.track_*` calls must now be awaited.
 Breaking: Remove AsyncEmitter. Use `asyncio.gather` instead.

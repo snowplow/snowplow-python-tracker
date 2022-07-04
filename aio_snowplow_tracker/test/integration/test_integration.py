@@ -31,9 +31,9 @@ from aiohttp.test_utils import TestServer
 from freezegun import freeze_time
 from typing import Dict, Optional
 
-from snowplow_tracker import tracker, _version, emitters, subject
-from snowplow_tracker.self_describing_json import SelfDescribingJson
-from snowplow_tracker.redis import redis_emitter
+from aio_snowplow_tracker import tracker, _version, emitters, subject
+from aio_snowplow_tracker.self_describing_json import SelfDescribingJson
+from aio_snowplow_tracker.redis import redis_emitter
 
 
 @pytest.fixture

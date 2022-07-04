@@ -1,5 +1,5 @@
 """
-    self_describing_json.py
+    _version.py
 
     Copyright (c) 2013-2021 Snowplow Analytics Ltd. All rights reserved.
 
@@ -19,23 +19,6 @@
     License: Apache License Version 2.0
 """
 
-import json
-from typing import Union
-
-from snowplow_tracker.typing import PayloadDict, PayloadDictList
-
-
-class SelfDescribingJson(object):
-
-    def __init__(self, schema: str, data: Union[PayloadDict, PayloadDictList]) -> None:
-        self.schema = schema
-        self.data = data
-
-    def to_json(self) -> PayloadDict:
-        return {
-            "schema": self.schema,
-            "data": self.data
-        }
-
-    def to_string(self) -> str:
-        return json.dumps(self.to_json())
+__version_info__ = (1, 0, '0a3')
+__version__ = ".".join(str(x) for x in __version_info__)
+__build_version__ = __version__ + ''

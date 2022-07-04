@@ -25,10 +25,10 @@ import threading
 import aiohttp
 from typing import Optional, Union, Tuple
 
-from snowplow_tracker.self_describing_json import SelfDescribingJson
-from snowplow_tracker.typing import PayloadDict, PayloadDictList, HttpProtocol, Method, SuccessCallback, FailureCallback
-from snowplow_tracker.contracts import one_of
-from snowplow_tracker._timer import Timer
+from aio_snowplow_tracker.self_describing_json import SelfDescribingJson
+from aio_snowplow_tracker.typing import PayloadDict, PayloadDictList, HttpProtocol, Method, SuccessCallback, FailureCallback
+from aio_snowplow_tracker.contracts import one_of
+from aio_snowplow_tracker._timer import Timer
 
 # logging
 logging.basicConfig()

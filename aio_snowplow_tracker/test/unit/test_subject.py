@@ -22,7 +22,7 @@
 import unittest
 import pytest
 
-from snowplow_tracker import subject as _subject
+from aio_snowplow_tracker import subject as _subject
 
 
 class TestSubject(unittest.TestCase):

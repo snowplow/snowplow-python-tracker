@@ -22,7 +22,7 @@
 import json
 import base64
 from typing import Any, Optional
-from snowplow_tracker.typing import PayloadDict, JsonEncoderFunction
+from aio_snowplow_tracker.typing import PayloadDict, JsonEncoderFunction
 
 
 class Payload:

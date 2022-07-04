@@ -24,7 +24,7 @@ import base64
 import unittest
 from typing import Dict, Any
 
-from snowplow_tracker import payload
+from aio_snowplow_tracker import payload
 
 
 def is_subset(dict1: Dict[Any, Any], dict2: Dict[Any, Any]) -> bool:

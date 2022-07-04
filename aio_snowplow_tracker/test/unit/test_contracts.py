@@ -21,7 +21,7 @@
 
 import unittest
 
-from snowplow_tracker.contracts import form_element, greater_than, non_empty, non_empty_string, one_of, satisfies
+from aio_snowplow_tracker.contracts import form_element, greater_than, non_empty, non_empty_string, one_of, satisfies
 
 
 class TestContracts(unittest.TestCase):

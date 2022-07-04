@@ -22,8 +22,8 @@
 import logging
 from typing import Any, Optional
 
-from snowplow_tracker.emitters import Emitter
-from snowplow_tracker.typing import HttpProtocol, Method
+from aio_snowplow_tracker.emitters import Emitter
+from aio_snowplow_tracker.typing import HttpProtocol, Method
 
 _CELERY_OPT = True
 try:

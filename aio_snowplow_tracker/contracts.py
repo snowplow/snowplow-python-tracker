@@ -22,7 +22,7 @@
 import traceback
 import re
 from typing import Any, Dict, Iterable, Callable, Sized
-from snowplow_tracker.typing import FORM_TYPES, FORM_NODE_NAMES
+from aio_snowplow_tracker.typing import FORM_TYPES, FORM_NODE_NAMES
 
 _CONTRACTS_ENABLED = True
 _MATCH_FIRST_PARAMETER_REGEX = re.compile(r"\(([\w.]+)[,)]")

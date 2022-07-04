@@ -38,7 +38,7 @@ Example
 
 .. code-block:: python
 
-    from snowplow_tracker import Tracker, Emitter, Subject
+    from aio_snowplow_tracker import Tracker, Emitter, Subject
     import asyncio
 
     async def main():

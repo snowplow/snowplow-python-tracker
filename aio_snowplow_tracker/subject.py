@@ -19,8 +19,8 @@
     License: Apache License Version 2.0
 """
 
-from snowplow_tracker.contracts import one_of, greater_than
-from snowplow_tracker.typing import SupportedPlatform, SUPPORTED_PLATFORMS
+from aio_snowplow_tracker.contracts import one_of, greater_than
+from aio_snowplow_tracker.typing import SupportedPlatform, SUPPORTED_PLATFORMS
 
 DEFAULT_PLATFORM = "pc"
 

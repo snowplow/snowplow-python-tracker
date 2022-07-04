@@ -23,10 +23,10 @@ import time
 import uuid
 from typing import Any, Optional, Union, List, Dict, Sequence
 
-from snowplow_tracker import payload, _version, SelfDescribingJson
-from snowplow_tracker import subject as _subject
-from snowplow_tracker.contracts import non_empty_string, one_of, non_empty, form_element
-from snowplow_tracker.typing import JsonEncoderFunction, EmitterProtocol,\
+from aio_snowplow_tracker import payload, _version, SelfDescribingJson
+from aio_snowplow_tracker import subject as _subject
+from aio_snowplow_tracker.contracts import non_empty_string, one_of, non_empty, form_element
+from aio_snowplow_tracker.typing import JsonEncoderFunction, EmitterProtocol,\
     FORM_NODE_NAMES, FORM_TYPES, FormNodeName, ElementClasses, FormClasses
 
 """
