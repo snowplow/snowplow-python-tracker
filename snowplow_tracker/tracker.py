@@ -115,7 +115,7 @@ class Tracker:
     Tracking methods
     """
 
-    def track(self, pb: payload.Payload) -> 'Tracker':
+    async def track(self, pb: payload.Payload) -> 'Tracker':
         """
             Send the payload to a emitter
 
@@ -124,10 +124,10 @@ class Tracker:
             :rtype:                  tracker
         """
         for emitter in self.emitters:
-            emitter.input(pb.nv_pairs)
+            await emitter.input(pb.nv_pairs)
         return self
 
-    def complete_payload(
+    async def complete_payload(
             self,
             pb: payload.Payload,
             context: Optional[List[SelfDescribingJson]],
@@ -163,9 +163,9 @@ class Tracker:
         fin_subject = event_subject if event_subject is not None else self.subject
         pb.add_dict(fin_subject.standard_nv_pairs)
 
-        return self.track(pb)
+        return await self.track(pb)
 
-    def track_page_view(
+    async def track_page_view(
             self,
             page_url: str,
             page_title: Optional[str] = None,
@@ -196,9 +196,9 @@ class Tracker:
         pb.add("page", page_title)
         pb.add("refr", referrer)
 
-        return self.complete_payload(pb, context, tstamp, event_subject)
+        return await self.complete_payload(pb, context, tstamp, event_subject)
 
-    def track_page_ping(
+    async def track_page_ping(
             self,
             page_url: str,
             page_title: Optional[str] = None,
@@ -245,9 +245,9 @@ class Tracker:
         pb.add("pp_miy", min_y)
         pb.add("pp_may", max_y)
 
-        return self.complete_payload(pb, context, tstamp, event_subject)
+        return await self.complete_payload(pb, context, tstamp, event_subject)
 
-    def track_link_click(
+    async def track_link_click(
             self,
             target_url: str,
             element_id: Optional[str] = None,
@@ -291,9 +291,9 @@ class Tracker:
 
         event_json = SelfDescribingJson("%s/link_click/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties)
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return await self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    def track_add_to_cart(
+    async def track_add_to_cart(
             self,
             sku: str,
             quantity: int,
@@ -341,9 +341,9 @@ class Tracker:
 
         event_json = SelfDescribingJson("%s/add_to_cart/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties)
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return await self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    def track_remove_from_cart(
+    async def track_remove_from_cart(
             self,
             sku: str,
             quantity: int,
@@ -391,9 +391,9 @@ class Tracker:
 
         event_json = SelfDescribingJson("%s/remove_from_cart/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties)
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return await self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    def track_form_change(
+    async def track_form_change(
             self,
             form_id: str,
             element_id: Optional[str],
@@ -442,9 +442,9 @@ class Tracker:
 
         event_json = SelfDescribingJson("%s/change_form/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties)
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return await self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    def track_form_submit(
+    async def track_form_submit(
             self,
             form_id: str,
             form_classes: Optional[FormClasses] = None,
@@ -480,9 +480,9 @@ class Tracker:
 
         event_json = SelfDescribingJson("%s/submit_form/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties)
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return await self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    def track_site_search(
+    async def track_site_search(
             self,
             terms: Sequence[str],
             filters: Optional[Dict[str, Union[str, bool]]] = None,
@@ -521,9 +521,9 @@ class Tracker:
 
         event_json = SelfDescribingJson("%s/site_search/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties)
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return await self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    def track_ecommerce_transaction_item(
+    async def track_ecommerce_transaction_item(
             self,
             order_id: str,
             sku: str,
@@ -574,9 +574,9 @@ class Tracker:
         pb.add("ti_qu", quantity)
         pb.add("ti_cu", currency)
 
-        return self.complete_payload(pb, context, tstamp, event_subject)
+        return await self.complete_payload(pb, context, tstamp, event_subject)
 
-    def track_ecommerce_transaction(
+    async def track_ecommerce_transaction(
             self,
             order_id: str,
             total_value: float,
@@ -636,7 +636,7 @@ class Tracker:
 
         tstamp = Tracker.get_timestamp(tstamp)
 
-        self.complete_payload(pb, context, tstamp, event_subject)
+        await self.complete_payload(pb, context, tstamp, event_subject)
 
         if items is None:
             items = []
@@ -645,11 +645,11 @@ class Tracker:
             item["event_subject"] = event_subject
             item["order_id"] = order_id
             item["currency"] = currency
-            self.track_ecommerce_transaction_item(**item)
+            await self.track_ecommerce_transaction_item(**item)
 
         return self
 
-    def track_screen_view(
+    async def track_screen_view(
             self,
             name: Optional[str] = None,
             id_: Optional[str] = None,
@@ -677,9 +677,9 @@ class Tracker:
 
         event_json = SelfDescribingJson("%s/screen_view/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), screen_view_properties)
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return await self.track_unstruct_event(event_json, context, tstamp, event_subject)
 
-    def track_struct_event(
+    async def track_struct_event(
             self,
             category: str,
             action: str,
@@ -721,9 +721,9 @@ class Tracker:
         pb.add("se_pr", property_)
         pb.add("se_va", value)
 
-        return self.complete_payload(pb, context, tstamp, event_subject)
+        return await self.complete_payload(pb, context, tstamp, event_subject)
 
-    def track_unstruct_event(
+    async def track_unstruct_event(
             self,
             event_json: SelfDescribingJson,
             context: Optional[List[SelfDescribingJson]] = None,
@@ -750,12 +750,12 @@ class Tracker:
         pb.add("e", "ue")
         pb.add_json(envelope, self.encode_base64, "ue_px", "ue_pr", self.json_encoder)
 
-        return self.complete_payload(pb, context, tstamp, event_subject)
+        return await self.complete_payload(pb, context, tstamp, event_subject)
 
     # Alias
     track_self_describing_event = track_unstruct_event
 
-    def flush(self, is_async: bool = False) -> 'Tracker':
+    async def flush(self, is_async: bool = False) -> 'Tracker':
         """
             Flush the emitter
 
@@ -766,10 +766,10 @@ class Tracker:
         for emitter in self.emitters:
             if is_async:
                 if hasattr(emitter, 'flush'):
-                    emitter.flush()
+                    await emitter.flush()
             else:
                 if hasattr(emitter, 'sync_flush'):
-                    emitter.sync_flush()
+                    await emitter.sync_flush()
         return self
 
     def set_subject(self, subject: Optional[_subject.Subject]) -> 'Tracker':

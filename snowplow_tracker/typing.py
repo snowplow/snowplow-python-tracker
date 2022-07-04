@@ -50,7 +50,7 @@ SupportedPlatform = Literal["pc", "tv", "mob", "cnsl", "iot", "web", "srv", "app
 
 
 class EmitterProtocol(Protocol):
-    def input(self, payload: PayloadDict) -> None:
+    async def input(self, payload: PayloadDict) -> None:
         ...
 
 

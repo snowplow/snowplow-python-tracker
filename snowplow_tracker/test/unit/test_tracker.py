@@ -25,8 +25,9 @@ import unittest
 import unittest.mock as mock
 
 from freezegun import freeze_time
-from typing import Any
+from typing import Any, Type
 
+import snowplow_tracker
 from snowplow_tracker.contracts import disable_contracts, enable_contracts
 from snowplow_tracker.tracker import Tracker
 from snowplow_tracker.tracker import VERSION as TRACKER_VERSION
@@ -80,30 +81,51 @@ class ContractsDisabled(object):
         enable_contracts()
 
 
-class TestTracker(unittest.TestCase):
+try:
+    AsyncTestCase = unittest.IsolatedAsyncioTestCase
+    async_patch = mock.patch
+    async_mock = mock.AsyncMock
+except AttributeError:
+    # Python 3.7 compatibility
+    import asynctest  # noqa
+    AsyncTestCase = asynctest.TestCase
+    async_patch = asynctest.patch
+    async_mock = asynctest.create_autospec
 
-    def create_patch(self, name: str) -> Any:
-        patcher = mock.patch(name)
-        thing = patcher.start()
-        thing.side_effect = mock.MagicMock
-        self.addCleanup(patcher.stop)
-        return thing
+
+def create_mock_emitter() -> snowplow_tracker.Emitter:
+    try:
+        return mock.AsyncMock()
+    except AttributeError:
+        return asynctest.create_autospec(snowplow_tracker.Emitter)(endpoint=None)
+
+
+class TestTracker(AsyncTestCase):
+
+    def patch_emitter(self, name: str) -> Any:
+        # patcher = mock.patch(name)
+        # emitter = patcher.start()
+        # try:
+        #     emitter.side_effect = mock.AsyncMock
+        # except AttributeError:
+        #     emitter.side_effect = asynctest.create_autospec(snowplow_tracker.Emitter)
+        # self.addCleanup(patcher.stop)
+        # return emitter
+        return asynctest.create_autospec(snowplow_tracker.Emitter)
 
     def setUp(self) -> None:
         pass
 
-    def test_initialisation(self) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    async def test_initialisation(self) -> None:
+        e = create_mock_emitter()
 
         t = Tracker([e], namespace="cloudfront", encode_base64=False, app_id="AF003")
         self.assertEqual(t.standard_nv_pairs["tna"], "cloudfront")
         self.assertEqual(t.standard_nv_pairs["aid"], "AF003")
         self.assertEqual(t.encode_base64, False)
 
-    def test_initialisation_default_optional(self) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    async def test_initialisation_default_optional(self) -> None:
+        e = create_mock_emitter()
 
         t = Tracker(e)
         self.assertEqual(t.emitters, [e])
@@ -111,87 +133,81 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(t.standard_nv_pairs["aid"] is None)
         self.assertEqual(t.encode_base64, True)
 
-    def test_initialisation_emitter_list(self) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e1 = mokEmitter()
-        e2 = mokEmitter()
+    async def test_initialisation_emitter_list(self) -> None:
+        e1 = create_mock_emitter()
+        e2 = create_mock_emitter()
 
         t = Tracker([e1, e2])
         self.assertEqual(t.emitters, [e1, e2])
 
-    def test_initialisation_error(self) -> None:
+    async def test_initialisation_error(self) -> None:
         with self.assertRaises(ValueError):
             Tracker([])
 
-    def test_initialization_with_subject(self) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    async def test_initialization_with_subject(self) -> None:
+        e = create_mock_emitter()
 
         s = Subject()
         t = Tracker(e, subject=s)
         self.assertIs(t.subject, s)
 
-    def test_get_uuid(self) -> None:
+    async def test_get_uuid(self) -> None:
         eid = Tracker.get_uuid()
         self.assertIsNotNone(re.match(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\Z', eid))
 
     @freeze_time("1970-01-01 00:00:01")
-    def test_get_timestamp(self) -> None:
+    async def test_get_timestamp(self) -> None:
         tstamp = Tracker.get_timestamp()
         self.assertEqual(tstamp, 1000)   # 1970-01-01 00:00:01 in ms
 
-    def test_get_timestamp_1(self) -> None:
+    async def test_get_timestamp_1(self) -> None:
         tstamp = Tracker.get_timestamp(1399021242030)
         self.assertEqual(tstamp, 1399021242030)
 
-    def test_get_timestamp_2(self) -> None:
+    async def test_get_timestamp_2(self) -> None:
         tstamp = Tracker.get_timestamp(1399021242240.0303)
         self.assertEqual(tstamp, 1399021242240)
 
     @freeze_time("1970-01-01 00:00:01")
-    def test_get_timestamp_3(self) -> None:
+    async def test_get_timestamp_3(self) -> None:
         tstamp = Tracker.get_timestamp("1399021242030")   # test wrong arg type
         self.assertEqual(tstamp, 1000)                    # 1970-01-01 00:00:01 in ms
 
-    @mock.patch('snowplow_tracker.Tracker.track')
-    def test_alias_of_track_unstruct_event(self, mok_track: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track')
+    async def test_alias_of_track_unstruct_event(self, mok_track: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track.side_effect = mocked_track
         t = Tracker(e)
         evJson = SelfDescribingJson("test.schema", {"n": "v"})
         # call the alias
-        t.track_self_describing_event(evJson)
+        await t.track_self_describing_event(evJson)
         self.assertEqual(mok_track.call_count, 1)
 
-    def test_flush(self) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e1 = mokEmitter()
-        e2 = mokEmitter()
+    async def test_flush(self) -> None:
+        e1 = create_mock_emitter()
+        e2 = create_mock_emitter()
 
         t = Tracker([e1, e2])
-        t.flush()
+        await t.flush()
         e1.flush.assert_not_called()
         self.assertEqual(e1.sync_flush.call_count, 1)
         e2.flush.assert_not_called()
         self.assertEqual(e2.sync_flush.call_count, 1)
 
-    def test_flush_async(self) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e1 = mokEmitter()
-        e2 = mokEmitter()
+    async def test_flush_async(self) -> None:
+        e1 = create_mock_emitter()
+        e2 = create_mock_emitter()
 
         t = Tracker([e1, e2])
-        t.flush(is_async=True)
+        await t.flush(is_async=True)
         self.assertEqual(e1.flush.call_count, 1)
         e1.sync_flush.assert_not_called()
         self.assertEqual(e2.flush.call_count, 1)
         e2.sync_flush.assert_not_called()
 
-    def test_set_subject(self) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    async def test_set_subject(self) -> None:
+        e = create_mock_emitter()
 
         t = Tracker(e)
         new_subject = Subject()
@@ -199,10 +215,9 @@ class TestTracker(unittest.TestCase):
         t.set_subject(new_subject)
         self.assertIs(t.subject, new_subject)
 
-    def test_add_emitter(self) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e1 = mokEmitter()
-        e2 = mokEmitter()
+    async def test_add_emitter(self) -> None:
+        e1 = create_mock_emitter()
+        e2 = create_mock_emitter()
 
         t = Tracker(e1)
         t.add_emitter(e2)
@@ -212,34 +227,32 @@ class TestTracker(unittest.TestCase):
     # test track and complete payload methods
     ###
 
-    def test_track(self) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e1 = mokEmitter()
-        e2 = mokEmitter()
-        e3 = mokEmitter()
+    async def test_track(self) -> None:
+        e1 = create_mock_emitter()
+        e2 = create_mock_emitter()
+        e3 = create_mock_emitter()
 
         t = Tracker([e1, e2, e3])
 
         p = Payload({"test": "track"})
-        t.track(p)
+        await t.track(p)
 
         e1.input.assert_called_once_with({"test": "track"})
         e2.input.assert_called_once_with({"test": "track"})
         e3.input.assert_called_once_with({"test": "track"})
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @mock.patch('snowplow_tracker.Tracker.track')
-    @mock.patch('snowplow_tracker.Tracker.get_uuid')
-    def test_complete_payload(self, mok_uuid: Any, mok_track: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track')
+    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    async def test_complete_payload(self, mok_uuid: Any, mok_track: Any) -> None:
+        e = create_mock_emitter()
 
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
 
         t = Tracker(e)
         p = Payload()
-        t.complete_payload(p, None, None, None)
+        await t.complete_payload(p, None, None, None)
 
         self.assertEqual(mok_track.call_count, 1)
         trackArgsTuple = mok_track.call_args_list[0][0]
@@ -255,11 +268,10 @@ class TestTracker(unittest.TestCase):
         self.assertDictEqual(passed_nv_pairs, expected)
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @mock.patch('snowplow_tracker.Tracker.track')
-    @mock.patch('snowplow_tracker.Tracker.get_uuid')
-    def test_complete_payload_tstamp_int(self, mok_uuid: Any, mok_track: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track')
+    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    async def test_complete_payload_tstamp_int(self, mok_uuid: Any, mok_track: Any) -> None:
+        e = create_mock_emitter()
 
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
@@ -267,7 +279,7 @@ class TestTracker(unittest.TestCase):
         t = Tracker(e)
         p = Payload()
         time_in_millis = 100010001000
-        t.complete_payload(p, None, time_in_millis, None)
+        await t.complete_payload(p, None, time_in_millis, None)
 
         self.assertEqual(mok_track.call_count, 1)
         trackArgsTuple = mok_track.call_args_list[0][0]
@@ -284,11 +296,10 @@ class TestTracker(unittest.TestCase):
         self.assertDictEqual(passed_nv_pairs, expected)
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @mock.patch('snowplow_tracker.Tracker.track')
-    @mock.patch('snowplow_tracker.Tracker.get_uuid')
-    def test_complete_payload_tstamp_dtm(self, mok_uuid: Any, mok_track: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track')
+    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    async def test_complete_payload_tstamp_dtm(self, mok_uuid: Any, mok_track: Any) -> None:
+        e = create_mock_emitter()
 
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
@@ -296,7 +307,7 @@ class TestTracker(unittest.TestCase):
         t = Tracker(e)
         p = Payload()
         time_in_millis = 100010001000
-        t.complete_payload(p, None, time_in_millis, None)
+        await t.complete_payload(p, None, time_in_millis, None)
 
         self.assertEqual(mok_track.call_count, 1)
         trackArgsTuple = mok_track.call_args_list[0][0]
@@ -313,11 +324,10 @@ class TestTracker(unittest.TestCase):
         self.assertDictEqual(passed_nv_pairs, expected)
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @mock.patch('snowplow_tracker.Tracker.track')
-    @mock.patch('snowplow_tracker.Tracker.get_uuid')
-    def test_complete_payload_tstamp_ttm(self, mok_uuid: Any, mok_track: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track')
+    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    async def test_complete_payload_tstamp_ttm(self, mok_uuid: Any, mok_track: Any) -> None:
+        e = create_mock_emitter()
 
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
@@ -325,7 +335,7 @@ class TestTracker(unittest.TestCase):
         t = Tracker(e)
         p = Payload()
         time_in_millis = 100010001000
-        t.complete_payload(p, None, time_in_millis, None)
+        await t.complete_payload(p, None, time_in_millis, None)
 
         self.assertEqual(mok_track.call_count, 1)
         trackArgsTuple = mok_track.call_args_list[0][0]
@@ -342,11 +352,10 @@ class TestTracker(unittest.TestCase):
         self.assertDictEqual(passed_nv_pairs, expected)
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @mock.patch('snowplow_tracker.Tracker.track')
-    @mock.patch('snowplow_tracker.Tracker.get_uuid')
-    def test_complete_payload_co(self, mok_uuid: Any, mok_track: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track')
+    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    async def test_complete_payload_co(self, mok_uuid: Any, mok_track: Any) -> None:
+        e = create_mock_emitter()
 
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
@@ -357,7 +366,7 @@ class TestTracker(unittest.TestCase):
         geo_ctx = SelfDescribingJson(geoSchema, geoData)
         mov_ctx = SelfDescribingJson(movSchema, movData)
         ctx_array = [geo_ctx, mov_ctx]
-        t.complete_payload(p, ctx_array, None, None)
+        await t.complete_payload(p, ctx_array, None, None)
 
         self.assertEqual(mok_track.call_count, 1)
         trackArgsTuple = mok_track.call_args_list[0][0]
@@ -381,11 +390,10 @@ class TestTracker(unittest.TestCase):
         self.assertDictEqual(json.loads(passed_nv_pairs["co"]), expected_co)
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @mock.patch('snowplow_tracker.Tracker.track')
-    @mock.patch('snowplow_tracker.Tracker.get_uuid')
-    def test_complete_payload_cx(self, mok_uuid: Any, mok_track: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track')
+    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    async def test_complete_payload_cx(self, mok_uuid: Any, mok_track: Any) -> None:
+        e = create_mock_emitter()
 
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
@@ -396,7 +404,7 @@ class TestTracker(unittest.TestCase):
         geo_ctx = SelfDescribingJson(geoSchema, geoData)
         mov_ctx = SelfDescribingJson(movSchema, movData)
         ctx_array = [geo_ctx, mov_ctx]
-        t.complete_payload(p, ctx_array, None, None)
+        await t.complete_payload(p, ctx_array, None, None)
 
         self.assertEqual(mok_track.call_count, 1)
         trackArgsTuple = mok_track.call_args_list[0][0]
@@ -406,11 +414,10 @@ class TestTracker(unittest.TestCase):
         self.assertIn("cx", passed_nv_pairs)
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
-    @mock.patch('snowplow_tracker.Tracker.track')
-    @mock.patch('snowplow_tracker.Tracker.get_uuid')
-    def test_complete_payload_event_subject(self, mok_uuid: Any, mok_track: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track')
+    @async_patch('snowplow_tracker.Tracker.get_uuid')
+    async def test_complete_payload_event_subject(self, mok_uuid: Any, mok_track: Any) -> None:
+        e = create_mock_emitter()
 
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
@@ -418,7 +425,7 @@ class TestTracker(unittest.TestCase):
         t = Tracker(e)
         p = Payload()
         evSubject = Subject().set_lang('EN').set_user_id("tester")
-        t.complete_payload(p, None, None, evSubject)
+        await t.complete_payload(p, None, None, evSubject)
 
         self.assertEqual(mok_track.call_count, 1)
         trackArgsTuple = mok_track.call_args_list[0][0]
@@ -439,16 +446,15 @@ class TestTracker(unittest.TestCase):
     # test track_x methods
     ###
 
-    @mock.patch('snowplow_tracker.Tracker.complete_payload')
-    def test_track_unstruct_event(self, mok_complete_payload: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    async def test_track_unstruct_event(self, mok_complete_payload: Any) -> None:
+        e = create_mock_emitter()
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
         t = Tracker(e, encode_base64=False)
         evJson = SelfDescribingJson("test.sde.schema", {"n": "v"})
-        t.track_unstruct_event(evJson)
+        await t.track_unstruct_event(evJson)
         self.assertEqual(mok_complete_payload.call_count, 1)
         completeArgsList = mok_complete_payload.call_args_list[0][0]
         self.assertEqual(len(completeArgsList), 4)
@@ -475,10 +481,9 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(actualContextArg is None)
         self.assertTrue(actualTstampArg is None)
 
-    @mock.patch('snowplow_tracker.Tracker.complete_payload')
-    def test_track_unstruct_event_all_args(self, mok_complete_payload: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    async def test_track_unstruct_event_all_args(self, mok_complete_payload: Any) -> None:
+        e = create_mock_emitter()
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
@@ -487,7 +492,7 @@ class TestTracker(unittest.TestCase):
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evContext = [ctx]
         evTstamp = 1399021242030
-        t.track_unstruct_event(evJson, evContext, evTstamp)
+        await t.track_unstruct_event(evJson, evContext, evTstamp)
         self.assertEqual(mok_complete_payload.call_count, 1)
         completeArgsList = mok_complete_payload.call_args_list[0][0]
         self.assertEqual(len(completeArgsList), 4)
@@ -514,16 +519,15 @@ class TestTracker(unittest.TestCase):
         self.assertIs(actualContextArg[0], ctx)
         self.assertEqual(actualTstampArg, evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.complete_payload')
-    def test_track_unstruct_event_encode(self, mok_complete_payload: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    async def test_track_unstruct_event_encode(self, mok_complete_payload: Any) -> None:
+        e = create_mock_emitter()
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
         t = Tracker(e, encode_base64=True)
         evJson = SelfDescribingJson("test.sde.schema", {"n": "v"})
-        t.track_unstruct_event(evJson)
+        await t.track_unstruct_event(evJson)
         self.assertEqual(mok_complete_payload.call_count, 1)
         completeArgsList = mok_complete_payload.call_args_list[0][0]
         self.assertEqual(len(completeArgsList), 4)
@@ -532,17 +536,16 @@ class TestTracker(unittest.TestCase):
         actualPairs = actualPayloadArg.nv_pairs
         self.assertTrue("ue_px" in actualPairs.keys())
 
-    @mock.patch('snowplow_tracker.Tracker.complete_payload')
-    def test_track_struct_event(self, mok_complete_payload: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    async def test_track_struct_event(self, mok_complete_payload: Any) -> None:
+        e = create_mock_emitter()
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
         t = Tracker(e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
-        t.track_struct_event("Mixes", "Play", "Test", "TestProp", value=3.14, context=[ctx], tstamp=evTstamp)
+        await t.track_struct_event("Mixes", "Play", "Test", "TestProp", value=3.14, context=[ctx], tstamp=evTstamp)
         self.assertEqual(mok_complete_payload.call_count, 1)
         completeArgsList = mok_complete_payload.call_args_list[0][0]
         self.assertEqual(len(completeArgsList), 4)
@@ -564,17 +567,16 @@ class TestTracker(unittest.TestCase):
         self.assertIs(actualContextArg[0], ctx)
         self.assertEqual(actualTstampArg, evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.complete_payload')
-    def test_track_page_view(self, mok_complete_payload: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    async def test_track_page_view(self, mok_complete_payload: Any) -> None:
+        e = create_mock_emitter()
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
         t = Tracker(e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
-        t.track_page_view("example.com", "Example", "docs.snowplowanalytics.com", context=[ctx], tstamp=evTstamp)
+        await t.track_page_view("example.com", "Example", "docs.snowplowanalytics.com", context=[ctx], tstamp=evTstamp)
         self.assertEqual(mok_complete_payload.call_count, 1)
         completeArgsList = mok_complete_payload.call_args_list[0][0]
         self.assertEqual(len(completeArgsList), 4)
@@ -594,17 +596,16 @@ class TestTracker(unittest.TestCase):
         self.assertIs(actualContextArg[0], ctx)
         self.assertEqual(actualTstampArg, evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.complete_payload')
-    def test_track_page_ping(self, mok_complete_payload: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    async def test_track_page_ping(self, mok_complete_payload: Any) -> None:
+        e = create_mock_emitter()
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
         t = Tracker(e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
-        t.track_page_ping("example.com", "Example", "docs.snowplowanalytics.com", 0, 1, 2, 3, context=[ctx], tstamp=evTstamp)
+        await t.track_page_ping("example.com", "Example", "docs.snowplowanalytics.com", 0, 1, 2, 3, context=[ctx], tstamp=evTstamp)
         self.assertEqual(mok_complete_payload.call_count, 1)
         completeArgsList = mok_complete_payload.call_args_list[0][0]
         self.assertEqual(len(completeArgsList), 4)
@@ -628,17 +629,16 @@ class TestTracker(unittest.TestCase):
         self.assertIs(actualContextArg[0], ctx)
         self.assertEqual(actualTstampArg, evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.complete_payload')
-    def test_track_ecommerce_transaction_item(self, mok_complete_payload: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    async def test_track_ecommerce_transaction_item(self, mok_complete_payload: Any) -> None:
+        e = create_mock_emitter()
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
         t = Tracker(e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
-        t.track_ecommerce_transaction_item("1234", "sku1234", 3.14, 1, "itemName", "itemCategory", "itemCurrency", context=[ctx], tstamp=evTstamp)
+        await t.track_ecommerce_transaction_item("1234", "sku1234", 3.14, 1, "itemName", "itemCategory", "itemCurrency", context=[ctx], tstamp=evTstamp)
         self.assertEqual(mok_complete_payload.call_count, 1)
         completeArgsList = mok_complete_payload.call_args_list[0][0]
         self.assertEqual(len(completeArgsList), 4)
@@ -662,17 +662,16 @@ class TestTracker(unittest.TestCase):
         self.assertIs(actualContextArg[0], ctx)
         self.assertEqual(actualTstampArg, evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.complete_payload')
-    def test_track_ecommerce_transaction_no_items(self, mok_complete_payload: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    async def test_track_ecommerce_transaction_no_items(self, mok_complete_payload: Any) -> None:
+        e = create_mock_emitter()
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
         t = Tracker(e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
-        t.track_ecommerce_transaction("1234", 10, "transAffiliation", 2.5, 1.5, "transCity", "transState", "transCountry", "transCurrency", context=[ctx], tstamp=evTstamp)
+        await t.track_ecommerce_transaction("1234", 10, "transAffiliation", 2.5, 1.5, "transCity", "transState", "transCountry", "transCurrency", context=[ctx], tstamp=evTstamp)
         self.assertEqual(mok_complete_payload.call_count, 1)
         completeArgsList = mok_complete_payload.call_args_list[0][0]
         self.assertEqual(len(completeArgsList), 4)
@@ -697,11 +696,10 @@ class TestTracker(unittest.TestCase):
         self.assertIs(actualContextArg[0], ctx)
         self.assertEqual(actualTstampArg, evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.track_ecommerce_transaction_item')
-    @mock.patch('snowplow_tracker.Tracker.complete_payload')
-    def test_track_ecommerce_transaction_with_items(self, mok_complete_payload: Any, mok_track_trans_item: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_ecommerce_transaction_item')
+    @async_patch('snowplow_tracker.Tracker.complete_payload')
+    async def test_track_ecommerce_transaction_with_items(self, mok_complete_payload: Any, mok_track_trans_item: Any) -> None:
+        e = create_mock_emitter()
 
         mok_complete_payload.side_effect = mocked_complete_payload
         mok_track_trans_item.side_effect = mocked_track_trans_item
@@ -713,7 +711,7 @@ class TestTracker(unittest.TestCase):
             {"sku": "sku1234", "quantity": 3, "price": 3.14},
             {"sku": "sku5678", "quantity": 1, "price": 2.72}
         ]
-        t.track_ecommerce_transaction("1234", 10, "transAffiliation", 2.5, 1.5, "transCity", "transState", "transCountry", "transCurrency", items=transItems, context=[ctx], tstamp=evTstamp)
+        await t.track_ecommerce_transaction("1234", 10, "transAffiliation", 2.5, 1.5, "transCity", "transState", "transCountry", "transCurrency", items=transItems, context=[ctx], tstamp=evTstamp)
 
         # Transaction
         callCompleteArgsList = mok_complete_payload.call_args_list
@@ -775,10 +773,9 @@ class TestTracker(unittest.TestCase):
         }
         self.assertDictEqual(secItemCallKwargs, expectedSecItemPairs)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_link_click(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_link_click(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
@@ -786,7 +783,7 @@ class TestTracker(unittest.TestCase):
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
-        t.track_link_click("example.com", "elemId", ["elemClass1", "elemClass2"], "_blank", "elemContent", context=[ctx], tstamp=evTstamp)
+        await t.track_link_click("example.com", "elemId", ["elemClass1", "elemClass2"], "_blank", "elemContent", context=[ctx], tstamp=evTstamp)
 
         expected = {
             "schema": LINK_CLICK_SCHEMA,
@@ -805,16 +802,15 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_link_click_optional_none(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_link_click_optional_none(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
         t = Tracker(e)
 
-        t.track_link_click("example.com")
+        await t.track_link_click("example.com")
 
         expected = {
             "schema": LINK_CLICK_SCHEMA,
@@ -829,10 +825,9 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_add_to_cart(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_add_to_cart(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
@@ -840,7 +835,7 @@ class TestTracker(unittest.TestCase):
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
-        t.track_add_to_cart("sku1234", 3, "testName", "testCategory", 3.14, "testCurrency", context=[ctx], tstamp=evTstamp)
+        await t.track_add_to_cart("sku1234", 3, "testName", "testCategory", 3.14, "testCurrency", context=[ctx], tstamp=evTstamp)
 
         expected = {
             "schema": ADD_TO_CART_SCHEMA,
@@ -860,16 +855,15 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_add_to_cart_optional_none(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_add_to_cart_optional_none(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
         t = Tracker(e)
 
-        t.track_add_to_cart("sku1234", 1)
+        await t.track_add_to_cart("sku1234", 1)
 
         expected = {
             "schema": ADD_TO_CART_SCHEMA,
@@ -885,10 +879,9 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_remove_from_cart(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_remove_from_cart(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
@@ -896,7 +889,7 @@ class TestTracker(unittest.TestCase):
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
-        t.track_remove_from_cart("sku1234", 3, "testName", "testCategory", 3.14, "testCurrency", context=[ctx], tstamp=evTstamp)
+        await t.track_remove_from_cart("sku1234", 3, "testName", "testCategory", 3.14, "testCurrency", context=[ctx], tstamp=evTstamp)
 
         expected = {
             "schema": REMOVE_FROM_CART_SCHEMA,
@@ -916,16 +909,15 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_remove_from_cart_optional_none(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_remove_from_cart_optional_none(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
         t = Tracker(e)
 
-        t.track_remove_from_cart("sku1234", 1)
+        await t.track_remove_from_cart("sku1234", 1)
 
         expected = {
             "schema": REMOVE_FROM_CART_SCHEMA,
@@ -941,10 +933,9 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_form_change(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_form_change(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
@@ -952,7 +943,7 @@ class TestTracker(unittest.TestCase):
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
-        t.track_form_change("testFormId", "testElemId", "INPUT", "testValue", "text", ["testClass1", "testClass2"], context=[ctx], tstamp=evTstamp)
+        await t.track_form_change("testFormId", "testElemId", "INPUT", "testValue", "text", ["testClass1", "testClass2"], context=[ctx], tstamp=evTstamp)
 
         expected = {
             "schema": FORM_CHANGE_SCHEMA,
@@ -972,15 +963,14 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_form_change_optional_none(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_form_change_optional_none(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
         t = Tracker(e)
-        t.track_form_change("testFormId", "testElemId", "INPUT", "testValue")
+        await t.track_form_change("testFormId", "testElemId", "INPUT", "testValue")
 
         expected = {
             "schema": FORM_CHANGE_SCHEMA,
@@ -998,10 +988,9 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_form_submit(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_form_submit(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
@@ -1017,7 +1006,7 @@ class TestTracker(unittest.TestCase):
             }
         ]
 
-        t.track_form_submit("testFormId", ["testClass1", "testClass2"], elems, context=[ctx], tstamp=evTstamp)
+        await t.track_form_submit("testFormId", ["testClass1", "testClass2"], elems, context=[ctx], tstamp=evTstamp)
 
         expected = {
             "schema": FORM_SUBMIT_SCHEMA,
@@ -1034,10 +1023,9 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_form_submit_invalid_element_type(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_form_submit_invalid_element_type(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
@@ -1054,12 +1042,11 @@ class TestTracker(unittest.TestCase):
         ]
 
         with self.assertRaises(ValueError):
-            t.track_form_submit("testFormId", ["testClass1", "testClass2"], elems, context=[ctx], tstamp=evTstamp)
+            await t.track_form_submit("testFormId", ["testClass1", "testClass2"], elems, context=[ctx], tstamp=evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_form_submit_invalid_element_type_disabled_contracts(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_form_submit_invalid_element_type_disabled_contracts(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
@@ -1076,7 +1063,7 @@ class TestTracker(unittest.TestCase):
         ]
 
         with ContractsDisabled():
-            t.track_form_submit("testFormId", ["testClass1", "testClass2"], elems, context=[ctx], tstamp=evTstamp)
+            await t.track_form_submit("testFormId", ["testClass1", "testClass2"], elems, context=[ctx], tstamp=evTstamp)
 
         expected = {
             "schema": FORM_SUBMIT_SCHEMA,
@@ -1093,15 +1080,14 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_form_submit_optional_none(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_form_submit_optional_none(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
         t = Tracker(e)
-        t.track_form_submit("testFormId")
+        await t.track_form_submit("testFormId")
 
         expected = {
             "schema": FORM_SUBMIT_SCHEMA,
@@ -1116,15 +1102,14 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_form_submit_empty_elems(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_form_submit_empty_elems(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
         t = Tracker(e)
-        t.track_form_submit("testFormId", elements=[])
+        await t.track_form_submit("testFormId", elements=[])
 
         expected = {
             "schema": FORM_SUBMIT_SCHEMA,
@@ -1137,10 +1122,9 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs[0].to_json(), expected)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_site_search(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_site_search(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
@@ -1148,7 +1132,7 @@ class TestTracker(unittest.TestCase):
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
-        t.track_site_search(["track", "search"], {"new": True}, 100, 10, context=[ctx], tstamp=evTstamp)
+        await t.track_site_search(["track", "search"], {"new": True}, 100, 10, context=[ctx], tstamp=evTstamp)
 
         expected = {
             "schema": SITE_SEARCH_SCHEMA,
@@ -1166,15 +1150,14 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_site_search_optional_none(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_site_search_optional_none(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
         t = Tracker(e)
-        t.track_site_search(["track", "search"])
+        await t.track_site_search(["track", "search"])
 
         expected = {
             "schema": SITE_SEARCH_SCHEMA,
@@ -1189,10 +1172,9 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch('snowplow_tracker.Tracker.track_unstruct_event')
-    def test_track_screen_view(self, mok_track_unstruct: Any) -> None:
-        mokEmitter = self.create_patch('snowplow_tracker.Emitter')
-        e = mokEmitter()
+    @async_patch('snowplow_tracker.Tracker.track_unstruct_event')
+    async def test_track_screen_view(self, mok_track_unstruct: Any) -> None:
+        e = create_mock_emitter()
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
@@ -1200,7 +1182,7 @@ class TestTracker(unittest.TestCase):
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
-        t.track_screen_view("screenName", "screenId", context=[ctx], tstamp=evTstamp)
+        await t.track_screen_view("screenName", "screenId", context=[ctx], tstamp=evTstamp)
 
         expected = {
             "schema": SCREEN_VIEW_SCHEMA,

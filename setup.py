@@ -43,7 +43,7 @@ authors_email_str = ', '.join(authors_email_list)
 
 setup(
     name='aio-snowplow-tracker',
-    version='1.0.0a1',
+    version='1.0.0a2',
     author=authors_str,
     author_email=authors_email_str,
     packages=['snowplow_tracker', 'snowplow_tracker.test', 'snowplow_tracker.redis', 'snowplow_tracker.celery'],
@@ -68,8 +68,8 @@ setup(
     ],
 
     install_requires=[
-        "requests>=2.25.1,<3.0",
-        "typing_extensions>=3.7.4"
+        "aiohttp>=3.0.0",
+        "typing_extensions>=3.7.4,<4.0.0"
     ],
 
     extras_require={
