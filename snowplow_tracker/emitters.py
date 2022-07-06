@@ -148,7 +148,7 @@ class Emitter(object):
             If the maximum size has been reached, flushes the buffer.
 
             :param payload:   The name-value pairs for the event
-            :type  payload:   dict(string:*)
+            :type  payload:   dict(string:\*)
         """
         with self.lock:
             if self.bytes_queued is not None:
@@ -207,7 +207,7 @@ class Emitter(object):
     def http_get(self, payload: PayloadDict) -> bool:
         """
             :param payload:  The event properties
-            :type  payload:  dict(string:*)
+            :type  payload:  dict(string:\*)
         """
         logger.info("Sending GET request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % payload)
@@ -242,7 +242,7 @@ class Emitter(object):
     def send_events(self, evts: PayloadDictList) -> None:
         """
             :param evts: Array of events to be sent
-            :type  evts: list(dict(string:*))
+            :type  evts: list(dict(string:\*))
         """
         if len(evts) > 0:
             logger.info("Attempting to send %s events" % len(evts))
@@ -302,12 +302,11 @@ class Emitter(object):
 
     @staticmethod
     def attach_sent_timestamp(events: PayloadDictList) -> None:
-        """
-            Attach (by mutating in-place) current timestamp in milliseconds
+        """ Attach (by mutating in-place) current timestamp in milliseconds
             as `stm` param
 
             :param events: Array of events to be sent
-            :type  events: list(dict(string:*))
+            :type  events: list(dict(string:\*))
             :rtype: None
         """
         def update(e: PayloadDict) -> None:

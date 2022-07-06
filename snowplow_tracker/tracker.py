@@ -263,7 +263,7 @@ class Tracker:
             :param  element_id:     ID attribute of the HTML element
             :type   element_id:     string_or_none
             :param  element_classes:    Classes of the HTML element
-            :type   element_classes:    list(str) | tuple(str,*) | None
+            :type   element_classes:    list(str) | tuple(str,\*) | None
             :param  element_target:     ID attribute of the HTML element
             :type   element_target:     string_or_none
             :param  element_content:    The content of the HTML element
@@ -416,7 +416,7 @@ class Tracker:
             :param  type_:          Type of data the element represents
             :type   type_:          non_empty_string, form_type
             :param  element_classes:    Classes of the HTML element
-            :type   element_classes:    list(str) | tuple(str,*) | None
+            :type   element_classes:    list(str) | tuple(str,\*) | None
             :param  context:        Custom context for the event
             :type   context:        context_array | None
             :param  tstamp:         Optional event timestamp in milliseconds
@@ -456,7 +456,7 @@ class Tracker:
             :param  form_id:        ID attribute of the HTML form
             :type   form_id:        non_empty_string
             :param  form_classes:   Classes of the HTML form
-            :type   form_classes:   list(str) | tuple(str,*) | None
+            :type   form_classes:   list(str) | tuple(str,\*) | None
             :param  elements:       Classes of the HTML form
             :type   elements:       list(form_element) | None
             :param  context:        Custom context for the event
@@ -611,7 +611,7 @@ class Tracker:
             :param  currency:       The currency the price is expressed in
             :type   currency:       string_or_none
             :param  items:          The items in the transaction
-            :type   items:          list(dict(str:*)) | None
+            :type   items:          list(dict(str:\*)) | None
             :param  context:        Custom context for the event
             :type   context:        context_array | None
             :param  tstamp:         Optional event timestamp in milliseconds
