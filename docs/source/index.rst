@@ -10,7 +10,8 @@ Welcome to Snowplow Python Tracker's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   modules
+   
 
 Indices and tables
 ==================
