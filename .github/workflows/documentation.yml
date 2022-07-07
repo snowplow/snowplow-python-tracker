@@ -15,7 +15,6 @@ jobs:
       run: |
         python3 -m pip install sphinx
         python3 -m pip install sphinx-rtd-theme
-        sphinx-quickstart docs        
         make clean
         make html
 
