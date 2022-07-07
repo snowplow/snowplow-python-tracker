@@ -7,7 +7,6 @@ on:
 
 jobs:
   documentation:
-  needs: ["build"]
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -16,7 +15,7 @@ jobs:
       run: |
         python3 -m pip install sphinx
         python3 -m pip install sphinx-rtd-theme
-        cd docs
+        sphinx-quickstart docs        
         make clean
         make html
 
