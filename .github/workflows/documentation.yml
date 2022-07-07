@@ -1,0 +1,17 @@
+name: documentation
+
+on:
+  push:
+    branches:
+      - issue/277-add_api_documentation_generation
+
+jobs:
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      name: Build Docs
+      run: 
+        cd docs
+        make clean
+        make html
+
