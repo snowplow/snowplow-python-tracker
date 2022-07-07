@@ -9,8 +9,8 @@ jobs:
   documentation:
     runs-on: ubuntu-latest
     steps:
-      name: Build Docs
-      run: 
+      - name: Build Docs
+      run: |
         cd docs
         make clean
         make html
