@@ -11,6 +11,15 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    - name: Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Pin pip version
+      run: |
+        echo "pip_v=pip" >> $GITHUB_ENV
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade "${{ env.pip_v }}" setuptools wheel
