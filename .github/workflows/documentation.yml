@@ -9,7 +9,9 @@ jobs:
   documentation:
     runs-on: ubuntu-latest
     steps:
-      - name: Build Docs
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build Docs
       run: |
         cd docs
         make clean
