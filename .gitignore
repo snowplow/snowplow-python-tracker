@@ -41,7 +41,3 @@ nosetests.xml
 # Vagrant
 .vagrant
 VERSION
-
-# docs
-docs/_build/
-docs/source/
