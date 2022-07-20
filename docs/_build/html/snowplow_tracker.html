@@ -18,8 +18,7 @@
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="snowplow_tracker" href="modules.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -37,24 +36,22 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">snowplow_tracker</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">snowplow_tracker package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#snowplow-tracker-contracts-module">snowplow_tracker.contracts module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-snowplow_tracker.emitters">snowplow_tracker.emitters module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-snowplow_tracker.payload">snowplow_tracker.payload module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-snowplow_tracker.self_describing_json">snowplow_tracker.self_describing_json module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-snowplow_tracker.subject">snowplow_tracker.subject module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-snowplow_tracker.tracker">snowplow_tracker.tracker module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-snowplow_tracker.typing">snowplow_tracker.typing module</a></li>
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">snowplow_tracker package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-snowplow_tracker.contracts">snowplow_tracker.contracts module</a></li>
+<li><a class="reference internal" href="#module-snowplow_tracker.emitters">snowplow_tracker.emitters module</a></li>
+<li><a class="reference internal" href="#module-snowplow_tracker.payload">snowplow_tracker.payload module</a></li>
+<li><a class="reference internal" href="#module-snowplow_tracker.self_describing_json">snowplow_tracker.self_describing_json module</a></li>
+<li><a class="reference internal" href="#module-snowplow_tracker.subject">snowplow_tracker.subject module</a></li>
+<li><a class="reference internal" href="#module-snowplow_tracker.tracker">snowplow_tracker.tracker module</a></li>
+<li><a class="reference internal" href="#module-snowplow_tracker.typing">snowplow_tracker.typing module</a></li>
+<li><a class="reference internal" href="#module-snowplow_tracker">Module contents</a></li>
 </ul>
 </li>
 </ul>
-</li>
-</ul>
-
+</div>
         </div>
       </div>
     </nav>
@@ -69,7 +66,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="modules.html">snowplow_tracker</a> &raquo;</li>
       <li>snowplow_tracker package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/snowplow_tracker.rst.txt" rel="nofollow"> View page source</a>
@@ -80,36 +76,61 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-snowplow_tracker">
-<span id="snowplow-tracker-package"></span><h1>snowplow_tracker package<a class="headerlink" href="#module-snowplow_tracker" title="Permalink to this heading"></a></h1>
+  <section id="snowplow-tracker-package">
+<h1>snowplow_tracker package<a class="headerlink" href="#snowplow-tracker-package" title="Permalink to this heading"></a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
 </section>
-<section id="snowplow-tracker-contracts-module">
-<h2>snowplow_tracker.contracts module<a class="headerlink" href="#snowplow-tracker-contracts-module" title="Permalink to this heading"></a></h2>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="snowplow_tracker.contracts">
-<span class="sig-prename descclassname"><span class="pre">snowplow_tracker.</span></span><span class="sig-name descname"><span class="pre">contracts</span></span><a class="headerlink" href="#snowplow_tracker.contracts" title="Permalink to this definition"></a></dt>
-<dd><p>alias of &lt;module ‘snowplow_tracker.contracts’ from ‘/Users/jackkeene/Documents/Work/snowplow-python-tracker/snowplow_tracker/contracts.py’&gt;</p>
-</dd></dl>
+<section id="module-snowplow_tracker.contracts">
+<span id="snowplow-tracker-contracts-module"></span><h2>snowplow_tracker.contracts module<a class="headerlink" href="#module-snowplow_tracker.contracts" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="snowplow_tracker.contracts.contracts_enabled">
+<span class="sig-prename descclassname"><span class="pre">snowplow_tracker.contracts.</span></span><span class="sig-name descname"><span class="pre">contracts_enabled</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#snowplow_tracker.contracts.contracts_enabled" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snowplow_tracker.contracts.disable_contracts">
+<span class="sig-prename descclassname"><span class="pre">snowplow_tracker.contracts.</span></span><span class="sig-name descname"><span class="pre">disable_contracts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#snowplow_tracker.contracts.disable_contracts" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snowplow_tracker.contracts.enable_contracts">
+<span class="sig-prename descclassname"><span class="pre">snowplow_tracker.contracts.</span></span><span class="sig-name descname"><span class="pre">enable_contracts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#snowplow_tracker.contracts.enable_contracts" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snowplow_tracker.contracts.form_element">
+<span class="sig-prename descclassname"><span class="pre">snowplow_tracker.contracts.</span></span><span class="sig-name descname"><span class="pre">form_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#snowplow_tracker.contracts.form_element" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snowplow_tracker.contracts.greater_than">
+<span class="sig-prename descclassname"><span class="pre">snowplow_tracker.contracts.</span></span><span class="sig-name descname"><span class="pre">greater_than</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compared_to</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#snowplow_tracker.contracts.greater_than" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snowplow_tracker.contracts.non_empty">
+<span class="sig-prename descclassname"><span class="pre">snowplow_tracker.contracts.</span></span><span class="sig-name descname"><span class="pre">non_empty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sized</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#snowplow_tracker.contracts.non_empty" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snowplow_tracker.contracts.non_empty_string">
+<span class="sig-prename descclassname"><span class="pre">snowplow_tracker.contracts.</span></span><span class="sig-name descname"><span class="pre">non_empty_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#snowplow_tracker.contracts.non_empty_string" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snowplow_tracker.contracts.one_of">
+<span class="sig-prename descclassname"><span class="pre">snowplow_tracker.contracts.</span></span><span class="sig-name descname"><span class="pre">one_of</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supported</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#snowplow_tracker.contracts.one_of" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snowplow_tracker.contracts.satisfies">
+<span class="sig-prename descclassname"><span class="pre">snowplow_tracker.contracts.</span></span><span class="sig-name descname"><span class="pre">satisfies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#snowplow_tracker.contracts.satisfies" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 <section id="module-snowplow_tracker.emitters">
 <span id="snowplow-tracker-emitters-module"></span><h2>snowplow_tracker.emitters module<a class="headerlink" href="#module-snowplow_tracker.emitters" title="Permalink to this heading"></a></h2>
-<p>emitters.py</p>
-<p>Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.</p>
-<p>This program is licensed to you under the Apache License Version 2.0,
-and you may not use this file except in compliance with the Apache License
-Version 2.0. You may obtain a copy of the Apache License Version 2.0 at
-<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
-<p>Unless required by applicable law or agreed to in writing,
-software distributed under the Apache License Version 2.0 is distributed on
-an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-express or implied. See the Apache License Version 2.0 for the specific
-language governing permissions and limitations there under.</p>
-<p>Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
-Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
-License: Apache License Version 2.0</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="snowplow_tracker.emitters.AsyncEmitter">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snowplow_tracker.emitters.</span></span><span class="sig-name descname"><span class="pre">AsyncEmitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'http'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'https'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'http'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'get'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'post'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'get'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_success</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_failure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thread_count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byte_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.AsyncEmitter" title="Permalink to this definition"></a></dt>
@@ -279,20 +300,6 @@ This is guaranteed to be blocking, not asynchronous.</p>
 </section>
 <section id="module-snowplow_tracker.payload">
 <span id="snowplow-tracker-payload-module"></span><h2>snowplow_tracker.payload module<a class="headerlink" href="#module-snowplow_tracker.payload" title="Permalink to this heading"></a></h2>
-<p>payload.py</p>
-<p>Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.</p>
-<p>This program is licensed to you under the Apache License Version 2.0,
-and you may not use this file except in compliance with the Apache License
-Version 2.0. You may obtain a copy of the Apache License Version 2.0 at
-<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
-<p>Unless required by applicable law or agreed to in writing,
-software distributed under the Apache License Version 2.0 is distributed on
-an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-express or implied. See the Apache License Version 2.0 for the specific
-language governing permissions and limitations there under.</p>
-<p>Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
-Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
-License: Apache License Version 2.0</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="snowplow_tracker.payload.Payload">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snowplow_tracker.payload.</span></span><span class="sig-name descname"><span class="pre">Payload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.payload.Payload" title="Permalink to this definition"></a></dt>
@@ -342,20 +349,6 @@ License: Apache License Version 2.0</p>
 </section>
 <section id="module-snowplow_tracker.self_describing_json">
 <span id="snowplow-tracker-self-describing-json-module"></span><h2>snowplow_tracker.self_describing_json module<a class="headerlink" href="#module-snowplow_tracker.self_describing_json" title="Permalink to this heading"></a></h2>
-<p>self_describing_json.py</p>
-<p>Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.</p>
-<p>This program is licensed to you under the Apache License Version 2.0,
-and you may not use this file except in compliance with the Apache License
-Version 2.0. You may obtain a copy of the Apache License Version 2.0 at
-<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
-<p>Unless required by applicable law or agreed to in writing,
-software distributed under the Apache License Version 2.0 is distributed on
-an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-express or implied. See the Apache License Version 2.0 for the specific
-language governing permissions and limitations there under.</p>
-<p>Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
-Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
-License: Apache License Version 2.0</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="snowplow_tracker.self_describing_json.SelfDescribingJson">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snowplow_tracker.self_describing_json.</span></span><span class="sig-name descname"><span class="pre">SelfDescribingJson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.self_describing_json.SelfDescribingJson" title="Permalink to this definition"></a></dt>
@@ -375,20 +368,6 @@ License: Apache License Version 2.0</p>
 </section>
 <section id="module-snowplow_tracker.subject">
 <span id="snowplow-tracker-subject-module"></span><h2>snowplow_tracker.subject module<a class="headerlink" href="#module-snowplow_tracker.subject" title="Permalink to this heading"></a></h2>
-<p>subject.py</p>
-<p>Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.</p>
-<p>This program is licensed to you under the Apache License Version 2.0,
-and you may not use this file except in compliance with the Apache License
-Version 2.0. You may obtain a copy of the Apache License Version 2.0 at
-<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
-<p>Unless required by applicable law or agreed to in writing,
-software distributed under the Apache License Version 2.0 is distributed on
-an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-express or implied. See the Apache License Version 2.0 for the specific
-language governing permissions and limitations there under.</p>
-<p>Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
-Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
-License: Apache License Version 2.0</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="snowplow_tracker.subject.Subject">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snowplow_tracker.subject.</span></span><span class="sig-name descname"><span class="pre">Subject</span></span><a class="headerlink" href="#snowplow_tracker.subject.Subject" title="Permalink to this definition"></a></dt>
@@ -555,20 +534,6 @@ This overwrites the nuid field set by the collector</p>
 </section>
 <section id="module-snowplow_tracker.tracker">
 <span id="snowplow-tracker-tracker-module"></span><h2>snowplow_tracker.tracker module<a class="headerlink" href="#module-snowplow_tracker.tracker" title="Permalink to this heading"></a></h2>
-<p>tracker.py</p>
-<p>Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.</p>
-<p>This program is licensed to you under the Apache License Version 2.0,
-and you may not use this file except in compliance with the Apache License
-Version 2.0. You may obtain a copy of the Apache License Version 2.0 at
-<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
-<p>Unless required by applicable law or agreed to in writing,
-software distributed under the Apache License Version 2.0 is distributed on
-an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-express or implied. See the Apache License Version 2.0 for the specific
-language governing permissions and limitations there under.</p>
-<p>Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
-Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
-License: Apache License Version 2.0</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="snowplow_tracker.tracker.ContextArray">
 <span class="sig-prename descclassname"><span class="pre">snowplow_tracker.tracker.</span></span><span class="sig-name descname"><span class="pre">ContextArray</span></span><a class="headerlink" href="#snowplow_tracker.tracker.ContextArray" title="Permalink to this definition"></a></dt>
@@ -998,20 +963,6 @@ A “schema” field identifying the schema against which the data is validated<
 </section>
 <section id="module-snowplow_tracker.typing">
 <span id="snowplow-tracker-typing-module"></span><h2>snowplow_tracker.typing module<a class="headerlink" href="#module-snowplow_tracker.typing" title="Permalink to this heading"></a></h2>
-<p>typing.py</p>
-<p>Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.</p>
-<p>This program is licensed to you under the Apache License Version 2.0,
-and you may not use this file except in compliance with the Apache License
-Version 2.0. You may obtain a copy of the Apache License Version 2.0 at
-<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
-<p>Unless required by applicable law or agreed to in writing,
-software distributed under the Apache License Version 2.0 is distributed on
-an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-express or implied. See the Apache License Version 2.0 for the specific
-language governing permissions and limitations there under.</p>
-<p>Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock, Matus Tomlein
-Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
-License: Apache License Version 2.0</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="snowplow_tracker.typing.EmitterProtocol">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">snowplow_tracker.typing.</span></span><span class="sig-name descname"><span class="pre">EmitterProtocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.typing.EmitterProtocol" title="Permalink to this definition"></a></dt>
@@ -1040,14 +991,15 @@ License: Apache License Version 2.0</p>
 </dd></dl>
 
 </section>
+<section id="module-snowplow_tracker">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-snowplow_tracker" title="Permalink to this heading"></a></h2>
+</section>
 </section>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="modules.html" class="btn btn-neutral float-left" title="snowplow_tracker" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-    </div>
+          <footer>
 
   <hr/>
 
