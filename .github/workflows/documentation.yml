@@ -33,10 +33,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+      run: "python3 -m pip install sphinx-rtd-theme"
+
     # Standard drop-in approach that should work for most people.
     - uses: ammaraskar/sphinx-action@master
       with:
-        run: "python3 -m pip install sphinx-rtd-theme"
         docs-folder: "docs/"
     # Example of using a custom build-command.
     - uses: ammaraskar/sphinx-action@master
