@@ -43,4 +43,4 @@ nosetests.xml
 VERSION
 
 # Docs
-.docs/
+docs/
