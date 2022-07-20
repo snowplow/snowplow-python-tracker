@@ -36,11 +36,12 @@ jobs:
     # Standard drop-in approach that should work for most people.
     - uses: ammaraskar/sphinx-action@master
       with:
+        run: "python3 -m pip install sphinx-rtd-theme"
         docs-folder: "docs/"
     # Example of using a custom build-command.
     - uses: ammaraskar/sphinx-action@master
       with:
-        build-command: "python3 -m pip install sphinx-rtd-theme sphinx-build -b html . _build"
+        build-command: "sphinx-build -b html . _build"
         docs-folder: "docs2/"
     # Grabbing custom dependencies and building as a pdf.
     # - uses: ammaraskar/sphinx-action@master
