@@ -1,8 +1,0 @@
-pytest==4.6.11; python_version < '3.10.0'
-pytest==6.2.5; python_version >= '3.10.0'
-attrs==21.2.0
-httmock==1.4.0
-freezegun==1.1.0
-pytest-cov
-coveralls==3.3.1
-fakeredis==1.7.0
