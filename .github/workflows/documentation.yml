@@ -37,10 +37,10 @@ jobs:
       with:
         docs-folder: "docs/"
     # Create an artifact of the html output.
-    - uses: actions/upload-artifact@v1
-      with:
-        name: DocumentationHTML
-        path: docs/_build/html/
+    # - uses: actions/upload-artifact@v1
+    #   with:
+    #     name: DocumentationHTML
+    #     path: docs/_build/html/
     # Publish built docs to gh-pages branch.
     # ===============================
 
@@ -49,7 +49,7 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/_build
+        publish_dir: ./docs/
 
     # - name: Commit documentation changes
     #   run: |
