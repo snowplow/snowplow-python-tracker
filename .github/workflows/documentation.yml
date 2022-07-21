@@ -1,33 +1,9 @@
-
-# on:
-#   push:
-#     branches:
-#       - issue/277-add_api_documentation_generation
-
-# jobs:
-#   docs:
-#     runs-on: ubuntu-latest
-#     steps:
-#     - uses: actions/checkout@v1
-#     - uses: ammaraskar/sphinx-action@master
-#       with:
-#         docs-folder: "docs/"
-
-    # - name: Build Docs
-    #   run: |
-    #     python3 -m pip install sphinx
-    #     python3 -m pip install sphinx-rtd-theme
-    #     cd docs
-    #     make clean
-    #     make html
-
 name: documentation
 
 on:
   push:
     branches:    
       - issue/277-add_api_documentation_generation
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,37 +12,9 @@ jobs:
     - uses: ammaraskar/sphinx-action@master
       with:
         docs-folder: "docs/"
-    # Create an artifact of the html output.
-    # - uses: actions/upload-artifact@v1
-    #   with:
-    #     name: DocumentationHTML
-    #     path: docs/_build/html/
-    # Publish built docs to gh-pages branch.
-    # ===============================
-
     - name: Deploy to GitHub Pages
       if: success()
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./docs/
-
-    # - name: Commit documentation changes
-    #   run: |
-    #     git clone https://github.com/snowplow/snowplow-python-tracker.git --branch gh-pages --single-branch gh-pages
-    #     cp -r docs/_build/html/* gh-pages/
-    #     cd gh-pages
-    #     touch .nojekyll
-    #     git config --local user.email "action@github.com"
-    #     git config --local user.name "GitHub Action"
-    #     git add .
-    #     git commit -m "Update documentation" -a || true
-    #     # The above command will fail if no changes were present, so we ignore
-    #     # that.
-    # - name: Push changes
-    #   uses: ad-m/github-push-action@master
-    #   with:
-    #     branch: gh-pages
-    #     directory: gh-pages
-    #     github_token: ${{ secrets.GITHUB_TOKEN }}
-    # ===============================
