@@ -302,7 +302,8 @@ class Emitter(object):
 
     @staticmethod
     def attach_sent_timestamp(events: PayloadDictList) -> None:
-        """ Attach (by mutating in-place) current timestamp in milliseconds
+        """ 
+            Attach (by mutating in-place) current timestamp in milliseconds
             as `stm` param
 
             :param events: Array of events to be sent

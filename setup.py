@@ -1,4 +1,4 @@
-# """
+# 
 #     setup.py
 
 #     Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
@@ -17,7 +17,7 @@
 #     Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
 #     Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
 #     License: Apache License Version 2.0
-# """
+# 
 
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
