@@ -3,7 +3,7 @@ name: documentation
 on:
   push:
     branches:    
-      - issue/277-add_api_documentation_generation
+      - master
 jobs:
   build:
     runs-on: ubuntu-latest
