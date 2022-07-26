@@ -23,35 +23,3 @@ With this tracker you can collect event data from your Python-based applications
 
 * :ref:`genindex`
 * :ref:`modindex`
-
-
-.. Tracker
-.. -------
-.. .. autoclass:: snowplow_tracker.Tracker
-..    :members:
-..    :inherited-members:
-
-.. Emitter
-.. -------
-.. .. autoclass:: snowplow_tracker.Emitter
-..    :members:
-..    :inherited-members:
-
-.. Subject
-.. --------
-.. .. autoclass:: snowplow_tracker.Subject
-..    :members:
-..    :inherited-members:
-
-.. SelfDescribingJson
-.. ------------------
-.. .. autoclass:: snowplow_tracker.SelfDescribingJson
-..    :members:
-..    :inherited-members:   
-
-.. Indices and tables
-.. ==================
-
-.. * :ref:`genindex`
-.. * :ref:`modindex`
-.. * :ref:`search`

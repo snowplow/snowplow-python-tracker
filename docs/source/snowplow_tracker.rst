@@ -1,9 +1,6 @@
 snowplow\_tracker package
 =========================
 
-.. Submodules
-.. ----------
-
 snowplow\_tracker.contracts module
 ----------------------------------
 
@@ -60,10 +57,3 @@ snowplow\_tracker.typing module
    :undoc-members:
    :show-inheritance:
 
-.. Module contents
-.. ---------------
-
-.. .. automodule:: snowplow_tracker
-..    :members:
-..    :undoc-members:
-..    :show-inheritance:
