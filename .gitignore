@@ -41,10 +41,3 @@ nosetests.xml
 # Vagrant
 .vagrant
 VERSION
-
-#Docs
-docs/_build/doctrees
-docs/source
-docs/Makefile
-docs/*.bat
-docs/*.txt
