@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - issue/279-add_demo_app
   pull_request:
 
 jobs:
