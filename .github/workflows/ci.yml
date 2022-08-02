@@ -57,7 +57,7 @@ jobs:
     - name: Demo
       run: |
         cd examples
-        python app.py
+        python app.py "localhost:9090"
 
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
