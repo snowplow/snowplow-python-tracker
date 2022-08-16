@@ -1,23 +1,23 @@
-"""
-    payload.py
+# """
+#     payload.py
 
-    Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
+#     Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
 
-    This program is licensed to you under the Apache License Version 2.0,
-    and you may not use this file except in compliance with the Apache License
-    Version 2.0. You may obtain a copy of the Apache License Version 2.0 at
-    http://www.apache.org/licenses/LICENSE-2.0.
+#     This program is licensed to you under the Apache License Version 2.0,
+#     and you may not use this file except in compliance with the Apache License
+#     Version 2.0. You may obtain a copy of the Apache License Version 2.0 at
+#     http://www.apache.org/licenses/LICENSE-2.0.
 
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the Apache License Version 2.0 is distributed on
-    an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-    express or implied. See the Apache License Version 2.0 for the specific
-    language governing permissions and limitations there under.
+#     Unless required by applicable law or agreed to in writing,
+#     software distributed under the Apache License Version 2.0 is distributed on
+#     an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+#     express or implied. See the Apache License Version 2.0 for the specific
+#     language governing permissions and limitations there under.
 
-    Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
-    Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
-    License: Apache License Version 2.0
-"""
+#     Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
+#     Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
+#     License: Apache License Version 2.0
+# """
 
 import json
 import base64
@@ -54,7 +54,7 @@ class Payload:
             Add a dict of name value pairs to the Payload object
 
             :param  dict_:          Dictionary to be added to the Payload
-            :type   dict_:          dict(string:*)
+            :type   dict_:          dict(string:\*)
         """
         for f in dict_:
             self.add(f, dict_[f])
@@ -70,7 +70,7 @@ class Payload:
             Add an encoded or unencoded JSON to the payload
 
             :param  dict_:                  Custom context for the event
-            :type   dict_:                  dict(string:*) | None
+            :type   dict_:                  dict(string:\*) | None
             :param  encode_base64:          If the payload is base64 encoded
             :type   encode_base64:          bool
             :param  type_when_encoded:      Name of the field when encode_base64 is set
