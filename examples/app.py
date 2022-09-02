@@ -1,5 +1,5 @@
 from distutils.log import error
-from snowplow_tracker import Tracker, Emitter, Subject
+from snowplow_tracker import Tracker, Emitter, Subject, SelfDescribingJson
 import sys
 
 
@@ -25,6 +25,14 @@ def main():
     t.track_page_ping("https://www.snowplowanalytics.com", "Homepage")
     t.track_link_click("https://www.snowplowanalytics.com")
 
+    t.track_self_describing_event(
+        SelfDescribingJson(
+            "iglu:com.snowplowanalytics.snowplow/link_click/jsonschema/1-0-1",
+            {"targetUrl": "example.com"},
+        )
+    )
+    t.track_struct_event("shop", "add-to-basket", None, "pcs", 2)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
