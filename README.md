@@ -1,7 +1,7 @@
 Python Analytics for Snowplow
 =============================
 
-[![Early Release](https://img.shields.io/static/v1?style=flat&label=Snowplow&message=Early%20Release&color=014477&labelColor=9ba0aa&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAeFBMVEVMaXGXANeYANeXANZbAJmXANeUANSQAM+XANeMAMpaAJhZAJeZANiXANaXANaOAM2WANVnAKWXANZ9ALtmAKVaAJmXANZaAJlXAJZdAJxaAJlZAJdbAJlbAJmQAM+UANKZANhhAJ+EAL+BAL9oAKZnAKVjAKF1ALNBd8J1AAAAKHRSTlMAa1hWXyteBTQJIEwRgUh2JjJon21wcBgNfmc+JlOBQjwezWF2l5dXzkW3/wAAAHpJREFUeNokhQOCA1EAxTL85hi7dXv/E5YPCYBq5DeN4pcqV1XbtW/xTVMIMAZE0cBHEaZhBmIQwCFofeprPUHqjmD/+7peztd62dWQRkvrQayXkn01f/gWp2CrxfjY7rcZ5V7DEMDQgmEozFpZqLUYDsNwOqbnMLwPAJEwCopZxKttAAAAAElFTkSuQmCC)](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/tracker-maintenance-classification/)[![Build Status](https://github.com/snowplow/snowplow-python-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/snowplow/snowplow-python-tracker/actions)[![Test Coverage](https://img.shields.io/coveralls/github/snowplow/snowplow-python-tracker)](https://coveralls.io/github/snowplow/snowplow-python-tracker?branch=master) [![image](http://img.shields.io/badge/license-Apache--2-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
+[![Early Release](https://img.shields.io/static/v1?style=flat&label=Snowplow&message=Early%20Release&color=014477&labelColor=9ba0aa&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAeFBMVEVMaXGXANeYANeXANZbAJmXANeUANSQAM+XANeMAMpaAJhZAJeZANiXANaXANaOAM2WANVnAKWXANZ9ALtmAKVaAJmXANZaAJlXAJZdAJxaAJlZAJdbAJlbAJmQAM+UANKZANhhAJ+EAL+BAL9oAKZnAKVjAKF1ALNBd8J1AAAAKHRSTlMAa1hWXyteBTQJIEwRgUh2JjJon21wcBgNfmc+JlOBQjwezWF2l5dXzkW3/wAAAHpJREFUeNokhQOCA1EAxTL85hi7dXv/E5YPCYBq5DeN4pcqV1XbtW/xTVMIMAZE0cBHEaZhBmIQwCFofeprPUHqjmD/+7peztd62dWQRkvrQayXkn01f/gWp2CrxfjY7rcZ5V7DEMDQgmEozFpZqLUYDsNwOqbnMLwPAJEwCopZxKttAAAAAElFTkSuQmCC)](https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/tracker-maintenance-classification/)[![Build Status](https://github.com/snowplow/snowplow-python-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/snowplow/snowplow-python-tracker/actions)[![Test Coverage](https://img.shields.io/coveralls/github/snowplow/snowplow-python-tracker)](https://coveralls.io/github/snowplow/snowplow-python-tracker?branch=master) [![image](http://img.shields.io/badge/license-Apache--2-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 
 
 [![Pypi Snowplow Tracker](https://img.shields.io/pypi/v/snowplow-tracker)](https://pypi.org/project/snowplow-tracker/)[![Python Versions](https://img.shields.io/pypi/pyversions/snowplow-tracker)](https://pypi.org/project/snowplow-tracker/)[![Monthly Downloads](https://img.shields.io/pypi/dm/snowplow-tracker)](https://pypi.org/project/snowplow-tracker/)
@@ -10,7 +10,7 @@ Overview
 --------
 
 Add analytics to your Python apps and Python games with the
-[Snowplow](http://snowplowanalytics.com) event tracker for
+[Snowplow](http://snowplow.io) event tracker for
 [Python](http://python.org).
 
 With this tracker you can collect event data from your Python-based
@@ -24,7 +24,7 @@ Find out more
   | Technical Docs | Setup Guide  | Contributing |
   |     :----:     |     :----:   |     :----:   |
   | ![techdocs](https://d3i6fms1cm1j0i.cloudfront.net/github/images/techdocs.png) | ![setup](https://d3i6fms1cm1j0i.cloudfront.net/github/images/setup.png) |                                                ![contributing](https://d3i6fms1cm1j0i.cloudfront.net/github/images/contributing.png) |
-  | [Technical Docs](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/python-tracker) | [Setup Guide](https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/python-tracker/setup/)| [Contributing](https://github.com/snowplow/snowplow-python-tracker/blob/master/CONTRIBUTING.md) |                                                                              
+  | [Technical Docs](https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/python-tracker/) | [Setup Guide](https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/python-tracker/setup/)| [Contributing](https://github.com/snowplow/snowplow-python-tracker/blob/master/CONTRIBUTING.md) |                                                                              
   --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Python Support
