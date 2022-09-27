@@ -49,8 +49,8 @@ setup(
     url='http://snowplowanalytics.com',
     license='Apache License 2.0',
     description='Snowplow event tracker for Python. Add analytics to your Python and Django apps, webapps and games',
-    long_description=open('README.rst').read(),
-    long_description_content_type='text/x-rst',
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
 
     classifiers=[
         "Development Status :: 5 - Production/Stable",
