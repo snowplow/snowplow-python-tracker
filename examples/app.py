@@ -21,9 +21,9 @@ def main():
 
     print("Sending events to " + collector_url)
 
-    t.track_page_view("https://www.snowplowanalytics.com", "Homepage")
-    t.track_page_ping("https://www.snowplowanalytics.com", "Homepage")
-    t.track_link_click("https://www.snowplowanalytics.com")
+    t.track_page_view("https://www.snowplow.io", "Homepage")
+    t.track_page_ping("https://www.snowplow.io", "Homepage")
+    t.track_link_click("https://www.snowplow.io")
 
     t.track_self_describing_event(
         SelfDescribingJson(
