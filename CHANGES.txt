@@ -1,3 +1,13 @@
+Version 0.11.0 (2022-10-06)
+---------------------------
+Update README file (#264) 
+Update CONTRIBUTING.md file (#265) 
+Add API doc generation in CI (#277) 
+Add Demo App (#279) 
+Fix failing build in Dockerfile (#266) 
+Bump Copyright to 2022 (#271) 
+Update README.rst to README.md (#270)
+
 Version 0.10.0 (2021-12-16)
 --------------------------
 Add Python 3.10 support (#254)

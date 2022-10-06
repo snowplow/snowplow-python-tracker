@@ -52,6 +52,11 @@ jobs:
     - name: Tests
       run: |
         pytest --cov=snowplow_tracker --cov-report=xml
+      
+    - name: Demo
+      run: |
+        cd examples
+        python app.py "localhost:9090"
 
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
