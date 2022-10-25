@@ -42,6 +42,8 @@ class TestSubject(unittest.TestCase):
         s.set_timezone("PST")
         s.set_lang("EN")
         s.set_domain_user_id("domain-user-id")
+        s.set_domain_session_id("domain-session-id")
+        s.set_domain_session_index(1)
         s.set_ip_address("127.0.0.1")
         s.set_useragent("useragent-string")
         s.set_network_user_id("network-user-id")
@@ -57,6 +59,8 @@ class TestSubject(unittest.TestCase):
             "ip": "127.0.0.1",
             "ua": "useragent-string",
             "duid": "domain-user-id",
+            "sid": "domain-session-id",
+            "vid": 1,
             "tnuid": "network-user-id"
         }
         self.assertDictEqual(s.standard_nv_pairs, exp)
@@ -85,5 +89,9 @@ class TestSubject(unittest.TestCase):
             s.standard_nv_pairs["ua"]
         with pytest.raises(KeyError):
             s.standard_nv_pairs["duid"]
+        with pytest.raises(KeyError):
+            s.standard_nv_pairs["sid"]
+        with pytest.raises(KeyError):
+            s.standard_nv_pairs["vid"]
         with pytest.raises(KeyError):
             s.standard_nv_pairs["tnuid"]
