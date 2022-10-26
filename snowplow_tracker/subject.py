@@ -123,6 +123,26 @@ class Subject(object):
         self.standard_nv_pairs["duid"] = duid
         return self
 
+    def set_domain_session_id(self, sid: str) -> 'Subject':
+        """
+            Set the domain session ID
+            :param sid:             Domain session ID
+            :type  sid:             string
+            :rtype:                 subject
+        """
+        self.standard_nv_pairs["sid"] = sid
+        return self
+
+    def set_domain_session_index(self, vid: int) -> 'Subject':
+        """
+            Set the domain session Index
+            :param vid:             Domain session Index
+            :type vid:              int
+            :rtype:                 subject
+        """
+        self.standard_nv_pairs["vid"] = vid
+        return self
+
     def set_ip_address(self, ip: str) -> 'Subject':
         """
             Set the domain user ID

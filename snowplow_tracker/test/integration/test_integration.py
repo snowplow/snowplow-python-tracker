@@ -226,6 +226,8 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_identification_methods(self) -> None:
         s = subject.Subject()
         s.set_domain_user_id("4616bfb38f872d16")
+        s.set_domain_session_id("59ed13b1a5724dae")
+        s.set_domain_session_index(1)
         s.set_ip_address("255.255.255.255")
         s.set_useragent("Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/5.0)")
         s.set_network_user_id("fbc6c76c-bce5-43ce-8d5a-31c5")
@@ -235,6 +237,8 @@ class IntegrationTest(unittest.TestCase):
             t.track_page_view("localhost", "local host")
         expected_fields = {
             "duid": "4616bfb38f872d16",
+            "sid": "59ed13b1a5724dae",
+            "vid": "1",
             "ip": "255.255.255.255",
             "ua": "Mozilla%2F5.0+%28compatible%3B+MSIE+9.0%3B+Windows+NT+6.0%3B+Trident%2F5.0%29",
             "tnuid": "fbc6c76c-bce5-43ce-8d5a-31c5"
@@ -245,7 +249,7 @@ class IntegrationTest(unittest.TestCase):
     def test_integration_event_subject(self) -> None:
         s = subject.Subject()
         s.set_domain_user_id("4616bfb38f872d16")
-        s.set_ip_address("255.255.255.255")
+        s.set_lang("ES")
 
         t = tracker.Tracker([emitters.Emitter("localhost")], s, "cf", app_id="angry-birds-android")
         evSubject = subject.Subject().set_domain_user_id("1111aaa11a111a11").set_lang("EN")
