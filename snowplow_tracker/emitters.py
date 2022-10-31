@@ -51,7 +51,7 @@ class Emitter(object):
     def __init__(
             self,
             endpoint: str,
-            protocol: HttpProtocol = "http",
+            protocol: HttpProtocol = "https",
             port: Optional[int] = None,
             method: Method = "get",
             buffer_size: Optional[int] = None,
@@ -60,9 +60,9 @@ class Emitter(object):
             byte_limit: Optional[int] = None,
             request_timeout: Optional[Union[float, Tuple[float, float]]] = None) -> None:
         """
-            :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
+            :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
             :type  endpoint:    string
-            :param protocol:    The protocol to use - http or https. Defaults to http.
+            :param protocol:    The protocol to use - http or https. Defaults to https.
             :type  protocol:    protocol
             :param port:        The collector port to connect to
             :type  port:        int | None
@@ -116,7 +116,7 @@ class Emitter(object):
     @staticmethod
     def as_collector_uri(
             endpoint: str,
-            protocol: HttpProtocol = "http",
+            protocol: HttpProtocol = "https",
             port: Optional[int] = None,
             method: Method = "get") -> str:
         """
@@ -132,6 +132,11 @@ class Emitter(object):
         """
         if len(endpoint) < 1:
             raise ValueError("No endpoint provided.")
+
+        if bool(PROTOCOLS & set(endpoint.split("://"))):
+            endpoint_arr = endpoint.split("://")
+            protocol = endpoint_arr[0]
+            endpoint = endpoint_arr[1]
 
         if method == "get":
             path = "/i"

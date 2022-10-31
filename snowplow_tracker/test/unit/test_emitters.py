@@ -54,7 +54,7 @@ class TestEmitters(unittest.TestCase):
 
     def test_init(self) -> None:
         e = Emitter('0.0.0.0')
-        self.assertEqual(e.endpoint, 'http://0.0.0.0/i')
+        self.assertEqual(e.endpoint, 'https://0.0.0.0/i')
         self.assertEqual(e.method, 'get')
         self.assertEqual(e.buffer_size, 1)
         self.assertEqual(e.buffer, [])
@@ -83,24 +83,32 @@ class TestEmitters(unittest.TestCase):
 
     def test_as_collector_uri(self) -> None:
         uri = Emitter.as_collector_uri('0.0.0.0')
-        self.assertEqual(uri, 'http://0.0.0.0/i')
+        self.assertEqual(uri, 'https://0.0.0.0/i')
 
     def test_as_collector_uri_post(self) -> None:
         uri = Emitter.as_collector_uri('0.0.0.0', method="post")
-        self.assertEqual(uri, 'http://0.0.0.0/com.snowplowanalytics.snowplow/tp2')
+        self.assertEqual(uri, 'https://0.0.0.0/com.snowplowanalytics.snowplow/tp2')
 
     def test_as_collector_uri_port(self) -> None:
         uri = Emitter.as_collector_uri('0.0.0.0', port=9090, method="post")
-        self.assertEqual(uri, 'http://0.0.0.0:9090/com.snowplowanalytics.snowplow/tp2')
+        self.assertEqual(uri, 'https://0.0.0.0:9090/com.snowplowanalytics.snowplow/tp2')
 
-    def test_as_collector_uri_https(self) -> None:
-        uri = Emitter.as_collector_uri('0.0.0.0', protocol="https")
-        self.assertEqual(uri, 'https://0.0.0.0/i')
+    def test_as_collector_uri_http(self) -> None:
+        uri = Emitter.as_collector_uri('0.0.0.0', protocol="http")
+        self.assertEqual(uri, 'http://0.0.0.0/i')
 
     def test_as_collector_uri_empty_string(self) -> None:
         with self.assertRaises(ValueError):
             Emitter.as_collector_uri('')
 
+    def test_as_collector_uri_endpoint_protocol(self) -> None:
+        uri = Emitter.as_collector_uri("https://0.0.0.0")
+        self.assertEqual(uri, "https://0.0.0.0/i")
+
+    def test_as_collector_uri_endpoint_protocol_http(self) -> None:
+        uri = Emitter.as_collector_uri("http://0.0.0.0")
+        self.assertEqual(uri, "http://0.0.0.0/i")
+        
     @mock.patch('snowplow_tracker.Emitter.flush')
     def test_input_no_flush(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
