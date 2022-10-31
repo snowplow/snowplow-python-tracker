@@ -116,6 +116,23 @@ function deploy {
     pip install -r requirements-test.txt
     source deactivate
   fi
+
+  # pyenv install 3.11.0
+  if [ ! -e ~/.pyenv/versions/tracker311 ]; then
+    pyenv virtualenv 3.11.0 tracker311
+    pyenv activate tracker311
+    pip install .
+    pip install -r requirements-test.txt
+    source deactivate
+  fi
+
+  if [ ! -e ~/.pyenv/versions/tracker311redis ]; then
+    pyenv virtualenv 3.11.0 tracker311redis
+    pyenv activate tracker311redis
+    pip install .[redis]
+    pip install -r requirements-test.txt
+    source deactivate
+  fi
 }
 
 
@@ -167,6 +184,15 @@ function run_tests {
   pyenv activate tracker310redis
   pytest
   source deactivate
+
+  pyenv activate tracker311
+  pytest
+  source deactivate
+
+  pyenv activate tracker311redis
+  pytest
+  source deactivate
+
 }
 
 function refresh_deploy {
@@ -182,6 +208,8 @@ function refresh_deploy {
   pyenv uninstall -f tracker39redis
   pyenv uninstall -f tracker310
   pyenv uninstall -f tracker310redis
+  pyenv uninstall -f tracker311
+  pyenv uninstall -f tracker311redis
 }
 
 
