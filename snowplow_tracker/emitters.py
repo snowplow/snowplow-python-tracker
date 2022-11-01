@@ -133,7 +133,7 @@ class Emitter(object):
         if len(endpoint) < 1:
             raise ValueError("No endpoint provided.")
 
-        if bool(PROTOCOLS & set(endpoint.split("://"))):
+        if endpoint.split("://")[0] in PROTOCOLS:
             endpoint_arr = endpoint.split("://")
             protocol = endpoint_arr[0]
             endpoint = endpoint_arr[1]
