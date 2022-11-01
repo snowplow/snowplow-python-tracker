@@ -36,7 +36,7 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-DEFAULT_MAX_LENGTH = 10
+DEFAULT_MAX_LENGTH = 1
 PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4"
 PROTOCOLS = {"http", "https"}
 METHODS = {"get", "post"}
@@ -53,7 +53,7 @@ class Emitter(object):
             endpoint: str,
             protocol: HttpProtocol = "https",
             port: Optional[int] = None,
-            method: Method = "get",
+            method: Method = "post",
             buffer_size: Optional[int] = None,
             on_success: Optional[SuccessCallback] = None,
             on_failure: Optional[FailureCallback] = None,
@@ -66,9 +66,9 @@ class Emitter(object):
             :type  protocol:    protocol
             :param port:        The collector port to connect to
             :type  port:        int | None
-            :param method:      The HTTP request method
+            :param method:      The HTTP request method. Defaults to post.
             :type  method:      method
-            :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
+            :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 1.
             :type  buffer_size: int | None
             :param on_success:  Callback executed after every HTTP request in a flush has status code 200
                                 Gets passed the number of events flushed.
@@ -94,10 +94,8 @@ class Emitter(object):
         self.method = method
 
         if buffer_size is None:
-            if method == "post":
-                buffer_size = DEFAULT_MAX_LENGTH
-            else:
-                buffer_size = 1
+            buffer_size = DEFAULT_MAX_LENGTH
+
         self.buffer_size = buffer_size
         self.buffer = []
         self.byte_limit = byte_limit
@@ -118,7 +116,7 @@ class Emitter(object):
             endpoint: str,
             protocol: HttpProtocol = "https",
             port: Optional[int] = None,
-            method: Method = "get") -> str:
+            method: Method = "post") -> str:
         """
             :param endpoint:  The raw endpoint provided by the user
             :type  endpoint:  string
@@ -153,7 +151,7 @@ class Emitter(object):
             If the maximum size has been reached, flushes the buffer.
 
             :param payload:   The name-value pairs for the event
-            :type  payload:   dict(string:\*)
+            :type  payload:   dict(string:\\*)
         """
         with self.lock:
             if self.bytes_queued is not None:
@@ -212,7 +210,7 @@ class Emitter(object):
     def http_get(self, payload: PayloadDict) -> bool:
         """
             :param payload:  The event properties
-            :type  payload:  dict(string:\*)
+            :type  payload:  dict(string:\\*)
         """
         logger.info("Sending GET request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % payload)
@@ -247,7 +245,7 @@ class Emitter(object):
     def send_events(self, evts: PayloadDictList) -> None:
         """
             :param evts: Array of events to be sent
-            :type  evts: list(dict(string:\*))
+            :type  evts: list(dict(string:\\*))
         """
         if len(evts) > 0:
             logger.info("Attempting to send %s events" % len(evts))
@@ -312,7 +310,7 @@ class Emitter(object):
             as `stm` param
 
             :param events: Array of events to be sent
-            :type  events: list(dict(string:\*))
+            :type  events: list(dict(string:\\*))
             :rtype: None
         """
         def update(e: PayloadDict) -> None:
@@ -332,7 +330,7 @@ class AsyncEmitter(Emitter):
             endpoint: str,
             protocol: HttpProtocol = "http",
             port: Optional[int] = None,
-            method: Method = "get",
+            method: Method = "post",
             buffer_size: Optional[int] = None,
             on_success: Optional[SuccessCallback] = None,
             on_failure: Optional[FailureCallback] = None,
