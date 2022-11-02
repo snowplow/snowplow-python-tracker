@@ -52,7 +52,7 @@ class CeleryEmitter(Emitter):
                 endpoint: str,
                 protocol: HttpProtocol = "http",
                 port: Optional[int] = None,
-                method: Method = "get",
+                method: Method = "post",
                 buffer_size: Optional[int] = None,
                 byte_limit: Optional[int] = None) -> None:
             super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, None, None, byte_limit)
