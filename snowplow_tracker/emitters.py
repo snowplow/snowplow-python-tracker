@@ -94,11 +94,10 @@ class Emitter(object):
         self.method = method
 
         if buffer_size is None:
-            if method == 'post':
+            if method == "post":
                 buffer_size = DEFAULT_MAX_LENGTH
             else:
                 buffer_size = 1
-
         self.buffer_size = buffer_size
         self.buffer = []
         self.byte_limit = byte_limit
