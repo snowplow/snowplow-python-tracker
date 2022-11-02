@@ -36,7 +36,7 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-DEFAULT_MAX_LENGTH = 1
+DEFAULT_MAX_LENGTH = 10
 PAYLOAD_DATA_SCHEMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4"
 PROTOCOLS = {"http", "https"}
 METHODS = {"get", "post"}
@@ -68,7 +68,7 @@ class Emitter(object):
             :type  port:        int | None
             :param method:      The HTTP request method. Defaults to post.
             :type  method:      method
-            :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 1.
+            :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
             :type  buffer_size: int | None
             :param on_success:  Callback executed after every HTTP request in a flush has status code 200
                                 Gets passed the number of events flushed.
@@ -94,7 +94,10 @@ class Emitter(object):
         self.method = method
 
         if buffer_size is None:
-            buffer_size = DEFAULT_MAX_LENGTH
+            if method == 'post':
+                buffer_size = DEFAULT_MAX_LENGTH
+            else:
+                buffer_size = 1
 
         self.buffer_size = buffer_size
         self.buffer = []
@@ -345,7 +348,7 @@ class AsyncEmitter(Emitter):
             :type  port:        int | None
             :param method:      The HTTP request method
             :type  method:      method
-            :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 1.
+            :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
             :type  buffer_size: int | None
             :param on_success:  Callback executed after every HTTP request in a flush has status code 200
                                 Gets passed the number of events flushed.
