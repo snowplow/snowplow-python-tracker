@@ -56,7 +56,7 @@ class TestEmitters(unittest.TestCase):
         e = Emitter('0.0.0.0')
         self.assertEqual(e.endpoint, 'https://0.0.0.0/com.snowplowanalytics.snowplow/tp2')
         self.assertEqual(e.method, 'post')
-        self.assertEqual(e.buffer_size, 1)
+        self.assertEqual(e.buffer_size, 10)
         self.assertEqual(e.buffer, [])
         self.assertIsNone(e.byte_limit)
         self.assertIsNone(e.bytes_queued)
