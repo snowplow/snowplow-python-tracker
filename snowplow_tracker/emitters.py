@@ -345,7 +345,7 @@ class AsyncEmitter(Emitter):
             :type  port:        int | None
             :param method:      The HTTP request method
             :type  method:      method
-            :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
+            :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 1.
             :type  buffer_size: int | None
             :param on_success:  Callback executed after every HTTP request in a flush has status code 200
                                 Gets passed the number of events flushed.
