@@ -36,9 +36,9 @@ from snowplow_tracker.redis import redis_emitter
 
 querystrings = [""]
 
-default_emitter = emitters.Emitter("localhost", protocol="http", port=80)
+default_emitter = emitters.Emitter("localhost", protocol="http", port=80, buffer_size=1)
 
-get_emitter = emitters.Emitter("localhost", protocol="http", port=80, method='get', buffer_size=1)
+get_emitter = emitters.Emitter("localhost", protocol="http", port=80, method='get')
 
 default_subject = subject.Subject()
 
@@ -313,6 +313,7 @@ class IntegrationTest(unittest.TestCase):
         callback_failure_queue = []
         callback_emitter = emitters.Emitter(
             "localhost",
+            method='get',
             on_success=lambda x: callback_success_queue.append(x),
             on_failure=lambda x, y: callback_failure_queue.append(x))
         t = tracker.Tracker([callback_emitter], default_subject)
