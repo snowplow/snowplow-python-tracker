@@ -54,9 +54,9 @@ class TestEmitters(unittest.TestCase):
 
     def test_init(self) -> None:
         e = Emitter('0.0.0.0')
-        self.assertEqual(e.endpoint, 'https://0.0.0.0/i')
-        self.assertEqual(e.method, 'get')
-        self.assertEqual(e.buffer_size, 1)
+        self.assertEqual(e.endpoint, 'https://0.0.0.0/com.snowplowanalytics.snowplow/tp2')
+        self.assertEqual(e.method, 'post')
+        self.assertEqual(e.buffer_size, 10)
         self.assertEqual(e.buffer, [])
         self.assertIsNone(e.byte_limit)
         self.assertIsNone(e.bytes_queued)
@@ -70,7 +70,7 @@ class TestEmitters(unittest.TestCase):
         self.assertEqual(e.buffer_size, 10)
 
     def test_init_post(self) -> None:
-        e = Emitter('0.0.0.0', method="post")
+        e = Emitter('0.0.0.0')
         self.assertEqual(e.buffer_size, DEFAULT_MAX_LENGTH)
 
     def test_init_byte_limit(self) -> None:
@@ -83,19 +83,19 @@ class TestEmitters(unittest.TestCase):
 
     def test_as_collector_uri(self) -> None:
         uri = Emitter.as_collector_uri('0.0.0.0')
-        self.assertEqual(uri, 'https://0.0.0.0/i')
-
-    def test_as_collector_uri_post(self) -> None:
-        uri = Emitter.as_collector_uri('0.0.0.0', method="post")
         self.assertEqual(uri, 'https://0.0.0.0/com.snowplowanalytics.snowplow/tp2')
 
+    def test_as_collector_uri_get(self) -> None:
+        uri = Emitter.as_collector_uri('0.0.0.0', method='get')
+        self.assertEqual(uri, 'https://0.0.0.0/i')
+
     def test_as_collector_uri_port(self) -> None:
-        uri = Emitter.as_collector_uri('0.0.0.0', port=9090, method="post")
+        uri = Emitter.as_collector_uri('0.0.0.0', port=9090)
         self.assertEqual(uri, 'https://0.0.0.0:9090/com.snowplowanalytics.snowplow/tp2')
 
     def test_as_collector_uri_http(self) -> None:
         uri = Emitter.as_collector_uri('0.0.0.0', protocol="http")
-        self.assertEqual(uri, 'http://0.0.0.0/i')
+        self.assertEqual(uri, 'http://0.0.0.0/com.snowplowanalytics.snowplow/tp2')
 
     def test_as_collector_uri_empty_string(self) -> None:
         with self.assertRaises(ValueError):
@@ -103,11 +103,11 @@ class TestEmitters(unittest.TestCase):
 
     def test_as_collector_uri_endpoint_protocol(self) -> None:
         uri = Emitter.as_collector_uri("https://0.0.0.0")
-        self.assertEqual(uri, "https://0.0.0.0/i")
+        self.assertEqual(uri, "https://0.0.0.0/com.snowplowanalytics.snowplow/tp2")
 
     def test_as_collector_uri_endpoint_protocol_http(self) -> None:
         uri = Emitter.as_collector_uri("http://0.0.0.0")
-        self.assertEqual(uri, "http://0.0.0.0/i")
+        self.assertEqual(uri, "http://0.0.0.0/com.snowplowanalytics.snowplow/tp2")
         
     @mock.patch('snowplow_tracker.Emitter.flush')
     def test_input_no_flush(self, mok_flush: Any) -> None:
@@ -173,7 +173,7 @@ class TestEmitters(unittest.TestCase):
     def test_input_bytes_post(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
-        e = Emitter('0.0.0.0', method="post")
+        e = Emitter('0.0.0.0')
         nvPairs = {"testString": "test", "testNum": 2.72}
         e.input(nvPairs)
 
@@ -219,7 +219,7 @@ class TestEmitters(unittest.TestCase):
     def test_flush_timer(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
-        e = Emitter('0.0.0.0', method="post", buffer_size=10)
+        e = Emitter('0.0.0.0', buffer_size=10)
         ev_list = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         for i in ev_list:
             e.input(i)
@@ -261,7 +261,7 @@ class TestEmitters(unittest.TestCase):
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
-        e = Emitter('0.0.0.0', method="post", buffer_size=10, on_success=mok_success, on_failure=mok_failure)
+        e = Emitter('0.0.0.0', buffer_size=10, on_success=mok_success, on_failure=mok_failure)
 
         evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         e.send_events(evBuffer)
@@ -274,7 +274,7 @@ class TestEmitters(unittest.TestCase):
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
-        e = Emitter('0.0.0.0', method="post", buffer_size=10, on_success=mok_success, on_failure=mok_failure)
+        e = Emitter('0.0.0.0', buffer_size=10, on_success=mok_success, on_failure=mok_failure)
 
         evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         e.send_events(evBuffer)
@@ -292,7 +292,7 @@ class TestEmitters(unittest.TestCase):
     @mock.patch('snowplow_tracker.emitters.requests.post')
     def test_http_get_connect_timeout_error(self, mok_post_request: Any) -> None:
         mok_post_request.side_effect = ConnectTimeout
-        e = Emitter('0.0.0.0')
+        e = Emitter('0.0.0.0', method='get')
         get_succeeded = e.http_get({"a": "b"})
 
         self.assertFalse(get_succeeded)
@@ -366,7 +366,7 @@ class TestEmitters(unittest.TestCase):
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
-        ae = Emitter('0.0.0.0', method="post", buffer_size=10, on_success=mok_success, on_failure=mok_failure)
+        ae = Emitter('0.0.0.0', buffer_size=10, on_success=mok_success, on_failure=mok_failure)
 
         evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         ae.send_events(evBuffer)
@@ -379,7 +379,7 @@ class TestEmitters(unittest.TestCase):
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
-        ae = Emitter('0.0.0.0', method="post", buffer_size=10, on_success=mok_success, on_failure=mok_failure)
+        ae = Emitter('0.0.0.0', buffer_size=10, on_success=mok_success, on_failure=mok_failure)
 
         evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         ae.send_events(evBuffer)
@@ -403,7 +403,7 @@ class TestEmitters(unittest.TestCase):
         mok_flush.side_effect = mocked_flush
 
         payload = {"unicode": u'\u0107', "alsoAscii": "abc"}
-        ae = AsyncEmitter('0.0.0.0', method="post", buffer_size=2)
+        ae = AsyncEmitter('0.0.0.0', buffer_size=2)
         ae.input(payload)
 
         self.assertEqual(len(ae.buffer), 1)

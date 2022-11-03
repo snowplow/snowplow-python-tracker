@@ -19,7 +19,7 @@ def main():
 
     t = Tracker(e, s)
 
-    print("Sending events to " + collector_url)
+    print("Sending events to " + e.endpoint)
 
     t.track_page_view("https://www.snowplow.io", "Homepage")
     t.track_page_ping("https://www.snowplow.io", "Homepage")
@@ -32,6 +32,7 @@ def main():
         )
     )
     t.track_struct_event("shop", "add-to-basket", None, "pcs", 2)
+    t.flush()
 
 
 if __name__ == "__main__":
