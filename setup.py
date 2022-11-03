@@ -37,7 +37,7 @@ authors_email_str = ", ".join(authors_email_list)
 
 setup(
     name="snowplow-tracker",
-    version="0.11.0",
+    version="0.12.0",
     author=authors_str,
     author_email=authors_email_str,
     packages=[

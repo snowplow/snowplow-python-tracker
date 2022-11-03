@@ -1,3 +1,11 @@
+Version 0.12.0 (2022-11-03)
+---------------------------
+Adds Domain Session ID and Domain Session Index to Subject class (#282) (Thanks to @cpnat)
+Add support for Python 3.11 (#286)
+Change default protocol to HTTPS in the Emitter (#14)
+Change default method to POST in the Emitter (#289)
+Update Docker base image (#283) (Thanks to @cpnat)
+
 Version 0.11.0 (2022-10-06)
 ---------------------------
 Update README file (#264) 
