@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>snowplow_tracker package &mdash; Snowplow Python Tracker 0.11 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>snowplow_tracker package &mdash; Snowplow Python Tracker 0.12 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -64,9 +64,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="modules.html">snowplow_tracker</a> &raquo;</li>
-      <li>snowplow_tracker package</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">snowplow_tracker</a></li>
+      <li class="breadcrumb-item active">snowplow_tracker package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/snowplow_tracker.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -130,7 +130,7 @@
 <span id="snowplow-tracker-emitters-module"></span><h2>snowplow_tracker.emitters module<a class="headerlink" href="#module-snowplow_tracker.emitters" title="Permalink to this headline"></a></h2>
 <dl class="class">
 <dt id="snowplow_tracker.emitters.AsyncEmitter">
-<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">AsyncEmitter</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str, protocol: Literal[http, https] = 'http', port: Optional[int] = None, method: Literal[get, post] = 'get', buffer_size: Optional[int] = None, on_success: Optional[Callable[[List[Dict[str, Any]]], None]] = None, on_failure: Optional[Callable[[int, List[Dict[str, Any]]], None]] = None, thread_count: int = 1, byte_limit: Optional[int] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.AsyncEmitter" title="Permalink to this definition"></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">AsyncEmitter</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str, protocol: Literal[http, https] = 'http', port: Optional[int] = None, method: Literal[get, post] = 'post', buffer_size: Optional[int] = None, on_success: Optional[Callable[[List[Dict[str, Any]]], None]] = None, on_failure: Optional[Callable[[int, List[Dict[str, Any]]], None]] = None, thread_count: int = 1, byte_limit: Optional[int] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.AsyncEmitter" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#snowplow_tracker.emitters.Emitter" title="snowplow_tracker.emitters.Emitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">snowplow_tracker.emitters.Emitter</span></code></a></p>
 <p>Uses threads to send HTTP requests asynchronously</p>
 <dl class="method">
@@ -156,13 +156,13 @@ This is guaranteed to be blocking, not asynchronous.</p>
 
 <dl class="class">
 <dt id="snowplow_tracker.emitters.Emitter">
-<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">Emitter</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str, protocol: Literal[http, https] = 'http', port: Optional[int] = None, method: Literal[get, post] = 'get', buffer_size: Optional[int] = None, on_success: Optional[Callable[[List[Dict[str, Any]]], None]] = None, on_failure: Optional[Callable[[int, List[Dict[str, Any]]], None]] = None, byte_limit: Optional[int] = None, request_timeout: Union[float, Tuple[float, float], None] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.Emitter" title="Permalink to this definition"></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">Emitter</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str, protocol: Literal[http, https] = 'https', port: Optional[int] = None, method: Literal[get, post] = 'post', buffer_size: Optional[int] = None, on_success: Optional[Callable[[List[Dict[str, Any]]], None]] = None, on_failure: Optional[Callable[[int, List[Dict[str, Any]]], None]] = None, byte_limit: Optional[int] = None, request_timeout: Union[float, Tuple[float, float], None] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.Emitter" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Synchronously send Snowplow events to a Snowplow collector
 Supports both GET and POST requests</p>
 <dl class="method">
 <dt id="snowplow_tracker.emitters.Emitter.as_collector_uri">
-<em class="property">static </em><code class="sig-name descname">as_collector_uri</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str</em>, <em class="sig-param">protocol: Literal[http</em>, <em class="sig-param">https] = 'http'</em>, <em class="sig-param">port: Optional[int] = None</em>, <em class="sig-param">method: Literal[get</em>, <em class="sig-param">post] = 'get'</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#snowplow_tracker.emitters.Emitter.as_collector_uri" title="Permalink to this definition"></a></dt>
+<em class="property">static </em><code class="sig-name descname">as_collector_uri</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str</em>, <em class="sig-param">protocol: Literal[http</em>, <em class="sig-param">https] = 'https'</em>, <em class="sig-param">port: Optional[int] = None</em>, <em class="sig-param">method: Literal[get</em>, <em class="sig-param">post] = 'post'</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#snowplow_tracker.emitters.Emitter.as_collector_uri" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -382,6 +382,24 @@ This is guaranteed to be blocking, not asynchronous.</p>
 <dd class="field-even"><p>subject</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="snowplow_tracker.subject.Subject.set_domain_session_id">
+<code class="sig-name descname">set_domain_session_id</code><span class="sig-paren">(</span><em class="sig-param">sid: str</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.subject.Subject<a class="headerlink" href="#snowplow_tracker.subject.Subject.set_domain_session_id" title="Permalink to this definition"></a></dt>
+<dd><p>Set the domain session ID
+:param sid:             Domain session ID
+:type  sid:             string
+:rtype:                 subject</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="snowplow_tracker.subject.Subject.set_domain_session_index">
+<code class="sig-name descname">set_domain_session_index</code><span class="sig-paren">(</span><em class="sig-param">vid: int</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.subject.Subject<a class="headerlink" href="#snowplow_tracker.subject.Subject.set_domain_session_index" title="Permalink to this definition"></a></dt>
+<dd><p>Set the domain session Index
+:param vid:             Domain session Index
+:type vid:              int
+:rtype:                 subject</p>
 </dd></dl>
 
 <dl class="method">
