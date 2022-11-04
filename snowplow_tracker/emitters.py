@@ -51,22 +51,22 @@ class Emitter(object):
     def __init__(
             self,
             endpoint: str,
-            protocol: HttpProtocol = "http",
+            protocol: HttpProtocol = "https",
             port: Optional[int] = None,
-            method: Method = "get",
+            method: Method = "post",
             buffer_size: Optional[int] = None,
             on_success: Optional[SuccessCallback] = None,
             on_failure: Optional[FailureCallback] = None,
             byte_limit: Optional[int] = None,
             request_timeout: Optional[Union[float, Tuple[float, float]]] = None) -> None:
         """
-            :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
+            :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
             :type  endpoint:    string
-            :param protocol:    The protocol to use - http or https. Defaults to http.
+            :param protocol:    The protocol to use - http or https. Defaults to https.
             :type  protocol:    protocol
             :param port:        The collector port to connect to
             :type  port:        int | None
-            :param method:      The HTTP request method
+            :param method:      The HTTP request method. Defaults to post.
             :type  method:      method
             :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
             :type  buffer_size: int | None
@@ -116,9 +116,9 @@ class Emitter(object):
     @staticmethod
     def as_collector_uri(
             endpoint: str,
-            protocol: HttpProtocol = "http",
+            protocol: HttpProtocol = "https",
             port: Optional[int] = None,
-            method: Method = "get") -> str:
+            method: Method = "post") -> str:
         """
             :param endpoint:  The raw endpoint provided by the user
             :type  endpoint:  string
@@ -132,6 +132,11 @@ class Emitter(object):
         """
         if len(endpoint) < 1:
             raise ValueError("No endpoint provided.")
+
+        if endpoint.split("://")[0] in PROTOCOLS:
+            endpoint_arr = endpoint.split("://")
+            protocol = endpoint_arr[0]
+            endpoint = endpoint_arr[1]
 
         if method == "get":
             path = "/i"
@@ -148,7 +153,7 @@ class Emitter(object):
             If the maximum size has been reached, flushes the buffer.
 
             :param payload:   The name-value pairs for the event
-            :type  payload:   dict(string:\*)
+            :type  payload:   dict(string:\\*)
         """
         with self.lock:
             if self.bytes_queued is not None:
@@ -207,7 +212,7 @@ class Emitter(object):
     def http_get(self, payload: PayloadDict) -> bool:
         """
             :param payload:  The event properties
-            :type  payload:  dict(string:\*)
+            :type  payload:  dict(string:\\*)
         """
         logger.info("Sending GET request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % payload)
@@ -242,7 +247,7 @@ class Emitter(object):
     def send_events(self, evts: PayloadDictList) -> None:
         """
             :param evts: Array of events to be sent
-            :type  evts: list(dict(string:\*))
+            :type  evts: list(dict(string:\\*))
         """
         if len(evts) > 0:
             logger.info("Attempting to send %s events" % len(evts))
@@ -307,7 +312,7 @@ class Emitter(object):
             as `stm` param
 
             :param events: Array of events to be sent
-            :type  events: list(dict(string:\*))
+            :type  events: list(dict(string:\\*))
             :rtype: None
         """
         def update(e: PayloadDict) -> None:
@@ -327,7 +332,7 @@ class AsyncEmitter(Emitter):
             endpoint: str,
             protocol: HttpProtocol = "http",
             port: Optional[int] = None,
-            method: Method = "get",
+            method: Method = "post",
             buffer_size: Optional[int] = None,
             on_success: Optional[SuccessCallback] = None,
             on_failure: Optional[FailureCallback] = None,
