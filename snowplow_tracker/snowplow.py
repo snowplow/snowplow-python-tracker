@@ -39,7 +39,7 @@ class Snowplow:
         trackers= {}) -> None:
         """
             :param trackers:         Dictionary of initialized trackers 
-            :type  trackers:         Dictionary | None
+            :type  trackers:         Dictionary | None  
         """
     
         self.trackers = trackers
