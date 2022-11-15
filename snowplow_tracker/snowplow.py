@@ -20,7 +20,7 @@
 # """
 import logging
 from typing import  Optional
-from snowplow_tracker import Tracker, Emitter, subject
+from snowplow_tracker import Tracker, Emitter, subject, EmitterConfiguration
 from snowplow_tracker.typing import JsonEncoderFunction
 
 # Logging
@@ -41,13 +41,13 @@ class Snowplow:
             :param trackers:         Dictionary of initialized trackers 
             :type  trackers:         Dictionary | None  
         """
-    
         self.trackers = trackers
     
-    def create_tracker(self, 
-                        tracker_namespace: str, 
-                        emitter: Emitter = None, 
-                        endpoint: str = None, 
+    @staticmethod
+    def create_tracker( 
+                        namespace: str, 
+                        endpoint: str, 
+                        emitter_config: EmitterConfiguration = None, 
                         appId = None,
                         subject: Optional[subject.Subject] = None,
                         encode_base64: bool = None,
@@ -56,23 +56,35 @@ class Snowplow:
         """
             Create a Snowplow tracker with a tracker_namespace and collector URL
 
-            :param  tracker_namespace:  Name of the tracker
-            :type   tracker_namespace:  String
-            :param  emitter:            Emitters to which events will be sent
-            :type   emitter:            Emitter | None
+            :param  namespace:          Name of the tracker
+            :type   namespace:          String
             :param  endpoint:           The collector URL
             :type   endpoint:           String | None
+            :param  emitter_config:     Emitter configuration
+            :type   emitter_config:     EmitterConfiguration | None
             :param  appId:              Application ID
             :type   appId:              String | None 
         """
-        if emitter is None:
-            if endpoint is None:
-                raise TypeError("Emitter or Collector URL must be parsed")     
-            emitter = Emitter(endpoint)     
+        if endpoint is None:
+            raise TypeError("Emitter or Collector URL must be provided")     
+        
+        emitter = Emitter(
+            endpoint, 
+            buffer_size=emitter_config.buffer_size, 
+            on_success=emitter_config.on_success, 
+            on_failure=emitter_config.on_failure, 
+            byte_limit=emitter_config.byte_limit,
+            request_timeout=emitter_config.request_timeout
+        )     
 
-        tracker = Tracker(emitter, namespace = tracker_namespace, app_id=appId, subject=subject, encode_base64=encode_base64, json_encoder=json_encoder)
-        self.add_tracker(tracker)
-
+        tracker = Tracker(
+            emitter, 
+            namespace = namespace, 
+            app_id=appId, 
+            subject=subject, 
+            encode_base64=encode_base64, 
+            json_encoder=json_encoder
+        )
     def add_tracker(self, tracker: Tracker):
         """
             Add a Snowplow tracker to the Snowplow object
