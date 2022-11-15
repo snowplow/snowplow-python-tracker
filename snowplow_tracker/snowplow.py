@@ -33,26 +33,18 @@ logger.setLevel(logging.INFO)
 Snowplow Class
 """
 class Snowplow:
+    trackers = {}
 
-    def __init__(
-        self,
-        trackers= {}) -> None:
-        """
-            :param trackers:         Dictionary of initialized trackers 
-            :type  trackers:         Dictionary | None  
-        """
-        self.trackers = trackers
-    
     @staticmethod
     def create_tracker( 
-                        namespace: str, 
-                        endpoint: str, 
-                        emitter_config: EmitterConfiguration = None, 
-                        appId = None,
-                        subject: Optional[subject.Subject] = None,
-                        encode_base64: bool = None,
-                        json_encoder: Optional[JsonEncoderFunction] = None
-                    ):
+                namespace: str,
+                endpoint: str,
+                emitter_config: EmitterConfiguration = EmitterConfiguration(), 
+                app_id = None,
+                subject: Optional[subject.Subject] = None,
+                encode_base64: bool = None,
+                json_encoder: Optional[JsonEncoderFunction] = None
+            ):
         """
             Create a Snowplow tracker with a tracker_namespace and collector URL
 
@@ -80,28 +72,32 @@ class Snowplow:
         tracker = Tracker(
             emitter, 
             namespace = namespace, 
-            app_id=appId, 
+            app_id=app_id, 
             subject=subject, 
             encode_base64=encode_base64, 
             json_encoder=json_encoder
         )
-    def add_tracker(self, tracker: Tracker):
+
+        Snowplow.add_tracker(tracker)
+    
+    @classmethod
+    def add_tracker(cls, tracker: Tracker):
         """
             Add a Snowplow tracker to the Snowplow object
 
             :param  tracker:  Tracker object to add to Snowplow
             :type   tracker:  Tracker
         """
-        tracker_name = tracker.standard_nv_pairs['tna']
+        tracker_name = cls.get_tracker_name(tracker)
         
-        if tracker_name in self.trackers.keys():
+        if tracker_name in cls.trackers.keys():
             raise TypeError("Tracker with this namespace already exists")      
         
-        self.trackers[tracker_name] = tracker
+        cls.trackers[tracker_name] = tracker
         logger.info("Tracker with namespace: '" + tracker_name + "' added to Snowplow")
 
-
-    def remove_tracker(self, tracker: Tracker=None, tracker_name:str = None):
+    @classmethod
+    def remove_tracker(cls, tracker: Tracker=None, tracker_name:str = None):
         """
             Remove a Snowplow tracker from the Snowplow object if it exists
 
@@ -112,9 +108,17 @@ class Snowplow:
         """
         if tracker is not None:
             tracker_name = tracker.standard_nv_pairs['tna']
-        self.trackers.pop(tracker_name)
+        cls.trackers.pop(tracker_name)
         logger.info("Tracker with namespace: '" + tracker_name + "' removed from Snowplow")
 
-    def reset(self):
-        self.trackers = {}
+    @classmethod
+    def reset(cls):
+        cls.trackers = {}
+
+    @classmethod
+    def get_tracker_name(cls, tracker: Tracker):
+        return tracker.standard_nv_pairs['tna']
         
+    @classmethod
+    def get_tracker(cls, tracker_name: str):
+        return cls.trackers[tracker_name]
