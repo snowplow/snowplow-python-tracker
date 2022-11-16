@@ -20,8 +20,8 @@
 # """
 import logging
 from typing import  Optional
-from snowplow_tracker import Tracker, Emitter, subject, EmitterConfiguration
-from snowplow_tracker.typing import JsonEncoderFunction
+from snowplow_tracker import Tracker, Emitter, subject, EmitterConfiguration, TrackerConfiguration
+from snowplow_tracker.typing import Method
 
 # Logging
 logging.basicConfig()
@@ -33,35 +33,39 @@ logger.setLevel(logging.INFO)
 Snowplow Class
 """
 class Snowplow:
-    trackers = {}
+    _trackers = {}
 
     @staticmethod
     def create_tracker( 
                 namespace: str,
-                endpoint: str,
+                endpoint: str, 
+                method: Method = "post",
                 emitter_config: EmitterConfiguration = EmitterConfiguration(), 
                 app_id = None,
                 subject: Optional[subject.Subject] = None,
-                encode_base64: bool = None,
-                json_encoder: Optional[JsonEncoderFunction] = None
-            ):
+                tracker_config: TrackerConfiguration = TrackerConfiguration()
+            ) -> Tracker:
         """
-            Create a Snowplow tracker with a tracker_namespace and collector URL
+            Create a Snowplow tracker with a namespace and collector URL
 
             :param  namespace:          Name of the tracker
             :type   namespace:          String
             :param  endpoint:           The collector URL
             :type   endpoint:           String | None
+            :param  method:             The HTTP request method. Defaults to post.
+            :type   method:             method
             :param  emitter_config:     Emitter configuration
             :type   emitter_config:     EmitterConfiguration | None
             :param  appId:              Application ID
             :type   appId:              String | None 
+            :rtype                      Tracker
         """
         if endpoint is None:
             raise TypeError("Emitter or Collector URL must be provided")     
         
         emitter = Emitter(
             endpoint, 
+            method=method,
             buffer_size=emitter_config.buffer_size, 
             on_success=emitter_config.on_success, 
             on_failure=emitter_config.on_failure, 
@@ -74,51 +78,67 @@ class Snowplow:
             namespace = namespace, 
             app_id=app_id, 
             subject=subject, 
-            encode_base64=encode_base64, 
-            json_encoder=json_encoder
+            encode_base64=tracker_config.encode_base64, 
+            json_encoder=tracker_config.json_encoder
         )
 
-        Snowplow.add_tracker(tracker)
+        return Snowplow.add_tracker(tracker)
     
     @classmethod
-    def add_tracker(cls, tracker: Tracker):
+    def add_tracker(cls, tracker: Tracker) -> Tracker:
         """
             Add a Snowplow tracker to the Snowplow object
 
             :param  tracker:  Tracker object to add to Snowplow
             :type   tracker:  Tracker
+            :rtype            Tracker
         """
-        tracker_name = cls.get_tracker_name(tracker)
+        if not isinstance(tracker, Tracker):
+            logger.info("Tracker not provided.")
+            return None
+
+        namespace = tracker.get_namespace()
         
-        if tracker_name in cls.trackers.keys():
+        if namespace in cls._trackers.keys():
             raise TypeError("Tracker with this namespace already exists")      
         
-        cls.trackers[tracker_name] = tracker
-        logger.info("Tracker with namespace: '" + tracker_name + "' added to Snowplow")
+        cls._trackers[namespace] = tracker
+        logger.info("Tracker with namespace: '" + namespace + "' added to Snowplow")
+        return cls._trackers[namespace] 
 
     @classmethod
-    def remove_tracker(cls, tracker: Tracker=None, tracker_name:str = None):
+    def remove_tracker(cls, tracker: Tracker=None, namespace:str = None):
         """
             Remove a Snowplow tracker from the Snowplow object if it exists
 
             :param  tracker:        Tracker object to remove from Snowplow
             :type   tracker:        Tracker | None
-            :param  tracker_name:   Tracker namespace to remove from Snowplow
+            :param  namespace:      Tracker namespace to remove from Snowplow
             :type   tracker:        String | None
         """
         if tracker is not None:
-            tracker_name = tracker.standard_nv_pairs['tna']
-        cls.trackers.pop(tracker_name)
-        logger.info("Tracker with namespace: '" + tracker_name + "' removed from Snowplow")
+            namespace = tracker.get_namespace()
+
+        if not cls._trackers.pop(namespace, False):
+            logger.info("Tracker with namespace: '" + namespace + "' does not exist")
+            return
+        logger.info("Tracker with namespace: '" + namespace + "' removed from Snowplow")
 
     @classmethod
     def reset(cls):
-        cls.trackers = {}
-
+        """
+            Remove all active Snowplow trackers from the Snowplow object
+        """
+        cls._trackers = {}
+      
     @classmethod
-    def get_tracker_name(cls, tracker: Tracker):
-        return tracker.standard_nv_pairs['tna']
-        
-    @classmethod
-    def get_tracker(cls, tracker_name: str):
-        return cls.trackers[tracker_name]
+    def get_tracker(cls, namespace: str) -> Tracker:
+        """
+            Returns a Snowplow tracker from the Snowplow object if it exists
+            :param  namespace:              Snowplow tracker namespace
+            :type   namespace:              string
+            :rtype:                         Tracker
+        """
+        if namespace in cls._trackers.keys():
+            return cls._trackers[namespace]
+        return None
