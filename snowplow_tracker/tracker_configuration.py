@@ -30,3 +30,28 @@ class TrackerConfiguration(object):
         
         self.encode_base64 = encode_base64
         self.json_encoder = json_encoder
+
+    @property
+    def encode_base64(self):
+        """
+        Whether JSONs in the payload should be base-64 encoded. Default is True.
+        """
+        return self._encode_base64
+
+    @encode_base64.setter
+    def encode_base64(self, value):
+        if isinstance(value, bool) or value is None:
+            self._encode_base64 = value
+        else:
+            raise ValueError("encode_base64 must be True or False")    
+        
+    @property
+    def json_encoder(self):
+        """
+        Custom JSON serializer that gets called on non-serializable object.
+        """
+        return self._json_encoder
+
+    @json_encoder.setter
+    def json_encoder(self, value):
+        self._json_encoder = value
