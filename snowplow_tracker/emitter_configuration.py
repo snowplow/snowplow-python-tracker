@@ -66,8 +66,9 @@ class EmitterConfiguration(object):
 
     @buffer_size.setter
     def buffer_size(self, value):
-        if isinstance(value, int) and value < 0:
-            raise ValueError("buffer_size must be greater than 0")    
+        if isinstance(value, int) and value < 0 or value is not None:
+            raise ValueError("buffer_size must be of type int and greater than 0")    
+        
         self._buffer_size = value
 
     @property
@@ -105,9 +106,10 @@ class EmitterConfiguration(object):
 
     @byte_limit.setter
     def byte_limit(self, value):
-        if isinstance(value, int) and value < 0:
-            raise ValueError("byte_limit must be greater than 0")    
-        self._byte_limit = value
+        if isinstance(value, int) and value < 0 or value is not None:
+            raise ValueError("byte_limit must be of type int and greater than 0")
+
+        self._byte_limit = value   
 
     @property
     def request_timeout(self):
@@ -120,6 +122,7 @@ class EmitterConfiguration(object):
 
     @request_timeout.setter
     def request_timeout(self, value):
-        if isinstance(value, int) and value < 0:
-            raise ValueError("request_timeout must be greater than 0")    
-        self._request_timeout = value
+        if isinstance(value, int) and value < 0 or value is not None:
+            raise ValueError("request_timeout must be of type int and greater than 0")
+
+        self._request_timeout = value    
