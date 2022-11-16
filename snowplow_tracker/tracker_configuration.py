@@ -27,6 +27,13 @@ class TrackerConfiguration(object):
             self,
             encode_base64: bool = None,
             json_encoder: Optional[JsonEncoderFunction] = None) -> None:
+        """
+            Configuration for additional tracker configuration options.
+            :param encode_base64:     Whether JSONs in the payload should be base-64 encoded. Default is True.
+            :type  encode_base64:     bool
+            :param json_encoder:      Custom JSON serializer that gets called on non-serializable object.
+            :type  json_encoder:      function | None
+        """
         
         self.encode_base64 = encode_base64
         self.json_encoder = json_encoder
