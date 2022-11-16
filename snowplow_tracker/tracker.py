@@ -793,3 +793,6 @@ class Tracker:
         """
         self.emitters.append(emitter)
         return self
+
+    def get_namespace(self):
+        return self.standard_nv_pairs['tna']
