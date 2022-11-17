@@ -45,7 +45,9 @@ def contracts_enabled() -> bool:
 
 def greater_than(value: float, compared_to: float) -> None:
     if contracts_enabled() and value <= compared_to:
-        raise ValueError("{0} must be greater than {1}.".format(_get_parameter_name(), compared_to))
+        raise ValueError(
+            "{0} must be greater than {1}.".format(_get_parameter_name(), compared_to)
+        )
 
 
 def non_empty(seq: Sized) -> None:
@@ -78,21 +80,26 @@ def _get_parameter_name() -> str:
 
     match = _MATCH_FIRST_PARAMETER_REGEX.search(code)
     if not match:
-        return 'Unnamed parameter'
+        return "Unnamed parameter"
     return match.groups(0)[0]
 
 
 def _check_form_element(element: Dict[str, Any]) -> bool:
     """
-        Helper method to check that dictionary conforms element
-        in sumbit_form and change_form schemas
+    Helper method to check that dictionary conforms element
+    in sumbit_form and change_form schemas
     """
-    all_present = isinstance(element, dict) and 'name' in element and 'value' in element and 'nodeName' in element
+    all_present = (
+        isinstance(element, dict)
+        and "name" in element
+        and "value" in element
+        and "nodeName" in element
+    )
     try:
-        if element['type'] in FORM_TYPES:
+        if element["type"] in FORM_TYPES:
             type_valid = True
         else:
             type_valid = False
     except KeyError:
         type_valid = True
-    return all_present and element['nodeName'] in FORM_NODE_NAMES and type_valid
+    return all_present and element["nodeName"] in FORM_NODE_NAMES and type_valid
