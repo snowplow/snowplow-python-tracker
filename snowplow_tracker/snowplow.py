@@ -118,18 +118,24 @@ class Snowplow:
         return cls._trackers[namespace]
 
     @classmethod
-    def remove_tracker(cls, tracker: Tracker = None, namespace: str = None):
+    def remove_tracker(cls, tracker: Tracker):
         """
         Remove a Snowplow tracker from the Snowplow object if it exists
 
         :param  tracker:        Tracker object to remove from Snowplow
         :type   tracker:        Tracker | None
+        """
+        namespace = tracker.get_namespace()
+        cls.remove_tracker_by_namespace(namespace)
+
+    @classmethod
+    def remove_tracker_by_namespace(cls, namespace: str):
+        """
+        Remove a Snowplow tracker from the Snowplow object using it's namespace if it exists
+
         :param  namespace:      Tracker namespace to remove from Snowplow
         :type   tracker:        String | None
         """
-        if tracker is not None:
-            namespace = tracker.get_namespace()
-
         if not cls._trackers.pop(namespace, False):
             logger.info("Tracker with namespace: '" + namespace + "' does not exist")
             return
