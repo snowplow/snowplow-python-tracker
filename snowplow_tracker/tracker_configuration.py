@@ -26,7 +26,7 @@ from snowplow_tracker.typing import JsonEncoderFunction
 class TrackerConfiguration(object):
     def __init__(
         self,
-        encode_base64: bool = None,
+        encode_base64: Optional[bool] = None,
         json_encoder: Optional[JsonEncoderFunction] = None,
     ) -> None:
         """
@@ -41,26 +41,26 @@ class TrackerConfiguration(object):
         self.json_encoder = json_encoder
 
     @property
-    def encode_base64(self):
+    def encode_base64(self) -> Optional[bool]:
         """
         Whether JSONs in the payload should be base-64 encoded. Default is True.
         """
         return self._encode_base64
 
     @encode_base64.setter
-    def encode_base64(self, value):
+    def encode_base64(self, value: Optional[bool]):
         if isinstance(value, bool) or value is None:
             self._encode_base64 = value
         else:
             raise ValueError("encode_base64 must be True or False")
 
     @property
-    def json_encoder(self):
+    def json_encoder(self) -> Optional[JsonEncoderFunction]:
         """
         Custom JSON serializer that gets called on non-serializable object.
         """
         return self._json_encoder
 
     @json_encoder.setter
-    def json_encoder(self, value):
+    def json_encoder(self, value: Optional[JsonEncoderFunction]):
         self._json_encoder = value
