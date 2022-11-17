@@ -60,32 +60,32 @@ class EmitterConfiguration(object):
         self.request_timeout = request_timeout
 
     @property
-    def buffer_size(self):
+    def buffer_size(self) -> Optional[int]:
         """
         The maximum number of queued events before the buffer is flushed. Default is 10.
         """
         return self._buffer_size
 
     @buffer_size.setter
-    def buffer_size(self, value):
+    def buffer_size(self, value: Optional[int]):
         if isinstance(value, int) and value < 0 or value is not None:
             raise ValueError("buffer_size must be of type int and greater than 0")
 
         self._buffer_size = value
 
     @property
-    def on_success(self):
+    def on_success(self) -> Optional[SuccessCallback]:
         """
         Callback executed after every HTTP request in a flush has status code 200. Gets passed the number of events flushed.
         """
         return self._on_success
 
     @on_success.setter
-    def on_success(self, value):
+    def on_success(self, value: Optional[SuccessCallback]):
         self._on_success = value
 
     @property
-    def on_failure(self):
+    def on_failure(self) -> Optional[FailureCallback]:
         """
         Callback executed if at least one HTTP request in a flush has status code other than 200
                                 Gets passed two arguments:
@@ -96,25 +96,25 @@ class EmitterConfiguration(object):
         return self._on_failure
 
     @on_failure.setter
-    def on_failure(self, value):
+    def on_failure(self, value: Optional[FailureCallback]):
         self._on_failure = value
 
     @property
-    def byte_limit(self):
+    def byte_limit(self) -> Optional[int]:
         """
         The size event list after reaching which queued events will be flushed
         """
         return self._byte_limit
 
     @byte_limit.setter
-    def byte_limit(self, value):
+    def byte_limit(self, value: Optional[int]):
         if isinstance(value, int) and value < 0 or value is not None:
             raise ValueError("byte_limit must be of type int and greater than 0")
 
         self._byte_limit = value
 
     @property
-    def request_timeout(self):
+    def request_timeout(self) -> Optional[Union[float, Tuple[float, float]]]:
         """
         Timeout for the HTTP requests. Can be set either as single float value which
                                      applies to both "connect" AND "read" timeout, or as tuple with two float values
@@ -123,8 +123,5 @@ class EmitterConfiguration(object):
         return self._request_timeout
 
     @request_timeout.setter
-    def request_timeout(self, value):
-        if isinstance(value, int) and value < 0 or value is not None:
-            raise ValueError("request_timeout must be of type int and greater than 0")
-
+    def request_timeout(self, value: Optional[Union[float, Tuple[float, float]]]):
         self._request_timeout = value
