@@ -47,7 +47,7 @@ class Snowplow:
         namespace: str,
         endpoint: str,
         method: Method = "post",
-        app_id=None,
+        app_id: Optional[str] = None,
         subject: Optional[subject.Subject] = None,
         tracker_config: TrackerConfiguration = TrackerConfiguration(),
         emitter_config: EmitterConfiguration = EmitterConfiguration(),
@@ -58,15 +58,17 @@ class Snowplow:
         :param  namespace:          Name of the tracker
         :type   namespace:          String
         :param  endpoint:           The collector URL
-        :type   endpoint:           String | None
+        :type   endpoint:           String
         :param  method:             The HTTP request method. Defaults to post.
         :type   method:             method
         :param  appId:              Application ID
         :type   appId:              String | None
+        :param  subject:            Subject to be tracked
+        :type   subject:            Subject | None
         :param  tracker_config:     Tracker configuration
-        :type   tracker_config:     TrackerConfiguration | None
+        :type   tracker_config:     TrackerConfiguration
         :param  emitter_config:     Emitter configuration
-        :type   emitter_config:     EmitterConfiguration | None
+        :type   emitter_config:     EmitterConfiguration
         :rtype                      Tracker
         """
         if endpoint is None:
