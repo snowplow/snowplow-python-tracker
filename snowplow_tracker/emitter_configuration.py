@@ -68,9 +68,10 @@ class EmitterConfiguration(object):
 
     @buffer_size.setter
     def buffer_size(self, value: Optional[int]):
-        if isinstance(value, int) and value < 0 or value is not None:
-            raise ValueError("buffer_size must be of type int and greater than 0")
-
+        if isinstance(value, int) and value < 0:
+            raise ValueError("buffer_size must greater than 0")
+        if not isinstance(value, int) and value is not None:
+            raise ValueError("buffer_size must be of type int")
         self._buffer_size = value
 
     @property
@@ -108,9 +109,10 @@ class EmitterConfiguration(object):
 
     @byte_limit.setter
     def byte_limit(self, value: Optional[int]):
-        if isinstance(value, int) and value < 0 or value is not None:
-            raise ValueError("byte_limit must be of type int and greater than 0")
-
+        if isinstance(value, int) and value < 0:
+            raise ValueError("byte_limit must greater than 0")
+        if not isinstance(value, int) and value is not None:
+            raise ValueError("byte_limit must be of type int")
         self._byte_limit = value
 
     @property
