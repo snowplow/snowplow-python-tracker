@@ -22,35 +22,37 @@
 from typing import Optional, Union, Tuple
 from snowplow_tracker.typing import SuccessCallback, FailureCallback
 
+
 class EmitterConfiguration(object):
     def __init__(
-            self,
-            buffer_size: Optional[int] = None,
-            on_success: Optional[SuccessCallback] = None,
-            on_failure: Optional[FailureCallback] = None,
-            byte_limit: Optional[int] = None,
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = None) -> None:
+        self,
+        buffer_size: Optional[int] = None,
+        on_success: Optional[SuccessCallback] = None,
+        on_failure: Optional[FailureCallback] = None,
+        byte_limit: Optional[int] = None,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+    ) -> None:
         """
-            Configuration for the emitter that sends events to the Snowplow collector.
-            :param buffer_size:     The maximum number of queued events before the buffer is flushed. Default is 10.
-            :type  buffer_size:     int | None
-            :param on_success:      Callback executed after every HTTP request in a flush has status code 200
-                                    Gets passed the number of events flushed.
-            :type  on_success:      function | None
-            :param on_failure:      Callback executed if at least one HTTP request in a flush has status code other than 200
-                                    Gets passed two arguments:
-                                    1) The number of events which were successfully sent
-                                    2) If method is "post": The unsent data in string form;
-                                       If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
-            :type  on_failure:      function | None
-            :param byte_limit:      The size event list after reaching which queued events will be flushed
-            :type  byte_limit:      int | None
-            :param request_timeout: Timeout for the HTTP requests. Can be set either as single float value which
-                                     applies to both "connect" AND "read" timeout, or as tuple with two float values
-                                     which specify the "connect" and "read" timeouts separately
-            :type request_timeout:  float | tuple | None
+        Configuration for the emitter that sends events to the Snowplow collector.
+        :param buffer_size:     The maximum number of queued events before the buffer is flushed. Default is 10.
+        :type  buffer_size:     int | None
+        :param on_success:      Callback executed after every HTTP request in a flush has status code 200
+                                Gets passed the number of events flushed.
+        :type  on_success:      function | None
+        :param on_failure:      Callback executed if at least one HTTP request in a flush has status code other than 200
+                                Gets passed two arguments:
+                                1) The number of events which were successfully sent
+                                2) If method is "post": The unsent data in string form;
+                                   If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
+        :type  on_failure:      function | None
+        :param byte_limit:      The size event list after reaching which queued events will be flushed
+        :type  byte_limit:      int | None
+        :param request_timeout: Timeout for the HTTP requests. Can be set either as single float value which
+                                 applies to both "connect" AND "read" timeout, or as tuple with two float values
+                                 which specify the "connect" and "read" timeouts separately
+        :type request_timeout:  float | tuple | None
         """
-        
+
         self.buffer_size = buffer_size
         self.on_success = on_success
         self.on_failure = on_failure
@@ -67,8 +69,8 @@ class EmitterConfiguration(object):
     @buffer_size.setter
     def buffer_size(self, value):
         if isinstance(value, int) and value < 0 or value is not None:
-            raise ValueError("buffer_size must be of type int and greater than 0")    
-        
+            raise ValueError("buffer_size must be of type int and greater than 0")
+
         self._buffer_size = value
 
     @property
@@ -109,7 +111,7 @@ class EmitterConfiguration(object):
         if isinstance(value, int) and value < 0 or value is not None:
             raise ValueError("byte_limit must be of type int and greater than 0")
 
-        self._byte_limit = value   
+        self._byte_limit = value
 
     @property
     def request_timeout(self):
@@ -125,4 +127,4 @@ class EmitterConfiguration(object):
         if isinstance(value, int) and value < 0 or value is not None:
             raise ValueError("request_timeout must be of type int and greater than 0")
 
-        self._request_timeout = value    
+        self._request_timeout = value

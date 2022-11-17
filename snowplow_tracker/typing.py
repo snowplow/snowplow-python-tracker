@@ -29,10 +29,29 @@ JsonEncoderFunction = Callable[[Any], Any]
 # tracker
 FORM_NODE_NAMES = {"INPUT", "TEXTAREA", "SELECT"}
 FORM_TYPES = {
-    "button", "checkbox", "color", "date", "datetime",
-    "datetime-local", "email", "file", "hidden", "image", "month",
-    "number", "password", "radio", "range", "reset", "search",
-    "submit", "tel", "text", "time", "url", "week"
+    "button",
+    "checkbox",
+    "color",
+    "date",
+    "datetime",
+    "datetime-local",
+    "email",
+    "file",
+    "hidden",
+    "image",
+    "month",
+    "number",
+    "password",
+    "radio",
+    "range",
+    "reset",
+    "search",
+    "submit",
+    "tel",
+    "text",
+    "time",
+    "url",
+    "week",
 }
 FormNodeName = Literal["INPUT", "TEXTAREA", "SELECT"]
 ElementClasses = Union[List[str], Tuple[str, Any]]
