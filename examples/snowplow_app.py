@@ -36,22 +36,22 @@ def main():
         emitter_config=emitter_config,
     )
 
-    Snowplow.get_tracker("ns").track_page_view("https://www.snowplow.io", "Homepage")
-    Snowplow.get_tracker("ns").track_page_ping("https://www.snowplow.io", "Homepage")
-    Snowplow.get_tracker("ns").track_link_click("https://www.snowplow.io/about")
-    Snowplow.get_tracker("ns").track_page_view("https://www.snowplow.io/about", "About")
+    tracker = Snowplow.get_tracker("ns")
 
-    Snowplow.get_tracker("ns").track_self_describing_event(
+    tracker.track_page_view("https://www.snowplow.io", "Homepage")
+    tracker.track_page_ping("https://www.snowplow.io", "Homepage")
+    tracker.track_link_click("https://www.snowplow.io/about")
+    tracker.track_page_view("https://www.snowplow.io/about", "About")
+
+    tracker.track_self_describing_event(
         SelfDescribingJson(
             "iglu:com.snowplowanalytics.snowplow/link_click/jsonschema/1-0-1",
             {"targetUrl": "example.com"},
         )
     )
-    Snowplow.get_tracker("ns").track_struct_event(
-        "shop", "add-to-basket", None, "pcs", 2
-    )
+    tracker.track_struct_event("shop", "add-to-basket", None, "pcs", 2)
 
-    Snowplow.get_tracker("ns").flush()
+    tracker.flush()
 
 
 if __name__ == "__main__":
