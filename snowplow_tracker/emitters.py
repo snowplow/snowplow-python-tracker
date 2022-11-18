@@ -203,14 +203,13 @@ class Emitter(object):
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
 
-    def http_post(self, data: str) -> bool:
+    def http_post(self, data: str) -> int:
         """
         :param data:  The array of JSONs to be sent
         :type  data:  string
         """
         logger.info("Sending POST request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % data)
-        post_succeeded = False
         try:
             r = requests.post(
                 self.endpoint,
@@ -218,35 +217,26 @@ class Emitter(object):
                 headers={"Content-Type": "application/json; charset=utf-8"},
                 timeout=self.request_timeout,
             )
-            post_succeeded = Emitter.is_good_status_code(r.status_code)
-            getattr(logger, "info" if post_succeeded else "warning")(
-                "POST request finished with status code: " + str(r.status_code)
-            )
         except requests.RequestException as e:
             logger.warning(e)
 
-        return post_succeeded
+        return r.status_code
 
-    def http_get(self, payload: PayloadDict) -> bool:
+    def http_get(self, payload: PayloadDict) -> int:
         """
         :param payload:  The event properties
         :type  payload:  dict(string:\\*)
         """
         logger.info("Sending GET request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % payload)
-        get_succeeded = False
         try:
             r = requests.get(
                 self.endpoint, params=payload, timeout=self.request_timeout
             )
-            get_succeeded = Emitter.is_good_status_code(r.status_code)
-            getattr(logger, "info" if get_succeeded else "warning")(
-                "GET request finished with status code: " + str(r.status_code)
-            )
         except requests.RequestException as e:
             logger.warning(e)
 
-        return get_succeeded
+        return r.status_code
 
     def sync_flush(self) -> None:
         """
@@ -264,7 +254,7 @@ class Emitter(object):
         :type  status_code:  int
         :rtype:              bool
         """
-        return 200 <= status_code < 400
+        return 200 <= status_code < 300
 
     def send_events(self, evts: PayloadDictList) -> None:
         """
@@ -280,7 +270,8 @@ class Emitter(object):
 
             if self.method == "post":
                 data = SelfDescribingJson(PAYLOAD_DATA_SCHEMA, evts).to_string()
-                request_succeeded = self.http_post(data)
+                status_code = self.http_post(data)
+                request_succeeded = Emitter.is_good_status_code(status_code)
                 if request_succeeded:
                     success_events += evts
                 else:
@@ -288,7 +279,9 @@ class Emitter(object):
 
             elif self.method == "get":
                 for evt in evts:
-                    request_succeeded = self.http_get(evt)
+                    status_code = self.http_get(evt)
+                    request_succeeded = Emitter.is_good_status_code(status_code)
+
                     if request_succeeded:
                         success_events += [evt]
                     else:
