@@ -68,6 +68,7 @@ class Emitter(object):
         on_failure: Optional[FailureCallback] = None,
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        retry_codes={},
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -120,6 +121,8 @@ class Emitter(object):
         self.lock = threading.RLock()
 
         self.timer = None
+
+        self.retry_codes = retry_codes
 
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
@@ -336,6 +339,15 @@ class Emitter(object):
 
         for event in events:
             update(event)
+
+    def should_retry(self, status_code: int) -> bool:
+        if Emitter.is_good_status_code(status_code):
+            return False
+
+        if status_code in self.retry_codes.keys():
+            return self.retry_codes[status_code]
+
+        return not status_code in [400, 401, 403, 410, 422]
 
 
 class AsyncEmitter(Emitter):
