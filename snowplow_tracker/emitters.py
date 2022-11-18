@@ -24,6 +24,7 @@ import logging
 import time
 import threading
 import requests
+import random
 from typing import Optional, Union, Tuple
 from queue import Queue
 
@@ -69,6 +70,7 @@ class Emitter(object):
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
         retry_codes={},
+        max_retry=60,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -123,6 +125,8 @@ class Emitter(object):
         self.timer = None
 
         self.retry_codes = retry_codes
+        self.max_retry = max_retry
+        self.retry_delay = 0
 
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
@@ -348,6 +352,10 @@ class Emitter(object):
             return self.retry_codes[status_code]
 
         return not status_code in [400, 401, 403, 410, 422]
+
+    def set_retry_delay(self) -> None:
+        random_noise = random.random()
+        self.retry_delay = min(self.retry_delay * 2 + random_noise, self.max_retry)
 
 
 class AsyncEmitter(Emitter):
