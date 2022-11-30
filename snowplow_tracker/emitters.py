@@ -185,7 +185,7 @@ class Emitter(object):
                 self.buffer.append(payload)
 
             if self.reached_limit():
-                self.flush()
+                threading.Timer(self.retry_delay, self.flush())
 
     def reached_limit(self) -> bool:
         """
@@ -205,8 +205,12 @@ class Emitter(object):
         Sends all events in the buffer to the collector.
         """
         with self.lock:
-            self.send_events(self.buffer)
+            if self.timer:
+                return
+
+            send_events = self.buffer
             self.buffer = []
+            self.send_events(send_events)
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
 
@@ -319,6 +323,7 @@ class Emitter(object):
 
         # Repeatable create new timer
         if flush_now:
+            self.timer = None
             self.flush()
         self.timer = threading.Timer(timeout, self.set_flush_timer, [timeout, True])
         self.timer.daemon = True
