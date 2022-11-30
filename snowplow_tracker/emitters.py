@@ -357,6 +357,8 @@ class Emitter(object):
         random_noise = random.random()
         self.retry_delay = min(self.retry_delay * 2 + random_noise, self.max_retry)
 
+    def reset_retry_delay(self) -> None:
+        self.retry_delay = 0
 
 class AsyncEmitter(Emitter):
     """
