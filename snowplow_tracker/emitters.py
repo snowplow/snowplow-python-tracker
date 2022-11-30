@@ -299,6 +299,11 @@ class Emitter(object):
             if self.on_failure is not None and len(failure_events) > 0:
                 self.on_failure(len(success_events), failure_events)
 
+            if self.should_retry(status_code):
+                self.set_retry_delay()
+                self.failure_retry(failure_events)
+            else:
+                self.reset_retry_delay()
         else:
             logger.info("Skipping flush since buffer is empty")
 
