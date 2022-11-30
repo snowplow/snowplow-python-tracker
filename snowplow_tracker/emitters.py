@@ -360,6 +360,14 @@ class Emitter(object):
     def reset_retry_delay(self) -> None:
         self.retry_delay = 0
 
+    def failure_retry(self, failed_events):
+        for event in failed_events:
+            if not event in self.buffer:
+                self.buffer.append(event)
+
+        self.set_flush_timer(self.retry_delay)
+
+
 class AsyncEmitter(Emitter):
     """
     Uses threads to send HTTP requests asynchronously
