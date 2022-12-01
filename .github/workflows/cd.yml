@@ -21,8 +21,8 @@ jobs:
     - name: Get tag and tracker versions
       id: version
       run: |
-        echo :: "{name}=TAG_VERSION::${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
-        echo "##["{name}=PYTHON_TRACKER_VERSION" >> $GITHUB_OUTPUT;]$(python setup.py --version)"
+        echo "TAG_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+        echo "PYTHON_TRACKER_VERSION=$(python setup.py --version)" >> $GITHUB_OUTPUT
 
     - name: Fail if version mismatch
       if: ${{ steps.version.outputs.TAG_VERSION != steps.version.outputs.PYTHON_TRACKER_VERSION }}
