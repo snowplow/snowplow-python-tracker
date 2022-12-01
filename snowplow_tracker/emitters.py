@@ -357,6 +357,13 @@ class Emitter(object):
             update(event)
 
     def should_retry(self, status_code: int) -> bool:
+        """
+            Checks if a request should be retried
+            
+            :param  status_code: Response status code
+            :type   status_code: int
+            :rtype: bool
+        """
         if Emitter.is_good_status_code(status_code):
             return False
 
@@ -366,13 +373,25 @@ class Emitter(object):
         return not status_code in [400, 401, 403, 410, 422]
 
     def set_retry_delay(self) -> None:
+        """
+            Sets a delay to retry failed events
+        """
         random_noise = random.random()
         self.retry_delay = min(self.retry_delay * 2 + random_noise, self.max_retry)
 
     def reset_retry_delay(self) -> None:
+        """
+            Resets retry delay to 0
+        """
         self.retry_delay = 0
 
-    def failure_retry(self, failed_events):
+    def failure_retry(self, failed_events) -> None:
+        """
+            Adds failed events back to the buffer to retry 
+
+            :param  failed_events: List of failed events
+            :type   List
+        """
         for event in failed_events:
             if not event in self.buffer:
                 self.buffer.append(event)
