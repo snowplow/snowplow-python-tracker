@@ -235,7 +235,7 @@ class TestEmitters(unittest.TestCase):
         e.set_flush_timer(3)
         self.assertEqual(len(e.buffer), 3)
         time.sleep(5)
-        self.assertEqual(mok_flush.call_count, 1)
+        self.assertGreaterEqual(mok_flush.call_count, 1)
 
     @mock.patch('snowplow_tracker.Emitter.http_get')
     def test_send_events_get_success(self, mok_http_get: Any) -> None:
