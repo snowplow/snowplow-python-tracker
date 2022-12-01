@@ -46,6 +46,14 @@ def mocked_http_success(*args: Any) -> bool:
 def mocked_http_failure(*args: Any) -> bool:
     return False
 
+def mocked_http_response_success(*args: Any) -> int:
+    return 200
+
+def mocked_http_response_failure(*args: Any) -> int:
+    return 400
+
+def mocked_http_response_failure_retry(*args: Any) -> int:
+    return 500
 
 class TestEmitters(unittest.TestCase):
 
