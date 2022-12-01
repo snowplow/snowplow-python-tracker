@@ -230,6 +230,7 @@ class Emitter(object):
             )
         except requests.RequestException as e:
             logger.warning(e)
+            return -1
 
         return r.status_code
 
@@ -246,6 +247,7 @@ class Emitter(object):
             )
         except requests.RequestException as e:
             logger.warning(e)
+            return -1
 
         return r.status_code
 
