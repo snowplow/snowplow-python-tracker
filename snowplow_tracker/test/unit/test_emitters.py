@@ -239,7 +239,7 @@ class TestEmitters(unittest.TestCase):
 
     @mock.patch('snowplow_tracker.Emitter.http_get')
     def test_send_events_get_success(self, mok_http_get: Any) -> None:
-        mok_http_get.side_effect = mocked_http_success
+        mok_http_get.side_effect = mocked_http_response_success
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
@@ -252,7 +252,7 @@ class TestEmitters(unittest.TestCase):
 
     @mock.patch('snowplow_tracker.Emitter.http_get')
     def test_send_events_get_failure(self, mok_http_get: Any) -> None:
-        mok_http_get.side_effect = mocked_http_failure
+        mok_http_get.side_effect = mocked_http_response_failure
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
@@ -265,7 +265,7 @@ class TestEmitters(unittest.TestCase):
 
     @mock.patch('snowplow_tracker.Emitter.http_post')
     def test_send_events_post_success(self, mok_http_post: Any) -> None:
-        mok_http_post.side_effect = mocked_http_success
+        mok_http_post.side_effect = mocked_http_response_success
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
@@ -278,7 +278,7 @@ class TestEmitters(unittest.TestCase):
 
     @mock.patch('snowplow_tracker.Emitter.http_post')
     def test_send_events_post_failure(self, mok_http_post: Any) -> None:
-        mok_http_post.side_effect = mocked_http_failure
+        mok_http_post.side_effect = mocked_http_response_failure
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
@@ -293,7 +293,8 @@ class TestEmitters(unittest.TestCase):
     def test_http_post_connect_timeout_error(self, mok_post_request: Any) -> None:
         mok_post_request.side_effect = ConnectTimeout
         e = Emitter('0.0.0.0')
-        post_succeeded = e.http_post("dummy_string")
+        response = e.http_post("dummy_string")
+        post_succeeded = Emitter.is_good_status_code(response)
 
         self.assertFalse(post_succeeded)
 
@@ -301,8 +302,8 @@ class TestEmitters(unittest.TestCase):
     def test_http_get_connect_timeout_error(self, mok_post_request: Any) -> None:
         mok_post_request.side_effect = ConnectTimeout
         e = Emitter('0.0.0.0', method='get')
-        get_succeeded = e.http_get({"a": "b"})
-
+        response = e.http_get({"a": "b"})
+        get_succeeded = Emitter.is_good_status_code(response)
         self.assertFalse(get_succeeded)
 
     ###
@@ -344,7 +345,7 @@ class TestEmitters(unittest.TestCase):
 
     @mock.patch('snowplow_tracker.Emitter.http_get')
     def test_async_send_events_get_success(self, mok_http_get: Any) -> None:
-        mok_http_get.side_effect = mocked_http_success
+        mok_http_get.side_effect = mocked_http_response_success
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
@@ -357,7 +358,7 @@ class TestEmitters(unittest.TestCase):
 
     @mock.patch('snowplow_tracker.Emitter.http_get')
     def test_async_send_events_get_failure(self, mok_http_get: Any) -> None:
-        mok_http_get.side_effect = mocked_http_failure
+        mok_http_get.side_effect = mocked_http_response_failure
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
@@ -370,7 +371,7 @@ class TestEmitters(unittest.TestCase):
 
     @mock.patch('snowplow_tracker.Emitter.http_post')
     def test_async_send_events_post_success(self, mok_http_post: Any) -> None:
-        mok_http_post.side_effect = mocked_http_success
+        mok_http_post.side_effect = mocked_http_response_success
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
@@ -383,7 +384,7 @@ class TestEmitters(unittest.TestCase):
 
     @mock.patch('snowplow_tracker.Emitter.http_post')
     def test_async_send_events_post_failure(self, mok_http_post: Any) -> None:
-        mok_http_post.side_effect = mocked_http_failure
+        mok_http_post.side_effect = mocked_http_response_failure
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
