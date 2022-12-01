@@ -417,3 +417,35 @@ class TestEmitters(unittest.TestCase):
 
         self.assertEqual(len(ae.buffer), 1)
         self.assertDictEqual(payload, ae.buffer[0])
+
+    @mock.patch('snowplow_tracker.Emitter.http_post')
+    def test_send_events_post_retry(self, mok_http_post: Any) -> None:
+        mok_http_post.side_effect = mocked_http_response_failure_retry
+        mok_success = mock.Mock(return_value="success mocked")
+        mok_failure = mock.Mock(return_value="failure mocked")
+
+        e = Emitter('0.0.0.0', buffer_size=10, on_success=mok_success, on_failure=mok_failure)
+        evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
+        e.send_events(evBuffer)
+        
+        mok_http_post.side_effect = mocked_http_response_success
+        time.sleep(5)
+
+        mok_failure.assert_called_with(0, evBuffer)
+        mok_success.assert_called_with(evBuffer)
+
+    @mock.patch('snowplow_tracker.Emitter.http_get')
+    def test_send_events_get_retry(self, mok_http_get: Any) -> None:
+        mok_http_get.side_effect = mocked_http_response_failure_retry
+        mok_success = mock.Mock(return_value="success mocked")
+        mok_failure = mock.Mock(return_value="failure mocked")
+
+        e = Emitter('0.0.0.0', method='get', buffer_size=1, on_success=mok_success, on_failure=mok_failure)
+        evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
+        e.send_events(evBuffer)
+        
+        mok_http_get.side_effect = mocked_http_response_success
+        time.sleep(5)
+
+        mok_failure.assert_called_with(0, evBuffer)
+        mok_success.assert_called_with(evBuffer)
