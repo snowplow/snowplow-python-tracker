@@ -193,6 +193,7 @@ class Emitter(object):
                 self.buffer.append(payload)
 
             if self.reached_limit():
+                self.flush()
                 threading.Timer(self.retry_delay, self.flush())
 
     def reached_limit(self) -> bool:
@@ -271,7 +272,7 @@ class Emitter(object):
         This is guaranteed to be blocking, not asynchronous.
         """
         logger.debug("Starting synchronous flush...")
-        Emitter.flush(self)
+        Emitter._flush_now(self)
         logger.info("Finished synchronous flush")
 
     @staticmethod
