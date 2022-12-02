@@ -340,7 +340,11 @@ class Emitter(object):
         # Repeatable create new timer
         if flush_now:
             self.timer = None
-            self.flush()
+            self._flush_now()
+        
+        if self.timer is not None:
+            return 
+
         self.timer = threading.Timer(timeout, self.set_flush_timer, [timeout, True])
         self.timer.daemon = True
         self.timer.start()
