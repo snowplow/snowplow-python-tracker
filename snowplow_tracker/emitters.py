@@ -64,11 +64,12 @@ class Emitter(object):
         protocol: HttpProtocol = "https",
         port: Optional[int] = None,
         method: Method = "post",
-        buffer_size: Optional[int] = None,
+        batch_size: Optional[int] = None,
         on_success: Optional[SuccessCallback] = None,
         on_failure: Optional[FailureCallback] = None,
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        max_retry_delay_seconds: int =60,
         buffer_capacity: int =10000,
     ) -> None:
         """
@@ -80,8 +81,8 @@ class Emitter(object):
         :type  port:        int | None
         :param method:      The HTTP request method. Defaults to post.
         :type  method:      method
-        :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
-        :type  buffer_size: int | None
+        :param batch_size:  The maximum number of queued events before the buffer is flushed. Default is 10.
+        :type  batch_size:  int | None
         :param on_success:  Callback executed after every HTTP request in a flush has status code 200
                             Gets passed the number of events flushed.
         :type  on_success:  function | None
@@ -110,15 +111,15 @@ class Emitter(object):
 
         self.method = method
 
-        if buffer_size is None:
+        if batch_size is None:
             if method == "post":
-                buffer_size = DEFAULT_MAX_LENGTH
+                batch_size = DEFAULT_MAX_LENGTH
             else:
-                buffer_size = 1
+                batch_size = 1
         
-        if buffer_size > buffer_capacity:
-            buffer_size = buffer_capacity
-        self.buffer_size = buffer_size
+        if batch_size > buffer_capacity:
+            batch_size = buffer_capacity
+        self.batch_size = batch_size
         self.buffer = []
         self.byte_limit = byte_limit
         self.bytes_queued = None if byte_limit is None else 0
@@ -201,11 +202,11 @@ class Emitter(object):
         :rtype: bool
         """
         if self.byte_limit is None:
-            return len(self.buffer) >= self.buffer_size
+            return len(self.buffer) >= self.batch_size
         else:
             return (self.bytes_queued or 0) >= self.byte_limit or len(
                 self.buffer
-            ) >= self.buffer_size
+            ) >= self.batch_size
 
     def flush(self) -> None:
         """
@@ -416,7 +417,7 @@ class AsyncEmitter(Emitter):
         protocol: HttpProtocol = "http",
         port: Optional[int] = None,
         method: Method = "post",
-        buffer_size: Optional[int] = None,
+        batch_size: Optional[int] = None,
         on_success: Optional[SuccessCallback] = None,
         on_failure: Optional[FailureCallback] = None,
         thread_count: int = 1,
@@ -431,8 +432,8 @@ class AsyncEmitter(Emitter):
         :type  port:        int | None
         :param method:      The HTTP request method
         :type  method:      method
-        :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
-        :type  buffer_size: int | None
+        :param batch_size: The maximum number of queued events before the buffer is flushed. Default is 10.
+        :type  batch_size: int | None
         :param on_success:  Callback executed after every HTTP request in a flush has status code 200
                             Gets passed the number of events flushed.
         :type  on_success:  function | None
@@ -452,7 +453,7 @@ class AsyncEmitter(Emitter):
             protocol,
             port,
             method,
-            buffer_size,
+            batch_size,
             on_success,
             on_failure,
             byte_limit,
