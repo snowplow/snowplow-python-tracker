@@ -223,7 +223,7 @@ class TestEmitters(unittest.TestCase):
             reduced = reduced and "stm" in ev.keys() and ev["stm"] == "1618358402000"
         self.assertTrue(reduced)
 
-    @mock.patch('snowplow_tracker.Emitter.flush')
+    @mock.patch('snowplow_tracker.Emitter._flush_now')
     def test_flush_timer(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 
