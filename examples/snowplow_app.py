@@ -18,7 +18,7 @@ def main():
 
     collector_url = get_url_from_args()
     # Configure Emitter
-    emitter_config = EmitterConfiguration(buffer_size=5)
+    emitter_config = EmitterConfiguration(batch_size=5)
 
     # Configure Tracker
     tracker_config = TrackerConfiguration(encode_base64=True)
