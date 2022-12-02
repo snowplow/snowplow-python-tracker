@@ -69,7 +69,7 @@ class Emitter(object):
         on_failure: Optional[FailureCallback] = None,
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
-        max_retry_delay_seconds=60,
+        buffer_capacity: int =10000,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -99,6 +99,9 @@ class Emitter(object):
         :type request_timeout:  float | tuple | None
         :param max_retry_delay_seconds:     Set the maximum time between attempts to send failed events to the collector. Default 60 seconds
         :type max_retry_delay_seconds:      int
+        :param buffer_capacity: The default buffer capacity is 10 000 events.
+                                When the buffer is full (due to network outage), new events are lost.
+        :type buffer_capacity: int 
         """
         one_of(protocol, PROTOCOLS)
         one_of(method, METHODS)
@@ -112,6 +115,9 @@ class Emitter(object):
                 buffer_size = DEFAULT_MAX_LENGTH
             else:
                 buffer_size = 1
+        
+        if buffer_size > buffer_capacity:
+            buffer_size = buffer_capacity
         self.buffer_size = buffer_size
         self.buffer = []
         self.byte_limit = byte_limit
@@ -128,6 +134,7 @@ class Emitter(object):
         self.max_retry_delay_seconds = max_retry_delay_seconds
         self.retry_delay = 0
 
+        self.buffer_capacity = buffer_capacity
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
     @staticmethod
@@ -390,11 +397,13 @@ class Emitter(object):
             :type   List
         """
         for event in failed_events:
-            if not event in self.buffer:
+            if not event in self.buffer and not self.buffer_capacity_reached():
                 self.buffer.append(event)
 
         self.set_flush_timer(self.retry_delay)
 
+    def buffer_capacity_reached(self):
+        return len(self.buffer) >= self.buffer_capacity
 
 class AsyncEmitter(Emitter):
     """
