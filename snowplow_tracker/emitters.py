@@ -212,7 +212,8 @@ class Emitter(object):
         """
         Sends all events in the buffer to the collector.
         """
-        with self.lock:
+    def _flush_now(self) -> None:
+         with self.lock:
             if self.timer:
                 return
 
