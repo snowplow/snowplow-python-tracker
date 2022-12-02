@@ -436,7 +436,7 @@ class AsyncEmitter(Emitter):
         buffer_capacity: int =10000,
     ) -> None:
         """
-        :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
+        :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
         :type  endpoint:    string
         :param protocol:    The protocol to use - http or https. Defaults to http.
         :type  protocol:    protocol
