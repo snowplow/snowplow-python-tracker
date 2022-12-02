@@ -31,6 +31,7 @@ class EmitterConfiguration(object):
         on_failure: Optional[FailureCallback] = None,
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        buffer_capacity: Optional[int] = None
     ) -> None:
         """
         Configuration for the emitter that sends events to the Snowplow collector.
@@ -58,6 +59,7 @@ class EmitterConfiguration(object):
         self.on_failure = on_failure
         self.byte_limit = byte_limit
         self.request_timeout = request_timeout
+        self.buffer_capacity = buffer_capacity
 
     @property
     def batch_size(self) -> Optional[int]:
@@ -127,3 +129,19 @@ class EmitterConfiguration(object):
     @request_timeout.setter
     def request_timeout(self, value: Optional[Union[float, Tuple[float, float]]]):
         self._request_timeout = value
+
+    @property
+    def buffer_capacity(self) -> Optional[int]:
+        """
+        The maximum capacity of the event buffer. The default buffer capacity is 10 000 events.
+                                When the buffer is full new events are lost.
+        """
+        return self._buffer_capacity
+
+    @buffer_capacity.setter
+    def buffer_capacity(self, value: Optional[int]):
+        if isinstance(value, int) and value < 0:
+            raise ValueError("buffer_capacity must greater than 0")
+        if not isinstance(value, int) and value is not None:
+            raise ValueError("buffer_capacity must be of type int")
+        self._buffer_capacity = value
