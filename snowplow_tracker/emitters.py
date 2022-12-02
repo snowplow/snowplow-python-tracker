@@ -212,6 +212,11 @@ class Emitter(object):
         """
         Sends all events in the buffer to the collector.
         """
+        if self.retry_delay > 0:
+            self.set_flush_timer(self.retry_delay)
+        else:
+            self._flush_now()
+
     def _flush_now(self) -> None:
          with self.lock:
             if self.timer:
