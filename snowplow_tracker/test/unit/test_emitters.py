@@ -469,7 +469,7 @@ class TestEmitters(unittest.TestCase):
         mok_success = mock.Mock(return_value="success mocked")
         mok_failure = mock.Mock(return_value="failure mocked")
 
-        e = Emitter('0.0.0.0', method='get', batch_sizebatch_size=1, on_success=mok_success, on_failure=mok_failure)
+        e = Emitter('0.0.0.0', method='get', batch_size=1, on_success=mok_success, on_failure=mok_failure)
         evBuffer = [{"a": "aa"}, {"b": "bb"}, {"c": "cc"}]
         e.send_events(evBuffer)
         
