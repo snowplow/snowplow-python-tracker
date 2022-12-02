@@ -100,8 +100,8 @@ class Emitter(object):
         :type request_timeout:  float | tuple | None
         :param max_retry_delay_seconds:     Set the maximum time between attempts to send failed events to the collector. Default 60 seconds
         :type max_retry_delay_seconds:      int
-        :param buffer_capacity: The default buffer capacity is 10 000 events.
-                                When the buffer is full (due to network outage), new events are lost.
+        :param buffer_capacity: The maximum capacity of the event buffer. The default buffer capacity is 10 000 events.
+                                When the buffer is full new events are lost.
         :type buffer_capacity: int 
         """
         one_of(protocol, PROTOCOLS)
