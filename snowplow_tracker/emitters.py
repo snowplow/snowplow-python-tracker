@@ -432,6 +432,8 @@ class AsyncEmitter(Emitter):
         on_failure: Optional[FailureCallback] = None,
         thread_count: int = 1,
         byte_limit: Optional[int] = None,
+        max_retry_delay_seconds: int =60,
+        buffer_capacity: int =10000,
     ) -> None:
         """
         :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
@@ -457,6 +459,11 @@ class AsyncEmitter(Emitter):
         :type  thread_count: int
         :param byte_limit:  The size event list after reaching which queued events will be flushed
         :type  byte_limit:  int | None
+        :param max_retry_delay_seconds:     Set the maximum time between attempts to send failed events to the collector. Default 60 seconds
+        :type max_retry_delay_seconds:      int
+        :param buffer_capacity: The maximum capacity of the event buffer. The default buffer capacity is 10,000 events.
+                                When the buffer is full new events are lost.
+        :type buffer_capacity: int 
         """
         super(AsyncEmitter, self).__init__(
             endpoint,
@@ -467,6 +474,8 @@ class AsyncEmitter(Emitter):
             on_success,
             on_failure,
             byte_limit,
+            max_retry_delay_seconds,
+            buffer_capacity
         )
         self.queue = Queue()
         for i in range(thread_count):
