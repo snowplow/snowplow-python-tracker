@@ -69,8 +69,7 @@ class Emitter(object):
         on_failure: Optional[FailureCallback] = None,
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
-        retry_codes={},
-        max_retry=60,
+        max_retry_delay_seconds=60,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -98,6 +97,8 @@ class Emitter(object):
                                  applies to both "connect" AND "read" timeout, or as tuple with two float values
                                  which specify the "connect" and "read" timeouts separately
         :type request_timeout:  float | tuple | None
+        :param max_retry_delay_seconds:     Set the maximum time between attempts to send failed events to the collector. Default 60 seconds
+        :type max_retry_delay_seconds:      int
         """
         one_of(protocol, PROTOCOLS)
         one_of(method, METHODS)
@@ -124,8 +125,7 @@ class Emitter(object):
 
         self.timer = None
 
-        self.retry_codes = retry_codes
-        self.max_retry = max_retry
+        self.max_retry_delay_seconds = max_retry_delay_seconds
         self.retry_delay = 0
 
         logger.info("Emitter initialized with endpoint " + self.endpoint)
@@ -377,7 +377,7 @@ class Emitter(object):
             Sets a delay to retry failed events
         """
         random_noise = random.random()
-        self.retry_delay = min(self.retry_delay * 2 + random_noise, self.max_retry)
+        self.retry_delay = min(self.retry_delay * 2 + random_noise, self.max_retry_delay_seconds)
 
     def reset_retry_delay(self) -> None:
         """
