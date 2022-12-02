@@ -367,9 +367,6 @@ class Emitter(object):
         if Emitter.is_good_status_code(status_code):
             return False
 
-        if status_code in self.retry_codes.keys():
-            return self.retry_codes[status_code]
-
         return not status_code in [400, 401, 403, 410, 422]
 
     def set_retry_delay(self) -> None:
