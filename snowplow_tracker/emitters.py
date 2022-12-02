@@ -194,7 +194,7 @@ class Emitter(object):
 
             if self.reached_limit():
                 self.flush()
-                threading.Timer(self.retry_delay, self.flush())
+                # threading.Timer(self.retry_delay, self.flush())
 
     def reached_limit(self) -> bool:
         """
