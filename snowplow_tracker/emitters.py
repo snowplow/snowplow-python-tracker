@@ -131,6 +131,7 @@ class Emitter(object):
         self.lock = threading.RLock()
 
         self.timer = None
+        self.retry_timer = None
 
         self.max_retry_delay_seconds = max_retry_delay_seconds
         self.retry_delay = 0
@@ -327,9 +328,9 @@ class Emitter(object):
         else:
             logger.info("Skipping flush since buffer is empty")
 
-    def set_flush_timer(self, timeout: float, flush_now: bool = False) -> None:
+    def _set_retry_timer(self, timeout: float, flush_now: bool = False) -> None:
         """
-        Set an interval at which the buffer will be flushed
+        Set an interval at which failed events will be retried
 
         :param timeout:   interval in seconds
         :type  timeout:   int | float
@@ -339,11 +340,16 @@ class Emitter(object):
 
         # Repeatable create new timer
         if flush_now:
-            self.timer = None
+            self.retry_timer = None
             self._flush_now()
+            return
         
-        if self.timer is not None:
+        if self.retry_timer is not None:
             return 
+
+        self.timer = threading.Timer(timeout, self._set_retry_timer, [timeout, True])
+        self.timer.daemon = True
+        self.timer.start()
 
     def set_flush_timer(self, timeout: float, flush_now: bool = False) -> None:
         """
@@ -423,7 +429,7 @@ class Emitter(object):
             if not event in self.buffer and not self.buffer_capacity_reached():
                 self.buffer.append(event)
 
-        self.set_flush_timer(self.retry_delay)
+        self._set_retry_timer(self.retry_delay)
 
     def buffer_capacity_reached(self):
         return len(self.buffer) >= self.buffer_capacity
