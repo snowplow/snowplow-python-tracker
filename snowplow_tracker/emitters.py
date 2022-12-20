@@ -365,7 +365,7 @@ class Emitter(object):
 
         # Repeatable create new timer
         if flush_now:
-            self.flush()
+            self._flush_now()
         self.timer = threading.Timer(timeout, self.set_flush_timer, [timeout, True])
         self.timer.daemon = True
         self.timer.start()
