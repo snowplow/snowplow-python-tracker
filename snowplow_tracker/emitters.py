@@ -341,7 +341,6 @@ class Emitter(object):
         :type  flush_now: bool
         """
 
-        # Repeatable create new timer
         if flush_now:
             self.retry_timer = None
             self._flush_now()
@@ -349,10 +348,11 @@ class Emitter(object):
         
         if self.retry_timer is not None:
             return 
-
-        self.timer = threading.Timer(timeout, self._set_retry_timer, [timeout, True])
-        self.timer.daemon = True
-        self.timer.start()
+        
+        # Create new timer
+        self.retry_timer = threading.Timer(timeout, self._set_retry_timer, [timeout, True])
+        self.retry_timer.daemon = True
+        self.retry_timer.start()
 
     def set_flush_timer(self, timeout: float, flush_now: bool = False) -> None:
         """
