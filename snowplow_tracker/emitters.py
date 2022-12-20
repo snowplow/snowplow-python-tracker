@@ -345,6 +345,18 @@ class Emitter(object):
         if self.timer is not None:
             return 
 
+    def set_flush_timer(self, timeout: float, flush_now: bool = False) -> None:
+        """
+            Set an interval at which the buffer will be flushed
+            :param timeout:   interval in seconds
+            :type  timeout:   int | float
+            :param flush_now: immediately flush buffer
+            :type  flush_now: bool
+        """
+
+        # Repeatable create new timer
+        if flush_now:
+            self.flush()
         self.timer = threading.Timer(timeout, self.set_flush_timer, [timeout, True])
         self.timer.daemon = True
         self.timer.start()
