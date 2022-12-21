@@ -365,7 +365,7 @@ class Emitter(object):
 
         # Repeatable create new timer
         if flush_now:
-            self._flush_now()
+            self.flush()
         self.timer = threading.Timer(timeout, self.set_flush_timer, [timeout, True])
         self.timer.daemon = True
         self.timer.start()
@@ -506,7 +506,7 @@ class AsyncEmitter(Emitter):
 
     def sync_flush(self) -> None:
         while True:
-            self.flush()
+            self._flush_now()
             self.queue.join()
             if len(self.buffer) < 1:
                 break
