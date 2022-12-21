@@ -325,7 +325,7 @@ class Emitter(object):
 
             if self.should_retry(status_code):
                 self.set_retry_delay()
-                self.failure_retry(failure_events)
+                self._retry_failed_events(failure_events)
             else:
                 self.reset_retry_delay()
         else:
@@ -395,7 +395,7 @@ class Emitter(object):
         for event in events:
             update(event)
 
-    def should_retry(self, status_code: int) -> bool:
+    def _should_retry(self, status_code: int) -> bool:
         """
             Checks if a request should be retried
             
@@ -408,20 +408,20 @@ class Emitter(object):
 
         return not status_code in [400, 401, 403, 410, 422]
 
-    def set_retry_delay(self) -> None:
+    def _set_retry_delay(self) -> None:
         """
             Sets a delay to retry failed events
         """
         random_noise = random.random()
         self.retry_delay = min(self.retry_delay * 2 + random_noise, self.max_retry_delay_seconds)
 
-    def reset_retry_delay(self) -> None:
+    def _reset_retry_delay(self) -> None:
         """
             Resets retry delay to 0
         """
         self.retry_delay = 0
 
-    def failure_retry(self, failed_events) -> None:
+    def _retry_failed_events(self, failed_events) -> None:
         """
             Adds failed events back to the buffer to retry 
 
@@ -434,7 +434,7 @@ class Emitter(object):
 
         self._set_retry_timer(self.retry_delay)
 
-    def buffer_capacity_reached(self):
+    def _buffer_capacity_reached(self):
         return len(self.buffer) >= self.buffer_capacity
 
 class AsyncEmitter(Emitter):
