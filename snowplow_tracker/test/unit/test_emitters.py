@@ -70,7 +70,7 @@ class TestEmitters(unittest.TestCase):
         self.assertIsNone(e.bytes_queued)
         self.assertIsNone(e.on_success)
         self.assertIsNone(e.on_failure)
-        self.assertIsNone(e.timer)
+        self.assertFalse(e.timer.is_active())
         self.assertIsNone(e.request_timeout)
 
     def test_init_batch_size(self) -> None:
@@ -223,7 +223,7 @@ class TestEmitters(unittest.TestCase):
             reduced = reduced and "stm" in ev.keys() and ev["stm"] == "1618358402000"
         self.assertTrue(reduced)
 
-    @mock.patch('snowplow_tracker.Emitter._flush_now')
+    @mock.patch('snowplow_tracker.Emitter.flush')
     def test_flush_timer(self, mok_flush: Any) -> None:
         mok_flush.side_effect = mocked_flush
 

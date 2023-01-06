@@ -69,8 +69,8 @@ class Emitter(object):
         on_failure: Optional[FailureCallback] = None,
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
-        max_retry_delay_seconds: int =60,
-        buffer_capacity: int =10000,
+        max_retry_delay_seconds: int = 60,
+        buffer_capacity: int = 10000,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -130,8 +130,8 @@ class Emitter(object):
 
         self.lock = threading.RLock()
 
-        self.timer = None
-        self.retry_timer = None
+        self.timer = FlushTimer(emitter=self, repeating=True)
+        self.retry_timer = FlushTimer(emitter=self, repeating=False)
 
         self.max_retry_delay_seconds = max_retry_delay_seconds
         self.retry_delay = 0
@@ -214,17 +214,8 @@ class Emitter(object):
         Sends all events in the buffer to the collector.
         """
         with self.lock:
-            delay = self.retry_delay
-
-        if delay > 0:
-            return
-        else:
-            self._flush_now()
-
-    def _flush_now(self) -> None:
-         with self.lock:
-            
-            self._cancel_retry_timer()
+            if self.retry_timer.is_active():
+                return
 
             send_events = self.buffer
             self.buffer = []
@@ -275,7 +266,7 @@ class Emitter(object):
         This is guaranteed to be blocking, not asynchronous.
         """
         logger.debug("Starting synchronous flush...")
-        Emitter._flush_now(self)
+        self.flush()
         logger.info("Finished synchronous flush")
 
     @staticmethod
@@ -331,52 +322,28 @@ class Emitter(object):
         else:
             logger.info("Skipping flush since buffer is empty")
 
-    def _set_retry_timer(self, timeout: float, flush_now: bool = False) -> None:
+    def _set_retry_timer(self, timeout: float) -> None:
         """
         Set an interval at which failed events will be retried
 
         :param timeout:   interval in seconds
         :type  timeout:   int | float
-        :param flush_now: immediately flush buffer
-        :type  flush_now: bool
         """
+        self.retry_timer.start(timeout=timeout)
 
-        if flush_now:
-            self._cancel_retry_timer()
-            self._flush_now()
-            return
-        
-        if self.retry_timer is not None:
-            return 
-        
-        # Create new timer
-        self.retry_timer = threading.Timer(timeout, self._set_retry_timer, [timeout, True])
-        self.retry_timer.daemon = True
-        self.retry_timer.start()
-
-    def set_flush_timer(self, timeout: float, flush_now: bool = False) -> None:
+    def set_flush_timer(self, timeout: float) -> None:
         """
             Set an interval at which the buffer will be flushed
             :param timeout:   interval in seconds
             :type  timeout:   int | float
-            :param flush_now: immediately flush buffer
-            :type  flush_now: bool
         """
-
-        # Repeatable create new timer
-        if flush_now:
-            self.flush()
-        self.timer = threading.Timer(timeout, self.set_flush_timer, [timeout, True])
-        self.timer.daemon = True
-        self.timer.start()
+        self.timer.start(timeout=timeout)
 
     def cancel_flush_timer(self) -> None:
         """
         Abort automatic async flushing
         """
-
-        if self.timer is not None:
-            self.timer.cancel()
+        self.timer.cancel()
 
     @staticmethod
     def attach_sent_timestamp(events: PayloadDictList) -> None:
@@ -406,7 +373,7 @@ class Emitter(object):
         if Emitter.is_good_status_code(status_code):
             return False
 
-        return not status_code in [400, 401, 403, 410, 422]
+        return status_code not in [400, 401, 403, 410, 422]
 
     def _set_retry_delay(self) -> None:
         """
@@ -446,8 +413,7 @@ class Emitter(object):
         """
             Cancels a retry timer
         """
-        if self.retry_timer is not None:
-            self.retry_timer = None
+        self.retry_timer.cancel()
 
 
 class AsyncEmitter(Emitter):
@@ -466,8 +432,8 @@ class AsyncEmitter(Emitter):
         on_failure: Optional[FailureCallback] = None,
         thread_count: int = 1,
         byte_limit: Optional[int] = None,
-        max_retry_delay_seconds: int =60,
-        buffer_capacity: int =10000,
+        max_retry_delay_seconds: int = 60,
+        buffer_capacity: int = 10000,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -519,7 +485,7 @@ class AsyncEmitter(Emitter):
 
     def sync_flush(self) -> None:
         while True:
-            self._flush_now()
+            self.flush()
             self.queue.join()
             if len(self.buffer) < 1:
                 break
@@ -540,3 +506,47 @@ class AsyncEmitter(Emitter):
             evts = self.queue.get()
             self.send_events(evts)
             self.queue.task_done()
+
+
+class FlushTimer(object):
+    """
+    Internal class used by the Emitter to schedule flush calls for later.
+    """
+
+    def __init__(self, emitter: Emitter, repeating: bool):
+        self.emitter = emitter
+        self.repeating = repeating
+        self.timer: Optional[threading.Timer] = None
+        self.lock = threading.RLock()
+
+    def start(self, timeout: float) -> bool:
+        with self.lock:
+            if self.timer is not None:
+                return False
+            else:
+                self._schedule_timer(timeout=timeout)
+                return True
+
+    def cancel(self) -> None:
+        with self.lock:
+            if self.timer is not None:
+                self.timer.cancel()
+                self.timer = None
+
+    def is_active(self) -> bool:
+        with self.lock:
+            return self.timer is not None
+
+    def _fire(self, timeout: float) -> None:
+        with self.lock:
+            if self.repeating:
+                self._schedule_timer(timeout)
+            else:
+                self.timer = None
+
+        self.emitter.flush()
+
+    def _schedule_timer(self, timeout: float) -> None:
+        self.timer = threading.Timer(timeout, self._fire, [timeout])
+        self.timer.daemon = True
+        self.timer.start()
