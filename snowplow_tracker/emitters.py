@@ -217,13 +217,13 @@ class Emitter(object):
             delay = self.retry_delay
 
         if delay > 0:
-            self.set_flush_timer(delay)
+            return
         else:
             self._flush_now()
 
     def _flush_now(self) -> None:
          with self.lock:
-            if self.timer:
+            if self.retry_timer:
                 return
 
             send_events = self.buffer
