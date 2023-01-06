@@ -223,8 +223,8 @@ class Emitter(object):
 
     def _flush_now(self) -> None:
          with self.lock:
-            if self.retry_timer:
-                return
+            
+            self._cancel_retry_timer()
 
             send_events = self.buffer
             self.buffer = []
