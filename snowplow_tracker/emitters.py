@@ -342,7 +342,7 @@ class Emitter(object):
         """
 
         if flush_now:
-            self.retry_timer = None
+            self._cancel_retry_timer()
             self._flush_now()
             return
         
@@ -441,6 +441,14 @@ class Emitter(object):
             :rtype: bool 
         """
         return len(self.buffer) >= self.buffer_capacity
+
+    def _cancel_retry_timer(self) -> None:
+        """
+            Cancels a retry timer
+        """
+        if self.retry_timer is not None:
+            self.retry_timer = None
+
 
 class AsyncEmitter(Emitter):
     """
