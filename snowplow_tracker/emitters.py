@@ -24,6 +24,7 @@ import logging
 import time
 import threading
 import requests
+import random
 from typing import Optional, Union, Tuple
 from queue import Queue
 
@@ -63,11 +64,13 @@ class Emitter(object):
         protocol: HttpProtocol = "https",
         port: Optional[int] = None,
         method: Method = "post",
-        buffer_size: Optional[int] = None,
+        batch_size: Optional[int] = None,
         on_success: Optional[SuccessCallback] = None,
         on_failure: Optional[FailureCallback] = None,
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        max_retry_delay_seconds: int = 60,
+        buffer_capacity: int = 10000,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -78,8 +81,8 @@ class Emitter(object):
         :type  port:        int | None
         :param method:      The HTTP request method. Defaults to post.
         :type  method:      method
-        :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
-        :type  buffer_size: int | None
+        :param batch_size:  The maximum number of queued events before the buffer is flushed. Default is 10.
+        :type  batch_size:  int | None
         :param on_success:  Callback executed after every HTTP request in a flush has status code 200
                             Gets passed the number of events flushed.
         :type  on_success:  function | None
@@ -95,6 +98,11 @@ class Emitter(object):
                                  applies to both "connect" AND "read" timeout, or as tuple with two float values
                                  which specify the "connect" and "read" timeouts separately
         :type request_timeout:  float | tuple | None
+        :param max_retry_delay_seconds:     Set the maximum time between attempts to send failed events to the collector. Default 60 seconds
+        :type max_retry_delay_seconds:      int
+        :param buffer_capacity: The maximum capacity of the event buffer. The default buffer capacity is 10 000 events.
+                                When the buffer is full new events are lost.
+        :type buffer_capacity: int 
         """
         one_of(protocol, PROTOCOLS)
         one_of(method, METHODS)
@@ -103,12 +111,15 @@ class Emitter(object):
 
         self.method = method
 
-        if buffer_size is None:
+        if batch_size is None:
             if method == "post":
-                buffer_size = DEFAULT_MAX_LENGTH
+                batch_size = DEFAULT_MAX_LENGTH
             else:
-                buffer_size = 1
-        self.buffer_size = buffer_size
+                batch_size = 1
+        
+        if batch_size > buffer_capacity:
+            batch_size = buffer_capacity
+        self.batch_size = batch_size
         self.buffer = []
         self.byte_limit = byte_limit
         self.bytes_queued = None if byte_limit is None else 0
@@ -119,8 +130,13 @@ class Emitter(object):
 
         self.lock = threading.RLock()
 
-        self.timer = None
+        self.timer = FlushTimer(emitter=self, repeating=True)
+        self.retry_timer = FlushTimer(emitter=self, repeating=False)
 
+        self.max_retry_delay_seconds = max_retry_delay_seconds
+        self.retry_delay = 0
+
+        self.buffer_capacity = buffer_capacity
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
     @staticmethod
@@ -187,30 +203,33 @@ class Emitter(object):
         :rtype: bool
         """
         if self.byte_limit is None:
-            return len(self.buffer) >= self.buffer_size
+            return len(self.buffer) >= self.batch_size
         else:
             return (self.bytes_queued or 0) >= self.byte_limit or len(
                 self.buffer
-            ) >= self.buffer_size
+            ) >= self.batch_size
 
     def flush(self) -> None:
         """
         Sends all events in the buffer to the collector.
         """
         with self.lock:
-            self.send_events(self.buffer)
+            if self.retry_timer.is_active():
+                return
+
+            send_events = self.buffer
             self.buffer = []
+            self.send_events(send_events)
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
 
-    def http_post(self, data: str) -> bool:
+    def http_post(self, data: str) -> int:
         """
         :param data:  The array of JSONs to be sent
         :type  data:  string
         """
         logger.info("Sending POST request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % data)
-        post_succeeded = False
         try:
             r = requests.post(
                 self.endpoint,
@@ -218,35 +237,28 @@ class Emitter(object):
                 headers={"Content-Type": "application/json; charset=utf-8"},
                 timeout=self.request_timeout,
             )
-            post_succeeded = Emitter.is_good_status_code(r.status_code)
-            getattr(logger, "info" if post_succeeded else "warning")(
-                "POST request finished with status code: " + str(r.status_code)
-            )
         except requests.RequestException as e:
             logger.warning(e)
+            return -1
 
-        return post_succeeded
+        return r.status_code
 
-    def http_get(self, payload: PayloadDict) -> bool:
+    def http_get(self, payload: PayloadDict) -> int:
         """
         :param payload:  The event properties
         :type  payload:  dict(string:\\*)
         """
         logger.info("Sending GET request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % payload)
-        get_succeeded = False
         try:
             r = requests.get(
                 self.endpoint, params=payload, timeout=self.request_timeout
             )
-            get_succeeded = Emitter.is_good_status_code(r.status_code)
-            getattr(logger, "info" if get_succeeded else "warning")(
-                "GET request finished with status code: " + str(r.status_code)
-            )
         except requests.RequestException as e:
             logger.warning(e)
+            return -1
 
-        return get_succeeded
+        return r.status_code
 
     def sync_flush(self) -> None:
         """
@@ -254,7 +266,7 @@ class Emitter(object):
         This is guaranteed to be blocking, not asynchronous.
         """
         logger.debug("Starting synchronous flush...")
-        Emitter.flush(self)
+        self.flush()
         logger.info("Finished synchronous flush")
 
     @staticmethod
@@ -264,7 +276,7 @@ class Emitter(object):
         :type  status_code:  int
         :rtype:              bool
         """
-        return 200 <= status_code < 400
+        return 200 <= status_code < 300
 
     def send_events(self, evts: PayloadDictList) -> None:
         """
@@ -280,7 +292,8 @@ class Emitter(object):
 
             if self.method == "post":
                 data = SelfDescribingJson(PAYLOAD_DATA_SCHEMA, evts).to_string()
-                request_succeeded = self.http_post(data)
+                status_code = self.http_post(data)
+                request_succeeded = Emitter.is_good_status_code(status_code)
                 if request_succeeded:
                     success_events += evts
                 else:
@@ -288,7 +301,9 @@ class Emitter(object):
 
             elif self.method == "get":
                 for evt in evts:
-                    request_succeeded = self.http_get(evt)
+                    status_code = self.http_get(evt)
+                    request_succeeded = Emitter.is_good_status_code(status_code)
+
                     if request_succeeded:
                         success_events += [evt]
                     else:
@@ -299,33 +314,36 @@ class Emitter(object):
             if self.on_failure is not None and len(failure_events) > 0:
                 self.on_failure(len(success_events), failure_events)
 
+            if self._should_retry(status_code):
+                self._set_retry_delay()
+                self._retry_failed_events(failure_events)
+            else:
+                self._reset_retry_delay()
         else:
             logger.info("Skipping flush since buffer is empty")
 
-    def set_flush_timer(self, timeout: float, flush_now: bool = False) -> None:
+    def _set_retry_timer(self, timeout: float) -> None:
         """
-        Set an interval at which the buffer will be flushed
+        Set an interval at which failed events will be retried
 
         :param timeout:   interval in seconds
         :type  timeout:   int | float
-        :param flush_now: immediately flush buffer
-        :type  flush_now: bool
         """
+        self.retry_timer.start(timeout=timeout)
 
-        # Repeatable create new timer
-        if flush_now:
-            self.flush()
-        self.timer = threading.Timer(timeout, self.set_flush_timer, [timeout, True])
-        self.timer.daemon = True
-        self.timer.start()
+    def set_flush_timer(self, timeout: float) -> None:
+        """
+            Set an interval at which the buffer will be flushed
+            :param timeout:   interval in seconds
+            :type  timeout:   int | float
+        """
+        self.timer.start(timeout=timeout)
 
     def cancel_flush_timer(self) -> None:
         """
         Abort automatic async flushing
         """
-
-        if self.timer is not None:
-            self.timer.cancel()
+        self.timer.cancel()
 
     @staticmethod
     def attach_sent_timestamp(events: PayloadDictList) -> None:
@@ -344,6 +362,59 @@ class Emitter(object):
         for event in events:
             update(event)
 
+    def _should_retry(self, status_code: int) -> bool:
+        """
+            Checks if a request should be retried
+            
+            :param  status_code: Response status code
+            :type   status_code: int
+            :rtype: bool
+        """
+        if Emitter.is_good_status_code(status_code):
+            return False
+
+        return status_code not in [400, 401, 403, 410, 422]
+
+    def _set_retry_delay(self) -> None:
+        """
+            Sets a delay to retry failed events
+        """
+        random_noise = random.random()
+        self.retry_delay = min(self.retry_delay * 2 + random_noise, self.max_retry_delay_seconds)
+
+    def _reset_retry_delay(self) -> None:
+        """
+            Resets retry delay to 0
+        """
+        self.retry_delay = 0
+
+    def _retry_failed_events(self, failed_events) -> None:
+        """
+            Adds failed events back to the buffer to retry 
+
+            :param  failed_events: List of failed events
+            :type   List
+        """
+        for event in failed_events:
+            if not event in self.buffer and not self._buffer_capacity_reached():
+                self.buffer.append(event)
+
+        self._set_retry_timer(self.retry_delay)
+
+    def _buffer_capacity_reached(self) -> bool:
+        """
+            Returns true if buffer capacity is reached
+
+            :rtype: bool 
+        """
+        return len(self.buffer) >= self.buffer_capacity
+
+    def _cancel_retry_timer(self) -> None:
+        """
+            Cancels a retry timer
+        """
+        self.retry_timer.cancel()
+
 
 class AsyncEmitter(Emitter):
     """
@@ -356,14 +427,16 @@ class AsyncEmitter(Emitter):
         protocol: HttpProtocol = "http",
         port: Optional[int] = None,
         method: Method = "post",
-        buffer_size: Optional[int] = None,
+        batch_size: Optional[int] = None,
         on_success: Optional[SuccessCallback] = None,
         on_failure: Optional[FailureCallback] = None,
         thread_count: int = 1,
         byte_limit: Optional[int] = None,
+        max_retry_delay_seconds: int = 60,
+        buffer_capacity: int = 10000,
     ) -> None:
         """
-        :param endpoint:    The collector URL. Don't include "http://" - this is done automatically.
+        :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
         :type  endpoint:    string
         :param protocol:    The protocol to use - http or https. Defaults to http.
         :type  protocol:    protocol
@@ -371,8 +444,8 @@ class AsyncEmitter(Emitter):
         :type  port:        int | None
         :param method:      The HTTP request method
         :type  method:      method
-        :param buffer_size: The maximum number of queued events before the buffer is flushed. Default is 10.
-        :type  buffer_size: int | None
+        :param batch_size: The maximum number of queued events before the buffer is flushed. Default is 10.
+        :type  batch_size: int | None
         :param on_success:  Callback executed after every HTTP request in a flush has status code 200
                             Gets passed the number of events flushed.
         :type  on_success:  function | None
@@ -386,16 +459,23 @@ class AsyncEmitter(Emitter):
         :type  thread_count: int
         :param byte_limit:  The size event list after reaching which queued events will be flushed
         :type  byte_limit:  int | None
+        :param max_retry_delay_seconds:     Set the maximum time between attempts to send failed events to the collector. Default 60 seconds
+        :type max_retry_delay_seconds:      int
+        :param buffer_capacity: The maximum capacity of the event buffer. The default buffer capacity is 10,000 events.
+                                When the buffer is full new events are lost.
+        :type buffer_capacity: int 
         """
         super(AsyncEmitter, self).__init__(
             endpoint,
             protocol,
             port,
             method,
-            buffer_size,
+            batch_size,
             on_success,
             on_failure,
             byte_limit,
+            max_retry_delay_seconds,
+            buffer_capacity
         )
         self.queue = Queue()
         for i in range(thread_count):
@@ -426,3 +506,47 @@ class AsyncEmitter(Emitter):
             evts = self.queue.get()
             self.send_events(evts)
             self.queue.task_done()
+
+
+class FlushTimer(object):
+    """
+    Internal class used by the Emitter to schedule flush calls for later.
+    """
+
+    def __init__(self, emitter: Emitter, repeating: bool):
+        self.emitter = emitter
+        self.repeating = repeating
+        self.timer: Optional[threading.Timer] = None
+        self.lock = threading.RLock()
+
+    def start(self, timeout: float) -> bool:
+        with self.lock:
+            if self.timer is not None:
+                return False
+            else:
+                self._schedule_timer(timeout=timeout)
+                return True
+
+    def cancel(self) -> None:
+        with self.lock:
+            if self.timer is not None:
+                self.timer.cancel()
+                self.timer = None
+
+    def is_active(self) -> bool:
+        with self.lock:
+            return self.timer is not None
+
+    def _fire(self, timeout: float) -> None:
+        with self.lock:
+            if self.repeating:
+                self._schedule_timer(timeout)
+            else:
+                self.timer = None
+
+        self.emitter.flush()
+
+    def _schedule_timer(self, timeout: float) -> None:
+        self.timer = threading.Timer(timeout, self._fire, [timeout])
+        self.timer.daemon = True
+        self.timer.start()

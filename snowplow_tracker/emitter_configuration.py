@@ -26,16 +26,17 @@ from snowplow_tracker.typing import SuccessCallback, FailureCallback
 class EmitterConfiguration(object):
     def __init__(
         self,
-        buffer_size: Optional[int] = None,
+        batch_size: Optional[int] = None,
         on_success: Optional[SuccessCallback] = None,
         on_failure: Optional[FailureCallback] = None,
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        buffer_capacity: Optional[int] = None
     ) -> None:
         """
         Configuration for the emitter that sends events to the Snowplow collector.
-        :param buffer_size:     The maximum number of queued events before the buffer is flushed. Default is 10.
-        :type  buffer_size:     int | None
+        :param batch_size:     The maximum number of queued events before the buffer is flushed. Default is 10.
+        :type  batch_size:     int | None
         :param on_success:      Callback executed after every HTTP request in a flush has status code 200
                                 Gets passed the number of events flushed.
         :type  on_success:      function | None
@@ -53,26 +54,27 @@ class EmitterConfiguration(object):
         :type request_timeout:  float | tuple | None
         """
 
-        self.buffer_size = buffer_size
+        self.batch_size = batch_size
         self.on_success = on_success
         self.on_failure = on_failure
         self.byte_limit = byte_limit
         self.request_timeout = request_timeout
+        self.buffer_capacity = buffer_capacity
 
     @property
-    def buffer_size(self) -> Optional[int]:
+    def batch_size(self) -> Optional[int]:
         """
         The maximum number of queued events before the buffer is flushed. Default is 10.
         """
-        return self._buffer_size
+        return self._batch_size
 
-    @buffer_size.setter
-    def buffer_size(self, value: Optional[int]):
+    @batch_size.setter
+    def batch_size(self, value: Optional[int]):
         if isinstance(value, int) and value < 0:
-            raise ValueError("buffer_size must greater than 0")
+            raise ValueError("batch_size must greater than 0")
         if not isinstance(value, int) and value is not None:
-            raise ValueError("buffer_size must be of type int")
-        self._buffer_size = value
+            raise ValueError("batch_size must be of type int")
+        self._batch_size = value
 
     @property
     def on_success(self) -> Optional[SuccessCallback]:
@@ -127,3 +129,19 @@ class EmitterConfiguration(object):
     @request_timeout.setter
     def request_timeout(self, value: Optional[Union[float, Tuple[float, float]]]):
         self._request_timeout = value
+
+    @property
+    def buffer_capacity(self) -> Optional[int]:
+        """
+        The maximum capacity of the event buffer. The default buffer capacity is 10 000 events.
+                                When the buffer is full new events are lost.
+        """
+        return self._buffer_capacity
+
+    @buffer_capacity.setter
+    def buffer_capacity(self, value: Optional[int]):
+        if isinstance(value, int) and value < 0:
+            raise ValueError("buffer_capacity must greater than 0")
+        if not isinstance(value, int) and value is not None:
+            raise ValueError("buffer_capacity must be of type int")
+        self._buffer_capacity = value

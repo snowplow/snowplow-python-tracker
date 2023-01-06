@@ -77,7 +77,7 @@ class Snowplow:
         emitter = Emitter(
             endpoint,
             method=method,
-            buffer_size=emitter_config.buffer_size,
+            batch_size=emitter_config.batch_size,
             on_success=emitter_config.on_success,
             on_failure=emitter_config.on_failure,
             byte_limit=emitter_config.byte_limit,

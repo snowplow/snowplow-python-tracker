@@ -36,7 +36,7 @@ from snowplow_tracker.redis import redis_emitter
 
 querystrings = [""]
 
-default_emitter = emitters.Emitter("localhost", protocol="http", port=80, buffer_size=1)
+default_emitter = emitters.Emitter("localhost", protocol="http", port=80, batch_size=1)
 
 get_emitter = emitters.Emitter("localhost", protocol="http", port=80, method='get')
 
@@ -333,7 +333,7 @@ class IntegrationTest(unittest.TestCase):
             self.assertEqual(request["data"][0][key], expected_fields[key])
 
     def test_post_batched(self) -> None:
-        default_emitter = emitters.Emitter("localhost", protocol="http", port=80, buffer_size=2)
+        default_emitter = emitters.Emitter("localhost", protocol="http", port=80, batch_size=2)
         t = tracker.Tracker(default_emitter, default_subject)
         with HTTMock(pass_post_response_content):
             t.track_struct_event("Test", "A")
@@ -343,7 +343,7 @@ class IntegrationTest(unittest.TestCase):
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
     def test_timestamps(self) -> None:
-        emitter = emitters.Emitter("localhost", protocol="http", port=80, buffer_size=3)
+        emitter = emitters.Emitter("localhost", protocol="http", port=80, batch_size=3)
         t = tracker.Tracker([emitter], default_subject)
         with HTTMock(pass_post_response_content):
             t.track_page_view("localhost", "stamp0", None, tstamp=None)
@@ -363,7 +363,7 @@ class IntegrationTest(unittest.TestCase):
             self.assertEqual(request["data"][i].get("stm"), expected_timestamps[i]["stm"])
 
     def test_bytelimit(self) -> None:
-        default_emitter = emitters.Emitter("localhost", protocol="http", port=80, buffer_size=5, byte_limit=420)
+        default_emitter = emitters.Emitter("localhost", protocol="http", port=80, batch_size=5, byte_limit=420)
         t = tracker.Tracker(default_emitter, default_subject)
         with HTTMock(pass_post_response_content):
             t.track_struct_event("Test", "A")       # 140 bytes

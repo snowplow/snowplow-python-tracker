@@ -53,9 +53,9 @@ class CeleryEmitter(Emitter):
                 protocol: HttpProtocol = "http",
                 port: Optional[int] = None,
                 method: Method = "post",
-                buffer_size: Optional[int] = None,
+                batch_size: Optional[int] = None,
                 byte_limit: Optional[int] = None) -> None:
-            super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, buffer_size, None, None, byte_limit)
+            super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, batch_size, None, None, byte_limit)
 
             try:
                 # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
