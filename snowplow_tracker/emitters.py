@@ -323,11 +323,11 @@ class Emitter(object):
             if self.on_failure is not None and len(failure_events) > 0:
                 self.on_failure(len(success_events), failure_events)
 
-            if self.should_retry(status_code):
-                self.set_retry_delay()
+            if self._should_retry(status_code):
+                self._set_retry_delay()
                 self._retry_failed_events(failure_events)
             else:
-                self.reset_retry_delay()
+                self._reset_retry_delay()
         else:
             logger.info("Skipping flush since buffer is empty")
 
@@ -429,12 +429,17 @@ class Emitter(object):
             :type   List
         """
         for event in failed_events:
-            if not event in self.buffer and not self.buffer_capacity_reached():
+            if not event in self.buffer and not self._buffer_capacity_reached():
                 self.buffer.append(event)
 
         self._set_retry_timer(self.retry_delay)
 
-    def _buffer_capacity_reached(self):
+    def _buffer_capacity_reached(self) -> bool:
+        """
+            Returns true if buffer capacity is reached
+
+            :rtype: bool 
+        """
         return len(self.buffer) >= self.buffer_capacity
 
 class AsyncEmitter(Emitter):
