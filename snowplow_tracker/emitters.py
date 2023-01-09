@@ -25,7 +25,7 @@ import time
 import threading
 import requests
 import random
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, Dict
 from queue import Queue
 
 from snowplow_tracker.self_describing_json import SelfDescribingJson
@@ -71,7 +71,7 @@ class Emitter(object):
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
         max_retry_delay_seconds: int = 60,
         buffer_capacity: int = 10000,
-        custom_retry_codes: dict = {}
+        custom_retry_codes: Dict[int, bool] = {}
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.

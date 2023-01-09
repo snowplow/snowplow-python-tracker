@@ -19,7 +19,7 @@
 #     License: Apache License Version 2.0
 # """
 
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, Dict
 from snowplow_tracker.typing import SuccessCallback, FailureCallback
 
 
@@ -32,7 +32,7 @@ class EmitterConfiguration(object):
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
         buffer_capacity: Optional[int] = None,
-        custom_retry_codes: dict = {}
+        custom_retry_codes: Dict[int, bool] = {}
     ) -> None:
         """
         Configuration for the emitter that sends events to the Snowplow collector.
@@ -153,17 +153,16 @@ class EmitterConfiguration(object):
         self._buffer_capacity = value
 
     @property
-    def custom_retry_codes(self) -> dict:
+    def custom_retry_codes(self) -> Dict[int, bool]:
         """
             Custom retry rules for HTTP status codes received in emit responses from the Collector.
         """
         return self._custom_retry_codes
 
     @custom_retry_codes.setter
-    def custom_retry_codes(self, value: Optional[dict]):
+    def custom_retry_codes(self, value: Dict[int, bool]):
         self._custom_retry_codes = value
-
-    def set_retry_code(self, status_code: Optional[int], retry = True) -> bool:
+    def set_retry_code(self, status_code: int, retry = True) -> bool:
         """
             Add a retry rule for HTTP status code received from emit responses from the Collector.
             :param  status_code:    HTTP response code
