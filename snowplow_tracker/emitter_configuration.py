@@ -31,7 +31,8 @@ class EmitterConfiguration(object):
         on_failure: Optional[FailureCallback] = None,
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
-        buffer_capacity: Optional[int] = None
+        buffer_capacity: Optional[int] = None,
+        custom_retry_codes: dict = {}
     ) -> None:
         """
         Configuration for the emitter that sends events to the Snowplow collector.
@@ -52,6 +53,10 @@ class EmitterConfiguration(object):
                                  applies to both "connect" AND "read" timeout, or as tuple with two float values
                                  which specify the "connect" and "read" timeouts separately
         :type request_timeout:  float | tuple | None
+        :param  custom_retry_codes: Set custom retry rules for HTTP status codes received in emit responses from the Collector.
+                                    By default, retry will not occur for status codes 400, 401, 403, 410 or 422. This can be overridden here.
+                                    Note that 2xx codes will never retry as they are considered successful.
+        :type   custom_retry_codes: dict
         """
 
         self.batch_size = batch_size
@@ -60,6 +65,7 @@ class EmitterConfiguration(object):
         self.byte_limit = byte_limit
         self.request_timeout = request_timeout
         self.buffer_capacity = buffer_capacity
+        self.custom_retry_codes = custom_retry_codes
 
     @property
     def batch_size(self) -> Optional[int]:
@@ -145,3 +151,14 @@ class EmitterConfiguration(object):
         if not isinstance(value, int) and value is not None:
             raise ValueError("buffer_capacity must be of type int")
         self._buffer_capacity = value
+
+    @property
+    def custom_retry_codes(self) -> dict:
+        """
+            Custom retry rules for HTTP status codes received in emit responses from the Collector.
+        """
+        return self._custom_retry_codes
+
+    @custom_retry_codes.setter
+    def custom_retry_codes(self, value: Optional[dict]):
+        self._custom_retry_codes = value
