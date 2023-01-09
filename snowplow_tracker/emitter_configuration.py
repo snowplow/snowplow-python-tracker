@@ -162,3 +162,28 @@ class EmitterConfiguration(object):
     @custom_retry_codes.setter
     def custom_retry_codes(self, value: Optional[dict]):
         self._custom_retry_codes = value
+
+    def set_retry_code(self, status_code: Optional[int], retry = True) -> bool:
+        """
+            Add a retry rule for HTTP status code received from emit responses from the Collector.
+            :param  status_code:    HTTP response code
+            :type   status_code:    int
+            :param  retry:  Set the status_code to retry (True) or not retry (False). Default is True
+            :type   retry:  bool
+        """
+        if not isinstance(status_code, int):
+            print("status_code must be of type int")
+            return False
+
+        if not isinstance(retry, bool):
+            print("retry must be of type bool")        
+            return False
+
+        if 200 <= status_code < 300:
+            print("custom_retry_codes should not include codes for succesful requests (2XX codes)")
+            return False
+
+        self.custom_retry_codes[status_code] = retry
+
+        return status_code in self.custom_retry_codes.keys()
+
