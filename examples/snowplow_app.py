@@ -18,7 +18,8 @@ def main():
 
     collector_url = get_url_from_args()
     # Configure Emitter
-    emitter_config = EmitterConfiguration(batch_size=5)
+    custom_retry_codes = {500: False, 401: True}
+    emitter_config = EmitterConfiguration(batch_size=5, custom_retry_codes=custom_retry_codes)
 
     # Configure Tracker
     tracker_config = TrackerConfiguration(encode_base64=True)

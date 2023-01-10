@@ -25,7 +25,7 @@ import time
 import threading
 import requests
 import random
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, Dict
 from queue import Queue
 
 from snowplow_tracker.self_describing_json import SelfDescribingJson
@@ -71,6 +71,7 @@ class Emitter(object):
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
         max_retry_delay_seconds: int = 60,
         buffer_capacity: int = 10000,
+        custom_retry_codes: Dict[int, bool] = {}
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -103,6 +104,10 @@ class Emitter(object):
         :param buffer_capacity: The maximum capacity of the event buffer. The default buffer capacity is 10 000 events.
                                 When the buffer is full new events are lost.
         :type buffer_capacity: int 
+        :param  custom_retry_codes: Set custom retry rules for HTTP status codes received in emit responses from the Collector.
+                                    By default, retry will not occur for status codes 400, 401, 403, 410 or 422. This can be overridden here.
+                                    Note that 2xx codes will never retry as they are considered successful.
+        :type   custom_retry_codes: dict
         """
         one_of(protocol, PROTOCOLS)
         one_of(method, METHODS)
@@ -137,6 +142,7 @@ class Emitter(object):
         self.retry_delay = 0
 
         self.buffer_capacity = buffer_capacity
+        self.custom_retry_codes = custom_retry_codes
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
     @staticmethod
@@ -372,6 +378,9 @@ class Emitter(object):
         """
         if Emitter.is_good_status_code(status_code):
             return False
+
+        if status_code in self.custom_retry_codes.keys():
+            return self.custom_retry_codes[status_code]
 
         return status_code not in [400, 401, 403, 410, 422]
 

@@ -82,6 +82,7 @@ class Snowplow:
             on_failure=emitter_config.on_failure,
             byte_limit=emitter_config.byte_limit,
             request_timeout=emitter_config.request_timeout,
+            custom_retry_codes=emitter_config.custom_retry_codes
         )
 
         tracker = Tracker(
