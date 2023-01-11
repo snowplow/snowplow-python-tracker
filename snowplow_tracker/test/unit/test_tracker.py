@@ -159,7 +159,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(tstamp, 1000)  # 1970-01-01 00:00:01 in ms
 
     @mock.patch("snowplow_tracker.Tracker.track")
-    def test_alias_of_track_unstruct_event(self, mok_track: Any) -> None:
+    def test_alias_of_track_self_describing_event(self, mok_track: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
 
@@ -441,7 +441,7 @@ class TestTracker(unittest.TestCase):
     ###
 
     @mock.patch("snowplow_tracker.Tracker.complete_payload")
-    def test_track_unstruct_event(self, mok_complete_payload: Any) -> None:
+    def test_track_self_describing_event(self, mok_complete_payload: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
 
@@ -449,7 +449,7 @@ class TestTracker(unittest.TestCase):
 
         t = Tracker(e, encode_base64=False)
         evJson = SelfDescribingJson("test.sde.schema", {"n": "v"})
-        t.track_unstruct_event(evJson)
+        t.track_self_describing_event(evJson)
         self.assertEqual(mok_complete_payload.call_count, 1)
         completeArgsList = mok_complete_payload.call_args_list[0][0]
         self.assertEqual(len(completeArgsList), 4)
@@ -474,7 +474,7 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(actualTstampArg is None)
 
     @mock.patch("snowplow_tracker.Tracker.complete_payload")
-    def test_track_unstruct_event_all_args(self, mok_complete_payload: Any) -> None:
+    def test_track_self_describing_event_all_args(self, mok_complete_payload: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
 
@@ -485,7 +485,7 @@ class TestTracker(unittest.TestCase):
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evContext = [ctx]
         evTstamp = 1399021242030
-        t.track_unstruct_event(evJson, evContext, evTstamp)
+        t.track_self_describing_event(evJson, evContext, evTstamp)
         self.assertEqual(mok_complete_payload.call_count, 1)
         completeArgsList = mok_complete_payload.call_args_list[0][0]
         self.assertEqual(len(completeArgsList), 4)
@@ -510,7 +510,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(actualTstampArg, evTstamp)
 
     @mock.patch("snowplow_tracker.Tracker.complete_payload")
-    def test_track_unstruct_event_encode(self, mok_complete_payload: Any) -> None:
+    def test_track_self_describing_event_encode(self, mok_complete_payload: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
 
@@ -518,7 +518,7 @@ class TestTracker(unittest.TestCase):
 
         t = Tracker(e, encode_base64=True)
         evJson = SelfDescribingJson("test.sde.schema", {"n": "v"})
-        t.track_unstruct_event(evJson)
+        t.track_self_describing_event(evJson)
         self.assertEqual(mok_complete_payload.call_count, 1)
         completeArgsList = mok_complete_payload.call_args_list[0][0]
         self.assertEqual(len(completeArgsList), 4)
@@ -829,7 +829,7 @@ class TestTracker(unittest.TestCase):
         }
         self.assertDictEqual(secItemCallKwargs, expectedSecItemPairs)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_link_click(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
@@ -867,7 +867,7 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_link_click_optional_none(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
@@ -891,7 +891,7 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_add_to_cart(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
@@ -931,7 +931,7 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_add_to_cart_optional_none(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
@@ -953,7 +953,7 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_remove_from_cart(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
@@ -993,7 +993,7 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_remove_from_cart_optional_none(
         self, mok_track_unstruct: Any
     ) -> None:
@@ -1017,7 +1017,7 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_change(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
@@ -1057,7 +1057,7 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_change_optional_none(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
@@ -1083,7 +1083,7 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_submit(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
@@ -1125,7 +1125,7 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_submit_invalid_element_type(
         self, mok_track_unstruct: Any
     ) -> None:
@@ -1155,7 +1155,7 @@ class TestTracker(unittest.TestCase):
                 tstamp=evTstamp,
             )
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_submit_invalid_element_type_disabled_contracts(
         self, mok_track_unstruct: Any
     ) -> None:
@@ -1200,7 +1200,7 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_submit_optional_none(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
@@ -1218,7 +1218,7 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_submit_empty_elems(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
@@ -1234,7 +1234,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs[0].to_json(), expected)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_site_search(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
@@ -1265,7 +1265,7 @@ class TestTracker(unittest.TestCase):
         self.assertIs(callArgs[1][0], ctx)
         self.assertEqual(callArgs[2], evTstamp)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_site_search_optional_none(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
@@ -1286,7 +1286,7 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch("snowplow_tracker.Tracker.track_unstruct_event")
+    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_screen_view(self, mok_track_unstruct: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
