@@ -22,6 +22,7 @@
 import time
 import uuid
 from typing import Any, Optional, Union, List, Dict, Sequence
+from warnings import warn
 
 from snowplow_tracker import payload, _version, SelfDescribingJson
 from snowplow_tracker import subject as _subject
@@ -310,7 +311,7 @@ class Tracker:
             "%s/link_click/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return self.track_self_describing_event(event_json, context, tstamp, event_subject)
 
     def track_add_to_cart(
         self,
@@ -363,7 +364,7 @@ class Tracker:
             "%s/add_to_cart/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return self.track_self_describing_event(event_json, context, tstamp, event_subject)
 
     def track_remove_from_cart(
         self,
@@ -416,7 +417,7 @@ class Tracker:
             "%s/remove_from_cart/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return self.track_self_describing_event(event_json, context, tstamp, event_subject)
 
     def track_form_change(
         self,
@@ -470,7 +471,7 @@ class Tracker:
             "%s/change_form/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return self.track_self_describing_event(event_json, context, tstamp, event_subject)
 
     def track_form_submit(
         self,
@@ -511,7 +512,7 @@ class Tracker:
             "%s/submit_form/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return self.track_self_describing_event(event_json, context, tstamp, event_subject)
 
     def track_site_search(
         self,
@@ -555,7 +556,7 @@ class Tracker:
             "%s/site_search/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return self.track_self_describing_event(event_json, context, tstamp, event_subject)
 
     def track_ecommerce_transaction_item(
         self,
@@ -717,7 +718,7 @@ class Tracker:
             screen_view_properties,
         )
 
-        return self.track_unstruct_event(event_json, context, tstamp, event_subject)
+        return self.track_self_describing_event(event_json, context, tstamp, event_subject)
 
     def track_struct_event(
         self,
@@ -764,7 +765,7 @@ class Tracker:
 
         return self.complete_payload(pb, context, tstamp, event_subject)
 
-    def track_unstruct_event(
+    def track_self_describing_event(
         self,
         event_json: SelfDescribingJson,
         context: Optional[List[SelfDescribingJson]] = None,
