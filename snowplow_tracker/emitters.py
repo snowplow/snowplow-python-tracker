@@ -38,7 +38,7 @@ from snowplow_tracker.typing import (
     FailureCallback,
 )
 from snowplow_tracker.contracts import one_of
-
+from snowplow_tracker.event_store import EventStore, InMemoryEventStore
 # logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -70,8 +70,9 @@ class Emitter(object):
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
         max_retry_delay_seconds: int = 60,
-        buffer_capacity: int = 10000,
-        custom_retry_codes: Dict[int, bool] = {}
+        buffer_capacity: Optional[int] = None,
+        custom_retry_codes: Dict[int, bool] = {},
+        event_store: EventStore = None
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -118,14 +119,23 @@ class Emitter(object):
 
         self.method = method
 
+        if event_store is None:
+            if buffer_capacity is None:
+                event_store = InMemoryEventStore()
+            else:
+                event_store = InMemoryEventStore(buffer_capacity=buffer_capacity)
+        
+        self.event_store = event_store
+
         if batch_size is None:
             if method == "post":
                 batch_size = DEFAULT_MAX_LENGTH
             else:
                 batch_size = 1
+             
+        if batch_size > event_store.buffer_capacity:
+            batch_size = event_store.buffer_capacity
         
-        if batch_size > buffer_capacity:
-            batch_size = buffer_capacity
         self.batch_size = batch_size
         self.buffer = []
         self.byte_limit = byte_limit
@@ -444,7 +454,8 @@ class AsyncEmitter(Emitter):
         thread_count: int = 1,
         byte_limit: Optional[int] = None,
         max_retry_delay_seconds: int = 60,
-        buffer_capacity: int = 10000,
+        buffer_capacity: int = None,
+        event_store: EventStore = None
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -488,7 +499,8 @@ class AsyncEmitter(Emitter):
             on_failure,
             byte_limit,
             max_retry_delay_seconds,
-            buffer_capacity
+            buffer_capacity,
+            event_store
         )
         self.queue = Queue()
         for i in range(thread_count):
