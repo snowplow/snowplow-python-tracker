@@ -65,7 +65,7 @@ class TestEmitters(unittest.TestCase):
         self.assertEqual(e.endpoint, 'https://0.0.0.0/com.snowplowanalytics.snowplow/tp2')
         self.assertEqual(e.method, 'post')
         self.assertEqual(e.batch_size, 10)
-        self.assertEqual(e.buffer, [])
+        self.assertEqual(e.event_store.event_buffer, [])
         self.assertIsNone(e.byte_limit)
         self.assertIsNone(e.bytes_queued)
         self.assertIsNone(e.on_success)
@@ -125,8 +125,8 @@ class TestEmitters(unittest.TestCase):
         nvPairs = {"n0": "v0", "n1": "v1"}
         e.input(nvPairs)
 
-        self.assertEqual(len(e.buffer), 1)
-        self.assertDictEqual(nvPairs, e.buffer[0])
+        self.assertEqual(len(e.event_store.event_buffer), 1)
+        self.assertDictEqual(nvPairs, e.event_store.event_buffer[0])
         self.assertIsNone(e.byte_limit)
         self.assertFalse(e.reached_limit())
         mok_flush.assert_not_called()
@@ -139,8 +139,8 @@ class TestEmitters(unittest.TestCase):
         nvPairs = {"n0": "v0", "n1": "v1"}
         e.input(nvPairs)
 
-        self.assertEqual(len(e.buffer), 1)
-        self.assertDictEqual(nvPairs, e.buffer[0])
+        self.assertEqual(len(e.event_store.event_buffer), 1)
+        self.assertDictEqual(nvPairs, e.event_store.event_buffer[0])
         self.assertTrue(e.reached_limit())
         self.assertEqual(mok_flush.call_count, 1)
 
@@ -152,14 +152,14 @@ class TestEmitters(unittest.TestCase):
         nvPairs = {"n0": "v0", "n1": "v1"}
         e.input(nvPairs)
 
-        self.assertEqual(len(e.buffer), 1)
+        self.assertEqual(len(e.event_store.event_buffer), 1)
         self.assertFalse(e.reached_limit())
-        self.assertDictEqual(nvPairs, e.buffer[0])
+        self.assertDictEqual(nvPairs, e.event_store.event_buffer[0])
 
         nextPairs = {"n0": "v0"}
         e.input(nextPairs)
         # since we mock flush, the buffer is not empty
-        self.assertEqual(e.buffer, [nvPairs, nextPairs])
+        self.assertEqual(e.event_store.event_buffer, [nvPairs, nextPairs])
         self.assertTrue(e.reached_limit())
         self.assertEqual(mok_flush.call_count, 1)
 
@@ -171,7 +171,7 @@ class TestEmitters(unittest.TestCase):
         nvPairs = {"n0": "v0", "n1": "v1"}
         e.input(nvPairs)
 
-        self.assertEqual(len(e.buffer), 1)
+        self.assertEqual(len(e.event_store.event_buffer), 1)
         self.assertEqual(e.bytes_queued, 24)
 
         e.input(nvPairs)
@@ -185,7 +185,7 @@ class TestEmitters(unittest.TestCase):
         nvPairs = {"testString": "test", "testNum": 2.72}
         e.input(nvPairs)
 
-        self.assertEqual(e.buffer, [{"testString": "test", "testNum": "2.72"}])
+        self.assertEqual(e.event_store.event_buffer, [{"testString": "test", "testNum": "2.72"}])
 
     @mock.patch('snowplow_tracker.Emitter.send_events')
     def test_flush(self, mok_send_events: Any) -> None:
@@ -197,7 +197,7 @@ class TestEmitters(unittest.TestCase):
         e.input(nvPairs)
 
         self.assertEqual(mok_send_events.call_count, 1)
-        self.assertEqual(len(e.buffer), 0)
+        self.assertEqual(len(e.event_store.event_buffer), 0)
 
     @mock.patch('snowplow_tracker.Emitter.send_events')
     def test_flush_bytes_queued(self, mok_send_events: Any) -> None:
@@ -209,7 +209,7 @@ class TestEmitters(unittest.TestCase):
         e.input(nvPairs)
 
         self.assertEqual(mok_send_events.call_count, 1)
-        self.assertEqual(len(e.buffer), 0)
+        self.assertEqual(len(e.event_store.event_buffer), 0)
         self.assertEqual(e.bytes_queued, 0)
 
     @freeze_time("2021-04-14 00:00:02")  # unix: 1618358402000
@@ -233,7 +233,7 @@ class TestEmitters(unittest.TestCase):
             e.input(i)
 
         e.set_flush_timer(3)
-        self.assertEqual(len(e.buffer), 3)
+        self.assertEqual(len(e.event_store.event_buffer), 3)
         time.sleep(5)
         self.assertGreaterEqual(mok_flush.call_count, 1)
 
@@ -318,7 +318,7 @@ class TestEmitters(unittest.TestCase):
 
         ae.input({"a": "aa"})
         ae.input({"b": "bb"})
-        self.assertEqual(len(ae.buffer), 2)
+        self.assertEqual(len(ae.event_store.event_buffer), 2)
         self.assertTrue(ae.queue.empty())
         mok_flush.assert_not_called()
 
@@ -334,12 +334,12 @@ class TestEmitters(unittest.TestCase):
 
         ae.input({"a": "aa"})
         ae.input({"b": "bb"})
-        self.assertEqual(len(ae.buffer), 2)
+        self.assertEqual(len(ae.event_store.event_buffer), 2)
         self.assertTrue(ae.queue.empty())
         mok_send_events.assert_not_called()
 
         ae.sync_flush()
-        self.assertEqual(len(ae.buffer), 0)
+        self.assertEqual(len(ae.event_store.event_buffer), 0)
         self.assertEqual(ae.bytes_queued, 0)
         self.assertEqual(mok_send_events.call_count, 1)
 
@@ -404,8 +404,8 @@ class TestEmitters(unittest.TestCase):
         ae = AsyncEmitter('0.0.0.0', method="get", batch_size=2)
         ae.input(payload)
 
-        self.assertEqual(len(ae.buffer), 1)
-        self.assertDictEqual(payload, ae.buffer[0])
+        self.assertEqual(len(ae.event_store.event_buffer), 1)
+        self.assertDictEqual(payload, ae.event_store.event_buffer[0])
 
     @mock.patch('snowplow_tracker.AsyncEmitter.flush')
     def test_input_unicode_post(self, mok_flush: Any) -> None:
@@ -415,8 +415,8 @@ class TestEmitters(unittest.TestCase):
         ae = AsyncEmitter('0.0.0.0', batch_size=2)
         ae.input(payload)
 
-        self.assertEqual(len(ae.buffer), 1)
-        self.assertDictEqual(payload, ae.buffer[0])
+        self.assertEqual(len(ae.event_store.event_buffer), 1)
+        self.assertDictEqual(payload, ae.event_store.event_buffer[0])
 
     @mock.patch('snowplow_tracker.Emitter.http_post')
     def test_send_events_post_retry(self, mok_http_post: Any) -> None:
