@@ -187,9 +187,9 @@ class TestEmitters(unittest.TestCase):
 
         self.assertEqual(e.event_store.event_buffer, [{"testString": "test", "testNum": "2.72"}])
 
-    @mock.patch('snowplow_tracker.Emitter.send_events')
+    @mock.patch('snowplow_tracker.Emitter.http_post')
     def test_flush(self, mok_send_events: Any) -> None:
-        mok_send_events.side_effect = mocked_send_events
+        mok_send_events.side_effect = mocked_http_response_success
 
         e = Emitter('0.0.0.0', batch_size=2, byte_limit=None)
         nvPairs = {"n": "v"}
@@ -199,9 +199,9 @@ class TestEmitters(unittest.TestCase):
         self.assertEqual(mok_send_events.call_count, 1)
         self.assertEqual(len(e.event_store.event_buffer), 0)
 
-    @mock.patch('snowplow_tracker.Emitter.send_events')
+    @mock.patch('snowplow_tracker.Emitter.http_post')
     def test_flush_bytes_queued(self, mok_send_events: Any) -> None:
-        mok_send_events.side_effect = mocked_send_events
+        mok_send_events.side_effect = mocked_http_response_success
 
         e = Emitter('0.0.0.0', batch_size=2, byte_limit=256)
         nvPairs = {"n": "v"}
