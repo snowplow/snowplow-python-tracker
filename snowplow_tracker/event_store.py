@@ -26,33 +26,37 @@ from snowplow_tracker.typing import PayloadDict, PayloadDictList
 class EventStore(Protocol):
     event_buffer: object
     buffer_capacity: int
-    
+
     def add_event(payload: PayloadDict) -> None:
-        ... 
+        ...
+
     def get_events_batch() -> PayloadDictList:
         ...
+
     def cleanup(need_retry: bool, batch: PayloadDictList) -> None:
         ...
+
     def size() -> int:
         ...
 
+
 class InMemoryEventStore(EventStore):
-    def __init__(self, buffer_capacity: int =10000) -> None:
+    def __init__(self, buffer_capacity: int = 10000) -> None:
 
         self.event_buffer = []
         self.buffer_capacity = buffer_capacity
 
     def add_event(self, payload: PayloadDict) -> None:
-        self.event_buffer.append(payload) 
+        self.event_buffer.append(payload)
 
     def get_events_batch(self) -> PayloadDictList:
         return self.event_buffer.index()
-    
+
     def cleanup(self, batch: PayloadDictList, need_retry: bool = False) -> None:
         if need_retry:
             self.event_buffer.append(batch)
             return
-        self.event_buffer = [] 
-    
+        self.event_buffer = []
+
     def size(self) -> int:
-        return len(self.event_buffer)  
+        return len(self.event_buffer)

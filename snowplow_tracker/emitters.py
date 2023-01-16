@@ -39,6 +39,7 @@ from snowplow_tracker.typing import (
 )
 from snowplow_tracker.contracts import one_of
 from snowplow_tracker.event_store import EventStore, InMemoryEventStore
+
 # logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -72,7 +73,7 @@ class Emitter(object):
         max_retry_delay_seconds: int = 60,
         buffer_capacity: Optional[int] = None,
         custom_retry_codes: Dict[int, bool] = {},
-        event_store: EventStore = None
+        event_store: EventStore = None,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -102,9 +103,9 @@ class Emitter(object):
         :type request_timeout:  float | tuple | None
         :param max_retry_delay_seconds:     Set the maximum time between attempts to send failed events to the collector. Default 60 seconds
         :type max_retry_delay_seconds:      int
-        :param buffer_capacity: The maximum capacity of the event buffer. 
+        :param buffer_capacity: The maximum capacity of the event buffer.
                                 When the buffer is full new events are lost.
-        :type buffer_capacity: int 
+        :type buffer_capacity: int
         :param  custom_retry_codes: Set custom retry rules for HTTP status codes received in emit responses from the Collector.
                                     By default, retry will not occur for status codes 400, 401, 403, 410 or 422. This can be overridden here.
                                     Note that 2xx codes will never retry as they are considered successful.
@@ -124,7 +125,7 @@ class Emitter(object):
                 event_store = InMemoryEventStore()
             else:
                 event_store = InMemoryEventStore(buffer_capacity=buffer_capacity)
-        
+
         self.event_store = event_store
 
         if batch_size is None:
@@ -132,10 +133,10 @@ class Emitter(object):
                 batch_size = DEFAULT_MAX_LENGTH
             else:
                 batch_size = 1
-             
+
         if batch_size > event_store.buffer_capacity:
             batch_size = event_store.buffer_capacity
-        
+
         self.batch_size = batch_size
         self.byte_limit = byte_limit
         self.bytes_queued = None if byte_limit is None else 0
@@ -176,7 +177,7 @@ class Emitter(object):
         if len(endpoint) < 1:
             raise ValueError("No endpoint provided.")
 
-        endpoint = endpoint.rstrip('/')
+        endpoint = endpoint.rstrip("/")
 
         if endpoint.split("://")[0] in PROTOCOLS:
             endpoint_arr = endpoint.split("://")
@@ -221,7 +222,9 @@ class Emitter(object):
         if self.byte_limit is None:
             return self.event_store.size() >= self.batch_size
         else:
-            return (self.bytes_queued or 0) >= self.byte_limit or self.event_store.size() >= self.batch_size
+            return (
+                self.bytes_queued or 0
+            ) >= self.byte_limit or self.event_store.size() >= self.batch_size
 
     def flush(self) -> None:
         """
@@ -325,7 +328,7 @@ class Emitter(object):
                 self.on_success(success_events)
             if self.on_failure is not None and len(failure_events) > 0:
                 self.on_failure(len(success_events), failure_events)
-            
+
             if self._should_retry(status_code):
                 self._set_retry_delay()
                 self._retry_failed_events(failure_events)
@@ -346,9 +349,9 @@ class Emitter(object):
 
     def set_flush_timer(self, timeout: float) -> None:
         """
-            Set an interval at which the buffer will be flushed
-            :param timeout:   interval in seconds
-            :type  timeout:   int | float
+        Set an interval at which the buffer will be flushed
+        :param timeout:   interval in seconds
+        :type  timeout:   int | float
         """
         self.timer.start(timeout=timeout)
 
@@ -377,11 +380,11 @@ class Emitter(object):
 
     def _should_retry(self, status_code: int) -> bool:
         """
-            Checks if a request should be retried
-            
-            :param  status_code: Response status code
-            :type   status_code: int
-            :rtype: bool
+        Checks if a request should be retried
+
+        :param  status_code: Response status code
+        :type   status_code: int
+        :rtype: bool
         """
         if Emitter.is_good_status_code(status_code):
             return False
@@ -393,41 +396,46 @@ class Emitter(object):
 
     def _set_retry_delay(self) -> None:
         """
-            Sets a delay to retry failed events
+        Sets a delay to retry failed events
         """
         random_noise = random.random()
-        self.retry_delay = min(self.retry_delay * 2 + random_noise, self.max_retry_delay_seconds)
+        self.retry_delay = min(
+            self.retry_delay * 2 + random_noise, self.max_retry_delay_seconds
+        )
 
     def _reset_retry_delay(self) -> None:
         """
-            Resets retry delay to 0
+        Resets retry delay to 0
         """
         self.retry_delay = 0
 
     def _retry_failed_events(self, failed_events) -> None:
         """
-            Adds failed events back to the buffer to retry 
+        Adds failed events back to the buffer to retry
 
-            :param  failed_events: List of failed events
-            :type   List
+        :param  failed_events: List of failed events
+        :type   List
         """
         for event in failed_events:
-            if not event in self.event_store.event_buffer and not self._buffer_capacity_reached():
+            if (
+                not event in self.event_store.event_buffer
+                and not self._buffer_capacity_reached()
+            ):
                 self.event_store.add_event(event)
 
         self._set_retry_timer(self.retry_delay)
 
     def _buffer_capacity_reached(self) -> bool:
         """
-            Returns true if buffer capacity is reached
+        Returns true if buffer capacity is reached
 
-            :rtype: bool 
+        :rtype: bool
         """
         return self.event_store.size() >= self.event_store.buffer_capacity
 
     def _cancel_retry_timer(self) -> None:
         """
-            Cancels a retry timer
+        Cancels a retry timer
         """
         self.retry_timer.cancel()
 
@@ -450,7 +458,7 @@ class AsyncEmitter(Emitter):
         byte_limit: Optional[int] = None,
         max_retry_delay_seconds: int = 60,
         buffer_capacity: int = None,
-        event_store: EventStore = None
+        event_store: EventStore = None,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -478,7 +486,7 @@ class AsyncEmitter(Emitter):
         :type  byte_limit:  int | None
         :param max_retry_delay_seconds:     Set the maximum time between attempts to send failed events to the collector. Default 60 seconds
         :type max_retry_delay_seconds:      int
-        :param buffer_capacity: The maximum capacity of the event buffer. 
+        :param buffer_capacity: The maximum capacity of the event buffer.
                                 When the buffer is full new events are lost.
         :type buffer_capacity: int
         :param  event_store:    Stores the event buffer and buffer capacity. Default is an InMemoryEventStore object with buffer_capacity of 10,000 events.
@@ -495,7 +503,7 @@ class AsyncEmitter(Emitter):
             byte_limit,
             max_retry_delay_seconds,
             buffer_capacity,
-            event_store
+            event_store,
         )
         self.queue = Queue()
         for i in range(thread_count):
