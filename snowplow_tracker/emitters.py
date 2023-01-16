@@ -137,7 +137,6 @@ class Emitter(object):
             batch_size = event_store.buffer_capacity
         
         self.batch_size = batch_size
-        self.buffer = []
         self.byte_limit = byte_limit
         self.bytes_queued = None if byte_limit is None else 0
         self.request_timeout = request_timeout
@@ -153,7 +152,6 @@ class Emitter(object):
         self.max_retry_delay_seconds = max_retry_delay_seconds
         self.retry_delay = 0
 
-        self.buffer_capacity = buffer_capacity
         self.custom_retry_codes = custom_retry_codes
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
@@ -207,9 +205,9 @@ class Emitter(object):
                 self.bytes_queued += len(str(payload))
 
             if self.method == "post":
-                self.buffer.append({key: str(payload[key]) for key in payload})
+                self.event_store.add_event({key: str(payload[key]) for key in payload})
             else:
-                self.buffer.append(payload)
+                self.event_store.add_event(payload)
 
             if self.reached_limit():
                 self.flush()
@@ -221,11 +219,9 @@ class Emitter(object):
         :rtype: bool
         """
         if self.byte_limit is None:
-            return len(self.buffer) >= self.batch_size
+            return self.event_store.size() >= self.batch_size
         else:
-            return (self.bytes_queued or 0) >= self.byte_limit or len(
-                self.buffer
-            ) >= self.batch_size
+            return (self.bytes_queued or 0) >= self.byte_limit or self.event_store.size() >= self.batch_size
 
     def flush(self) -> None:
         """
@@ -234,9 +230,7 @@ class Emitter(object):
         with self.lock:
             if self.retry_timer.is_active():
                 return
-
-            send_events = self.buffer
-            self.buffer = []
+            send_events = self.event_store.event_buffer
             self.send_events(send_events)
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
@@ -331,11 +325,12 @@ class Emitter(object):
                 self.on_success(success_events)
             if self.on_failure is not None and len(failure_events) > 0:
                 self.on_failure(len(success_events), failure_events)
-
+            
             if self._should_retry(status_code):
                 self._set_retry_delay()
                 self._retry_failed_events(failure_events)
             else:
+                self.event_store.cleanup(success_events)
                 self._reset_retry_delay()
         else:
             logger.info("Skipping flush since buffer is empty")
@@ -417,8 +412,8 @@ class Emitter(object):
             :type   List
         """
         for event in failed_events:
-            if not event in self.buffer and not self._buffer_capacity_reached():
-                self.buffer.append(event)
+            if not event in self.event_store.event_buffer and not self._buffer_capacity_reached():
+                self.event_store.add_event(event)
 
         self._set_retry_timer(self.retry_delay)
 
@@ -428,7 +423,7 @@ class Emitter(object):
 
             :rtype: bool 
         """
-        return len(self.buffer) >= self.buffer_capacity
+        return self.event_store.size() >= self.event_store.buffer_capacity
 
     def _cancel_retry_timer(self) -> None:
         """
@@ -512,7 +507,7 @@ class AsyncEmitter(Emitter):
         while True:
             self.flush()
             self.queue.join()
-            if len(self.buffer) < 1:
+            if self.event_store.size() < 1:
                 break
 
     def flush(self) -> None:
@@ -521,8 +516,8 @@ class AsyncEmitter(Emitter):
         executes the flush method of the base Emitter class
         """
         with self.lock:
-            self.queue.put(self.buffer)
-            self.buffer = []
+            self.queue.put(self.event_store.event_buffer)
+            self.event_store.cleanup(self.event_store.event_buffer)
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
 
