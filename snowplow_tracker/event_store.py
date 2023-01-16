@@ -19,7 +19,7 @@
 #     License: Apache License Version 2.0
 # """
 
-from typing import Protocol
+from typing_extensions import Protocol
 from snowplow_tracker.typing import PayloadDict, PayloadDictList
 
 
