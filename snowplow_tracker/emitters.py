@@ -101,13 +101,15 @@ class Emitter(object):
         :type request_timeout:  float | tuple | None
         :param max_retry_delay_seconds:     Set the maximum time between attempts to send failed events to the collector. Default 60 seconds
         :type max_retry_delay_seconds:      int
-        :param buffer_capacity: The maximum capacity of the event buffer. The default buffer capacity is 10 000 events.
+        :param buffer_capacity: The maximum capacity of the event buffer. 
                                 When the buffer is full new events are lost.
         :type buffer_capacity: int 
         :param  custom_retry_codes: Set custom retry rules for HTTP status codes received in emit responses from the Collector.
                                     By default, retry will not occur for status codes 400, 401, 403, 410 or 422. This can be overridden here.
                                     Note that 2xx codes will never retry as they are considered successful.
         :type   custom_retry_codes: dict
+        :param  event_store:    Stores the event buffer and buffer capacity. Default is an InMemoryEventStore object with buffer_capacity of 10,000 events.
+        :type   event_store:    EventStore
         """
         one_of(protocol, PROTOCOLS)
         one_of(method, METHODS)
@@ -470,9 +472,11 @@ class AsyncEmitter(Emitter):
         :type  byte_limit:  int | None
         :param max_retry_delay_seconds:     Set the maximum time between attempts to send failed events to the collector. Default 60 seconds
         :type max_retry_delay_seconds:      int
-        :param buffer_capacity: The maximum capacity of the event buffer. The default buffer capacity is 10,000 events.
+        :param buffer_capacity: The maximum capacity of the event buffer. 
                                 When the buffer is full new events are lost.
-        :type buffer_capacity: int 
+        :type buffer_capacity: int
+        :param  event_store:    Stores the event buffer and buffer capacity. Default is an InMemoryEventStore object with buffer_capacity of 10,000 events.
+        :type   event_store:    EventStore
         """
         super(AsyncEmitter, self).__init__(
             endpoint,
