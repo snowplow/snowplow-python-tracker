@@ -21,6 +21,7 @@
 
 from typing import Optional, Union, Tuple, Dict
 from snowplow_tracker.typing import SuccessCallback, FailureCallback
+from snowplow_tracker.event_store import EventStore
 
 
 class EmitterConfiguration(object):
@@ -32,7 +33,8 @@ class EmitterConfiguration(object):
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
         buffer_capacity: Optional[int] = None,
-        custom_retry_codes: Dict[int, bool] = {}
+        custom_retry_codes: Dict[int, bool] = {},
+        event_store: EventStore = None
     ) -> None:
         """
         Configuration for the emitter that sends events to the Snowplow collector.
@@ -66,6 +68,7 @@ class EmitterConfiguration(object):
         self.request_timeout = request_timeout
         self.buffer_capacity = buffer_capacity
         self.custom_retry_codes = custom_retry_codes
+        self.event_store = event_store
 
     @property
     def batch_size(self) -> Optional[int]:
@@ -186,3 +189,10 @@ class EmitterConfiguration(object):
 
         return status_code in self.custom_retry_codes.keys()
 
+    @property
+    def event_store(self) -> Optional[EventStore]:
+        return self._event_store
+    
+    @event_store.setter
+    def event_store(self, value: EventStore):
+        self._event_store = value
