@@ -63,3 +63,11 @@ class InMemoryEventStore(EventStore):
 
     def size(self) -> int:
         return len(self.event_buffer)
+
+    def _buffer_capacity_reached(self) -> bool:
+        """
+        Returns true if buffer capacity is reached
+
+        :rtype: bool
+        """
+        return self.size() >= self.buffer_capacity
