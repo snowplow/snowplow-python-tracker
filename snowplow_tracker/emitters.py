@@ -416,13 +416,7 @@ class Emitter(object):
         :param  failed_events: List of failed events
         :type   List
         """
-        for event in failed_events:
-            if (
-                not event in self.event_store.event_buffer
-                and not self._buffer_capacity_reached()
-            ):
-                self.event_store.add_event(event)
-
+        self.event_store.cleanup(failed_events, True)
         self._set_retry_timer(self.retry_delay)
 
 
