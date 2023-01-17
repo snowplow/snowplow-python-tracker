@@ -233,7 +233,7 @@ class Emitter(object):
         with self.lock:
             if self.retry_timer.is_active():
                 return
-            send_events = self.event_store.event_buffer
+            send_events = self.event_store.get_events_batch()
             self.send_events(send_events)
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
