@@ -30,7 +30,7 @@ class EventStore(Protocol):
     def get_events_batch() -> PayloadDictList:
         ...
 
-    def cleanup(need_retry: bool, batch: PayloadDictList) -> None:
+    def cleanup(batch: PayloadDictList, need_retry: bool) -> None:
         ...
 
     def size() -> int:
@@ -39,7 +39,6 @@ class EventStore(Protocol):
 
 class InMemoryEventStore(EventStore):
     def __init__(self, buffer_capacity: int = 10000) -> None:
-
         self.event_buffer = []
         self.buffer_capacity = buffer_capacity
 
