@@ -199,5 +199,5 @@ class EmitterConfiguration(object):
         return self._event_store
 
     @event_store.setter
-    def event_store(self, value: EventStore):
+    def event_store(self, value: Optional[EventStore]):
         self._event_store = value
