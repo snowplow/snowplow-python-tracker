@@ -24,33 +24,89 @@ from snowplow_tracker.typing import PayloadDict, PayloadDictList
 
 
 class EventStore(Protocol):
+    """
+    EventStore protocol. For buffering events in the Emitter.
+    """
+
     def add_event(payload: PayloadDict) -> None:
+        """
+        Add PayloadDict to buffer.
+
+        :param payload: The payload to add
+        :type  payload: PayloadDict
+        """
         ...
 
     def get_events_batch() -> PayloadDictList:
+        """
+        Get a list of all the PayloadDicts in the in the buffer.
+
+        :rtype  PayloadDictList
+        """
         ...
 
     def cleanup(batch: PayloadDictList, need_retry: bool) -> None:
+        """
+        Removes sent events from the event store. If events need to be retried they are re-added to the buffer.
+
+        :param  batch:  The events to be removed from the buffer
+        :type   batch:  PayloadDictList
+        :param  need_retry  Whether the events should be re-sent or not
+        :type   need_retry  bool
+        """
         ...
 
     def size() -> int:
+        """
+        Returns the number of events in the buffer
+
+        :rtype  int
+        """
         ...
 
 
 class InMemoryEventStore(EventStore):
+    """
+    Create a InMemoryEventStore object with custom buffer capacity. The default is 10,000 events.
+    """
+
     def __init__(self, buffer_capacity: int = 10000) -> None:
+        """
+        :param  buffer_capacity:    The maximum capacity of the event buffer.
+                                    When the buffer is full new events are lost.
+        :type   buffer_capacity     int
+        """
         self.event_buffer = []
         self.buffer_capacity = buffer_capacity
 
     def add_event(self, payload: PayloadDict) -> None:
+        """
+        Add PayloadDict to buffer.
+
+        :param payload: The payload to add
+        :type  payload: PayloadDict
+        """
         self.event_buffer.append(payload)
 
     def get_events_batch(self) -> PayloadDictList:
+        """
+        Get a list of all the PayloadDicts in the in the buffer.
+
+        :rtype  PayloadDictList
+        """
         batch = self.event_buffer
         self.event_buffer = []
         return batch
 
     def cleanup(self, batch: PayloadDictList, need_retry: bool) -> None:
+        """
+        Removes sent events from the InMemoryEventStore buffer. If events need to be retried they are re-added to the buffer.
+
+        :param  batch:  The events to be removed from the buffer
+        :type   batch:  PayloadDictList
+        :param  need_retry  Whether the events should be re-sent or not
+        :type   need_retry  bool
+        """
         if need_retry:
             for event in batch:
                 if (
@@ -61,6 +117,11 @@ class InMemoryEventStore(EventStore):
             return
 
     def size(self) -> int:
+        """
+        Returns the number of events in the buffer
+
+        :rtype  int
+        """
         return len(self.event_buffer)
 
     def _buffer_capacity_reached(self) -> bool:
