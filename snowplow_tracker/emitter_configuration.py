@@ -34,7 +34,7 @@ class EmitterConfiguration(object):
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
         buffer_capacity: Optional[int] = None,
         custom_retry_codes: Dict[int, bool] = {},
-        event_store: EventStore = None,
+        event_store: Optional[EventStore] = None,
     ) -> None:
         """
         Configuration for the emitter that sends events to the Snowplow collector.
@@ -59,6 +59,8 @@ class EmitterConfiguration(object):
                                     By default, retry will not occur for status codes 400, 401, 403, 410 or 422. This can be overridden here.
                                     Note that 2xx codes will never retry as they are considered successful.
         :type   custom_retry_codes: dict
+        :param  event_store:    Stores the event buffer and buffer capacity. Default is an InMemoryEventStore object with buffer_capacity of 10,000 events.
+        :type   event_store:    EventStore | None
         """
 
         self.batch_size = batch_size

@@ -111,7 +111,7 @@ class Emitter(object):
                                     Note that 2xx codes will never retry as they are considered successful.
         :type   custom_retry_codes: dict
         :param  event_store:    Stores the event buffer and buffer capacity. Default is an InMemoryEventStore object with buffer_capacity of 10,000 events.
-        :type   event_store:    EventStore
+        :type   event_store:    EventStore | None
         """
         one_of(protocol, PROTOCOLS)
         one_of(method, METHODS)
