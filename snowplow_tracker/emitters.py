@@ -425,13 +425,6 @@ class Emitter(object):
 
         self._set_retry_timer(self.retry_delay)
 
-    def _buffer_capacity_reached(self) -> bool:
-        """
-        Returns true if buffer capacity is reached
-
-        :rtype: bool
-        """
-        return self.event_store.size() >= self.event_store.buffer_capacity
 
     def _cancel_retry_timer(self) -> None:
         """
