@@ -47,7 +47,9 @@ class InMemoryEventStore(EventStore):
         self.event_buffer.append(payload)
 
     def get_events_batch(self) -> PayloadDictList:
-        return self.event_buffer.index()
+        batch = self.event_buffer
+        self.event_buffer = []
+        return batch
 
     def cleanup(self, batch: PayloadDictList, need_retry: bool = False) -> None:
         if need_retry:
