@@ -134,8 +134,8 @@ class Emitter(object):
             else:
                 batch_size = 1
 
-        if batch_size > event_store.buffer_capacity:
-            batch_size = event_store.buffer_capacity
+        if buffer_capacity is not None and batch_size > buffer_capacity:
+            batch_size = buffer_capacity
 
         self.batch_size = batch_size
         self.byte_limit = byte_limit
@@ -419,7 +419,6 @@ class Emitter(object):
         """
         self.event_store.cleanup(failed_events, True)
         self._set_retry_timer(self.retry_delay)
-
 
     def _cancel_retry_timer(self) -> None:
         """
