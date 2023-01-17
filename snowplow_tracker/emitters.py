@@ -332,8 +332,9 @@ class Emitter(object):
             if self._should_retry(status_code):
                 self._set_retry_delay()
                 self._retry_failed_events(failure_events)
+                self.event_store.cleanup(success_events, True)
             else:
-                self.event_store.cleanup(success_events)
+                self.event_store.cleanup(success_events, False)
                 self._reset_retry_delay()
         else:
             logger.info("Skipping flush since buffer is empty")
@@ -511,8 +512,7 @@ class AsyncEmitter(Emitter):
         executes the flush method of the base Emitter class
         """
         with self.lock:
-            self.queue.put(self.event_store.event_buffer)
-            self.event_store.cleanup(self.event_store.event_buffer)
+            self.queue.put(self.event_store.get_events_batch())
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
 
