@@ -24,9 +24,6 @@ from snowplow_tracker.typing import PayloadDict, PayloadDictList
 
 
 class EventStore(Protocol):
-    event_buffer: object
-    buffer_capacity: int
-
     def add_event(payload: PayloadDict) -> None:
         ...
 
