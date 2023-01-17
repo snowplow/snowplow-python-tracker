@@ -51,11 +51,15 @@ class InMemoryEventStore(EventStore):
         self.event_buffer = []
         return batch
 
-    def cleanup(self, batch: PayloadDictList, need_retry: bool = False) -> None:
+    def cleanup(self, batch: PayloadDictList, need_retry: bool) -> None:
         if need_retry:
-            self.event_buffer.append(batch)
+            for event in batch:
+                if (
+                    not event in self.get_events_batch()
+                    and not self._buffer_capacity_reached()
+                ):
+                    self.event_buffer.extend(batch)
             return
-        self.event_buffer = []
 
     def size(self) -> int:
         return len(self.event_buffer)
