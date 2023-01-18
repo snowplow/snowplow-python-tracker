@@ -21,6 +21,7 @@
 
 from typing import Optional, Union, Tuple, Dict
 from snowplow_tracker.typing import SuccessCallback, FailureCallback
+from snowplow_tracker.event_store import EventStore
 
 
 class EmitterConfiguration(object):
@@ -32,7 +33,8 @@ class EmitterConfiguration(object):
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
         buffer_capacity: Optional[int] = None,
-        custom_retry_codes: Dict[int, bool] = {}
+        custom_retry_codes: Dict[int, bool] = {},
+        event_store: Optional[EventStore] = None,
     ) -> None:
         """
         Configuration for the emitter that sends events to the Snowplow collector.
@@ -57,6 +59,8 @@ class EmitterConfiguration(object):
                                     By default, retry will not occur for status codes 400, 401, 403, 410 or 422. This can be overridden here.
                                     Note that 2xx codes will never retry as they are considered successful.
         :type   custom_retry_codes: dict
+        :param  event_store:    Stores the event buffer and buffer capacity. Default is an InMemoryEventStore object with buffer_capacity of 10,000 events.
+        :type   event_store:    EventStore | None
         """
 
         self.batch_size = batch_size
@@ -66,6 +70,7 @@ class EmitterConfiguration(object):
         self.request_timeout = request_timeout
         self.buffer_capacity = buffer_capacity
         self.custom_retry_codes = custom_retry_codes
+        self.event_store = event_store
 
     @property
     def batch_size(self) -> Optional[int]:
@@ -155,34 +160,44 @@ class EmitterConfiguration(object):
     @property
     def custom_retry_codes(self) -> Dict[int, bool]:
         """
-            Custom retry rules for HTTP status codes received in emit responses from the Collector.
+        Custom retry rules for HTTP status codes received in emit responses from the Collector.
         """
         return self._custom_retry_codes
 
     @custom_retry_codes.setter
     def custom_retry_codes(self, value: Dict[int, bool]):
         self._custom_retry_codes = value
-    def set_retry_code(self, status_code: int, retry = True) -> bool:
+
+    def set_retry_code(self, status_code: int, retry=True) -> bool:
         """
-            Add a retry rule for HTTP status code received from emit responses from the Collector.
-            :param  status_code:    HTTP response code
-            :type   status_code:    int
-            :param  retry:  Set the status_code to retry (True) or not retry (False). Default is True
-            :type   retry:  bool
+        Add a retry rule for HTTP status code received from emit responses from the Collector.
+        :param  status_code:    HTTP response code
+        :type   status_code:    int
+        :param  retry:  Set the status_code to retry (True) or not retry (False). Default is True
+        :type   retry:  bool
         """
         if not isinstance(status_code, int):
             print("status_code must be of type int")
             return False
 
         if not isinstance(retry, bool):
-            print("retry must be of type bool")        
+            print("retry must be of type bool")
             return False
 
         if 200 <= status_code < 300:
-            print("custom_retry_codes should not include codes for succesful requests (2XX codes)")
+            print(
+                "custom_retry_codes should not include codes for succesful requests (2XX codes)"
+            )
             return False
 
         self.custom_retry_codes[status_code] = retry
 
         return status_code in self.custom_retry_codes.keys()
 
+    @property
+    def event_store(self) -> Optional[EventStore]:
+        return self._event_store
+
+    @event_store.setter
+    def event_store(self, value: Optional[EventStore]):
+        self._event_store = value
