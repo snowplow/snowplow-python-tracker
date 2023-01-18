@@ -334,7 +334,6 @@ class Emitter(object):
             if self._should_retry(status_code):
                 self._set_retry_delay()
                 self._retry_failed_events(failure_events)
-                self.event_store.cleanup(success_events, True)
             else:
                 self.event_store.cleanup(success_events, False)
                 self._reset_retry_delay()
