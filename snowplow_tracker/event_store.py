@@ -70,14 +70,17 @@ class InMemoryEventStore(EventStore):
     Create a InMemoryEventStore object with custom buffer capacity. The default is 10,000 events.
     """
 
-    def __init__(self, buffer_capacity: int = 10000) -> None:
+    def __init__(self, logger: Logger, buffer_capacity: int = 10000) -> None:
         """
+        :param  logger: Logging module
+        :type   logger: Logger
         :param  buffer_capacity:    The maximum capacity of the event buffer.
                                     When the buffer is full new events are lost.
         :type   buffer_capacity     int
         """
         self.event_buffer = []
         self.buffer_capacity = buffer_capacity
+        self.logger = logger
 
     def add_event(self, payload: PayloadDict) -> None:
         """
@@ -114,7 +117,8 @@ class InMemoryEventStore(EventStore):
                     and not self._buffer_capacity_reached()
                 ):
                     self.event_buffer.extend(batch)
-            return
+            elif self._buffer_capacity_reached():
+                self.logger.error("Event buffer is full, dropping events.")
 
     def size(self) -> int:
         """
