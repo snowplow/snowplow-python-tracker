@@ -29,12 +29,13 @@ class EventStore(Protocol):
     EventStore protocol. For buffering events in the Emitter.
     """
 
-    def add_event(payload: PayloadDict) -> None:
+    def add_event(payload: PayloadDict) -> bool:
         """
-        Add PayloadDict to buffer.
+        Add PayloadDict to buffer. Returns True if successful.
 
         :param payload: The payload to add
         :type  payload: PayloadDict
+        :rtype  bool
         """
         ...
 
@@ -83,7 +84,7 @@ class InMemoryEventStore(EventStore):
         self.buffer_capacity = buffer_capacity
         self.logger = logger
 
-    def add_event(self, payload: PayloadDict) -> None:
+    def add_event(self, payload: PayloadDict) -> bool:
         """
         Add PayloadDict to buffer.
 
@@ -91,10 +92,11 @@ class InMemoryEventStore(EventStore):
         :type  payload: PayloadDict
         """
         if self._buffer_capacity_reached():
-            self.logger.error("Event buffer is full, dropping events.")
-            return
+            self.logger.error("Event buffer is full, dropping event.")
+            return False
 
         self.event_buffer.append(payload)
+        return True
 
     def get_events_batch(self) -> PayloadDictList:
         """
@@ -119,13 +121,9 @@ class InMemoryEventStore(EventStore):
             return
 
         for event in batch:
-            if (
-                not self._buffer_capacity_reached()
-                and not event in self.get_events_batch()
-            ):
-                self.event_buffer.extend(batch)
-            elif self._buffer_capacity_reached():
-                self.logger.error("Event buffer is full, dropping events.")
+            if not event in self.event_buffer:
+                if not self.add_event(event):
+                    return
 
     def size(self) -> int:
         """
