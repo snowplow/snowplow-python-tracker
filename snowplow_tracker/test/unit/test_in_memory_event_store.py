@@ -58,11 +58,14 @@ class TestInMemoryEventStore(unittest.TestCase):
     def test_add_failed_events_to_buffer(self):
         event_store = InMemoryEventStore(logger)
 
-        nvPairs = {"n0": "v0", "n1": "v1"}
+        nvPair1 = {"n0": "v0", "n1": "v1"}
+        nvPair2 = {"n2": "v2", "n3": "v3"}
 
-        event_store.add_event(nvPairs)
-        event_store.add_event(nvPairs)
+        event_store.add_event(nvPair1)
+        event_store.add_event(nvPair2)
+
         payload_list = event_store.get_events_batch()
+
         event_store.cleanup(payload_list, True)
 
         self.assertEqual(event_store.event_buffer, payload_list)
