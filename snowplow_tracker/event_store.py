@@ -39,7 +39,7 @@ class EventStore(Protocol):
 
     def get_events_batch() -> PayloadDictList:
         """
-        Get a list of all the PayloadDicts in the in the buffer.
+        Get a list of all the PayloadDicts in the buffer.
 
         :rtype  PayloadDictList
         """
