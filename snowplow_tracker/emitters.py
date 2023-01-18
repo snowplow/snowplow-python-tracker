@@ -122,9 +122,11 @@ class Emitter(object):
 
         if event_store is None:
             if buffer_capacity is None:
-                event_store = InMemoryEventStore()
+                event_store = InMemoryEventStore(logger=logger)
             else:
-                event_store = InMemoryEventStore(buffer_capacity=buffer_capacity)
+                event_store = InMemoryEventStore(
+                    buffer_capacity=buffer_capacity, logger=logger
+                )
 
         self.event_store = event_store
 

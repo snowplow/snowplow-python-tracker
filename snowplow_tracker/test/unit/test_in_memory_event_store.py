@@ -21,6 +21,12 @@
 
 import unittest
 from snowplow_tracker.event_store import InMemoryEventStore
+import logging
+
+# logging
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class TestInMemoryEventStore(unittest.TestCase):
@@ -28,19 +34,19 @@ class TestInMemoryEventStore(unittest.TestCase):
         pass
 
     def test_init(self):
-        event_store = InMemoryEventStore()
+        event_store = InMemoryEventStore(logger)
         self.assertEqual(event_store.buffer_capacity, 10000)
         self.assertEqual(event_store.event_buffer, [])
 
     def test_add_event(self):
-        event_store = InMemoryEventStore()
+        event_store = InMemoryEventStore(logger)
         nvPairs = {"n0": "v0", "n1": "v1"}
 
         event_store.add_event(nvPairs)
         self.assertDictEqual(nvPairs, event_store.event_buffer[0])
 
     def test_size(self):
-        event_store = InMemoryEventStore()
+        event_store = InMemoryEventStore(logger)
         nvPairs = {"n0": "v0", "n1": "v1"}
 
         event_store.add_event(nvPairs)
@@ -50,7 +56,7 @@ class TestInMemoryEventStore(unittest.TestCase):
         self.assertEqual(event_store.size(), 3)
 
     def add_failed_events_to_buffer(self):
-        event_store = InMemoryEventStore()
+        event_store = InMemoryEventStore(logger)
 
         nvPairs = {"n0": "v0", "n1": "v1"}
 
@@ -74,7 +80,7 @@ class TestInMemoryEventStore(unittest.TestCase):
         self.assertEqual(event_store.event_buffer, [])
 
     def drop_new_events_buffer_full(self):
-        event_store = InMemoryEventStore(buffer_capacity=2)
+        event_store = InMemoryEventStore(logger, buffer_capacity=2)
 
         nvPair1 = {"n0": "v0"}
         nvPair2 = {"n1": "v1"}
@@ -90,7 +96,7 @@ class TestInMemoryEventStore(unittest.TestCase):
         self.assertEqual(event_store.event_buffer, [{"n0": "v0"}, {"n1": "v1"}])
 
     def test_get_events(self):
-        event_store = InMemoryEventStore(buffer_capacity=2)
+        event_store = InMemoryEventStore(logger, buffer_capacity=2)
 
         nvPairs = {"n0": "v0"}
         batch = [nvPairs, nvPairs]
