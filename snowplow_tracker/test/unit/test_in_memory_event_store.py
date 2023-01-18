@@ -55,7 +55,7 @@ class TestInMemoryEventStore(unittest.TestCase):
 
         self.assertEqual(event_store.size(), 3)
 
-    def add_failed_events_to_buffer(self):
+    def test_add_failed_events_to_buffer(self):
         event_store = InMemoryEventStore(logger)
 
         nvPairs = {"n0": "v0", "n1": "v1"}
@@ -67,8 +67,8 @@ class TestInMemoryEventStore(unittest.TestCase):
 
         self.assertEqual(event_store.event_buffer, payload_list)
 
-    def remove_success_events_from_buffer(self):
-        event_store = InMemoryEventStore()
+    def test_remove_success_events_from_buffer(self):
+        event_store = InMemoryEventStore(logger)
 
         nvPairs = {"n0": "v0", "n1": "v1"}
 
@@ -79,7 +79,7 @@ class TestInMemoryEventStore(unittest.TestCase):
 
         self.assertEqual(event_store.event_buffer, [])
 
-    def drop_new_events_buffer_full(self):
+    def test_drop_new_events_buffer_full(self):
         event_store = InMemoryEventStore(logger, buffer_capacity=2)
 
         nvPair1 = {"n0": "v0"}
