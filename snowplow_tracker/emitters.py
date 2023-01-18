@@ -447,7 +447,7 @@ class AsyncEmitter(Emitter):
         byte_limit: Optional[int] = None,
         max_retry_delay_seconds: int = 60,
         buffer_capacity: int = None,
-        event_store: EventStore = None,
+        event_store: Optional[EventStore] = None,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
