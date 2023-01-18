@@ -62,7 +62,7 @@ class TestInMemoryEventStore(unittest.TestCase):
 
         event_store.add_event(nvPairs)
         event_store.add_event(nvPairs)
-        payload_list = event_store.event_buffer
+        payload_list = event_store.get_events_batch()
         event_store.cleanup(payload_list, True)
 
         self.assertEqual(event_store.event_buffer, payload_list)
@@ -74,7 +74,7 @@ class TestInMemoryEventStore(unittest.TestCase):
 
         event_store.add_event(nvPairs)
         event_store.add_event(nvPairs)
-        payload_list = event_store.event_buffer
+        payload_list = event_store.get_events_batch()
         event_store.cleanup(payload_list, False)
 
         self.assertEqual(event_store.event_buffer, [])
