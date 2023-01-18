@@ -44,7 +44,7 @@ REMOVE_FROM_CART_SCHEMA = (
 FORM_CHANGE_SCHEMA = "iglu:com.snowplowanalytics.snowplow/change_form/jsonschema/1-0-0"
 FORM_SUBMIT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/submit_form/jsonschema/1-0-0"
 SITE_SEARCH_SCHEMA = "iglu:com.snowplowanalytics.snowplow/site_search/jsonschema/1-0-0"
-SCREEN_VIEW_SCHEMA = "iglu:com.snowplowanalytics.snowplow/screen_view/jsonschema/1-0-0"
+SCREEN_VIEW_SCHEMA = "iglu:com.snowplowanalytics.mobile/screen_view/jsonschema/1-0-0"
 
 # helpers
 _TEST_UUID = "5628c4c6-3f8a-43f8-a09f-6ff68f68dfb6"
@@ -474,7 +474,9 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(actualTstampArg is None)
 
     @mock.patch("snowplow_tracker.Tracker.complete_payload")
-    def test_track_self_describing_event_all_args(self, mok_complete_payload: Any) -> None:
+    def test_track_self_describing_event_all_args(
+        self, mok_complete_payload: Any
+    ) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
 
@@ -510,7 +512,9 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(actualTstampArg, evTstamp)
 
     @mock.patch("snowplow_tracker.Tracker.complete_payload")
-    def test_track_self_describing_event_encode(self, mok_complete_payload: Any) -> None:
+    def test_track_self_describing_event_encode(
+        self, mok_complete_payload: Any
+    ) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
 
@@ -1297,7 +1301,7 @@ class TestTracker(unittest.TestCase):
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
-        t.track_screen_view("screenName", "screenId", context=[ctx], tstamp=evTstamp)
+        t.track_screen_view("screenId", "screenName", context=[ctx], tstamp=evTstamp)
 
         expected = {
             "schema": SCREEN_VIEW_SCHEMA,
