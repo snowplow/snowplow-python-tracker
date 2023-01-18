@@ -21,6 +21,7 @@
 
 from typing_extensions import Protocol
 from snowplow_tracker.typing import PayloadDict, PayloadDictList
+from logging import Logger
 
 
 class EventStore(Protocol):
