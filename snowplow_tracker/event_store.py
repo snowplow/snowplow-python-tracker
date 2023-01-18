@@ -114,13 +114,15 @@ class InMemoryEventStore(EventStore):
         :param  need_retry  Whether the events should be re-sent or not
         :type   need_retry  bool
         """
-        if need_retry:
-            for event in batch:
-                if (
-                    not event in self.get_events_batch()
-                    and not self._buffer_capacity_reached()
-                ):
-                    self.event_buffer.extend(batch)
+        if not need_retry:
+            return
+
+        for event in batch:
+            if (
+                not self._buffer_capacity_reached()
+                and not event in self.get_events_batch()
+            ):
+                self.event_buffer.extend(batch)
             elif self._buffer_capacity_reached():
                 self.logger.error("Event buffer is full, dropping events.")
 
