@@ -89,6 +89,10 @@ class InMemoryEventStore(EventStore):
         :param payload: The payload to add
         :type  payload: PayloadDict
         """
+        if self._buffer_capacity_reached():
+            self.logger.error("Event buffer is full, dropping events.")
+            return
+
         self.event_buffer.append(payload)
 
     def get_events_batch(self) -> PayloadDictList:
