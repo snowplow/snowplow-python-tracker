@@ -701,6 +701,42 @@ class Tracker:
 
     def track_screen_view(
         self,
+        name: Optional[str] = None,
+        id_: Optional[str] = None,
+        context: Optional[List[SelfDescribingJson]] = None,
+        tstamp: Optional[float] = None,
+        event_subject: Optional[_subject.Subject] = None,
+    ) -> "Tracker":
+        """
+        :param  name:           The name of the screen view event
+        :type   name:           string_or_none
+        :param  id_:            Screen view ID
+        :type   id_:            string_or_none
+        :param  context:        Custom context for the event
+        :type   context:        context_array | None
+        :param  tstamp:         Optional event timestamp in milliseconds
+        :type   tstamp:         int | float | None
+        :param  event_subject:  Optional per event subject
+        :type   event_subject:  subject | None
+        :rtype:                 tracker
+        """
+        screen_view_properties = {}
+        if name is not None:
+            screen_view_properties["name"] = name
+        if id_ is not None:
+            screen_view_properties["id"] = id_
+
+        event_json = SelfDescribingJson(
+            "%s/screen_view/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG),
+            screen_view_properties,
+        )
+
+        return self.track_self_describing_event(
+            event_json, context, tstamp, event_subject
+        )
+
+    def track_mobile_screen_view(
+        self,
         id_: str,
         name: Optional[str] = None,
         type: Optional[str] = None,
