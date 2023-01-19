@@ -125,10 +125,10 @@ class IntegrationTest(unittest.TestCase):
 
         self.assertEqual(from_querystring("ttm", querystrings[-3]), from_querystring("ttm", querystrings[-2]))
 
-    def test_integration_screen_view(self) -> None:
+    def test_integration_mobile_screen_view(self) -> None:
         t = tracker.Tracker([get_emitter], default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
-            t.track_screen_view("534", "Game HUD 2")
+            t.track_mobile_screen_view("534", "Game HUD 2")
         expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
@@ -380,7 +380,7 @@ class IntegrationTest(unittest.TestCase):
         test_ctx = SelfDescribingJson('iglu:a.b/c/jsonschema/1-0-0', {'test': unicode_a})
         with HTTMock(pass_response_content):
             t.track_page_view(unicode_b, context=[test_ctx])
-            t.track_screen_view(unicode_b, context=[test_ctx])
+            t.track_mobile_screen_view(unicode_b, context=[test_ctx])
 
         url_string = unquote_plus(from_querystring("url", querystrings[-2]))
         try:
@@ -404,7 +404,7 @@ class IntegrationTest(unittest.TestCase):
         test_ctx = SelfDescribingJson('iglu:a.b/c/jsonschema/1-0-0', {'test': unicode_a})
         with HTTMock(pass_post_response_content):
             t.track_page_view(unicode_b, context=[test_ctx])
-            t.track_screen_view(unicode_b, context=[test_ctx])
+            t.track_mobile_screen_view(unicode_b, context=[test_ctx])
 
         pv_event = querystrings[-2]
         self.assertEqual(pv_event['data'][0]['url'], unicode_b)
