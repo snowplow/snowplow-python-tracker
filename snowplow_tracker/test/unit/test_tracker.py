@@ -44,6 +44,9 @@ REMOVE_FROM_CART_SCHEMA = (
 FORM_CHANGE_SCHEMA = "iglu:com.snowplowanalytics.snowplow/change_form/jsonschema/1-0-0"
 FORM_SUBMIT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/submit_form/jsonschema/1-0-0"
 SITE_SEARCH_SCHEMA = "iglu:com.snowplowanalytics.snowplow/site_search/jsonschema/1-0-0"
+MOBILE_SCREEN_VIEW_SCHEMA = (
+    "iglu:com.snowplowanalytics.mobile/screen_view/jsonschema/1-0-0"
+)
 SCREEN_VIEW_SCHEMA = "iglu:com.snowplowanalytics.snowplow/screen_view/jsonschema/1-0-0"
 
 # helpers
