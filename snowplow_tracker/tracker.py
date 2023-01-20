@@ -742,7 +742,7 @@ class Tracker:
 
     def track_mobile_screen_view(
         self,
-        id_: str,
+        id_: Optional[str] = None,
         name: Optional[str] = None,
         type: Optional[str] = None,
         previous_name: Optional[str] = None,
@@ -754,8 +754,8 @@ class Tracker:
         event_subject: Optional[_subject.Subject] = None,
     ) -> "Tracker":
         """
-        :param  id_:            Screen view ID
-        :type   id_:            string
+        :param  id_:            Screen view ID. This must be of type UUID.
+        :type   id_:            string | None
         :param  name:           The name of the screen view event
         :type   name:           string_or_none
         :param  type:           The type of screen that was viewed e.g feed / carousel.
@@ -777,6 +777,9 @@ class Tracker:
         :rtype:                 tracker
         """
         screen_view_properties = {}
+
+        if id_ is None:
+            id_ = self.get_uuid()
 
         screen_view_properties["id"] = id_
 
