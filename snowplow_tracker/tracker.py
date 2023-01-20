@@ -720,6 +720,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 tracker
         """
+        warn(
+            "track_screen_view will be deprecated in future versions. Please use track_mobile_screen_view.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         screen_view_properties = {}
         if name is not None:
             screen_view_properties["name"] = name
