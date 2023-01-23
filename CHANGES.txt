@@ -1,3 +1,14 @@
+Version 0.13.0 (2023-01-24)
+---------------------------
+Adds Snowplow Interface (#295)
+Adds retry for failed events (#296)
+Adds customisable retry codes (#297)
+Adds EventStore with max limit (#309)
+Adds Snowplow Example App (#302)
+Fix Collector URL with trailing '/' (#300)
+Rename unstruct_event to self_describing_event (#298)
+Upgrade `set-output` in cd (#294)
+
 Version 0.12.0 (2022-11-03)
 ---------------------------
 Adds Domain Session ID and Domain Session Index to Subject class (#282) (Thanks to @cpnat)
