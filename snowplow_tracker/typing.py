@@ -13,10 +13,6 @@
 #     an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 #     express or implied. See the Apache License Version 2.0 for the specific
 #     language governing permissions and limitations there under.
-
-#     Authors: Anuj More, Alex Dean, Fred Blundun, Jack Keene, Paul Boocock, Matus Tomlein
-#     Copyright: Copyright (c) 2013-2023 Snowplow Analytics Ltd
-#     License: Apache License Version 2.0
 # """
 
 from typing import Dict, List, Callable, Any, Optional, Union, Tuple
