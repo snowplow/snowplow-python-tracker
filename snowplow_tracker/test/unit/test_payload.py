@@ -1,7 +1,7 @@
 # """
 #     test_payload.py
 
-#     Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
+#     Copyright (c) 2013-2023 Snowplow Analytics Ltd. All rights reserved.
 
 #     This program is licensed to you under the Apache License Version 2.0,
 #     and you may not use this file except in compliance with the Apache License
@@ -14,8 +14,8 @@
 #     express or implied. See the Apache License Version 2.0 for the specific
 #     language governing permissions and limitations there under.
 
-#     Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
-#     Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
+#     Authors: Anuj More, Alex Dean, Fred Blundun, Jack Keene, Paul Boocock
+#     Copyright: Copyright (c) 2013-2023 Snowplow Analytics Ltd
 #     License: Apache License Version 2.0
 # """
 
@@ -55,7 +55,6 @@ def date_encoder(o: Any) -> str:
 
 
 class TestPayload(unittest.TestCase):
-
     def setUp(self) -> None:
         pass
 
@@ -64,7 +63,12 @@ class TestPayload(unittest.TestCase):
         self.assertDictEqual({}, p.nv_pairs)
 
     def test_object_generation_2(self) -> None:
-        p = payload.Payload({"test1": "result1", "test2": "result2", })
+        p = payload.Payload(
+            {
+                "test1": "result1",
+                "test2": "result2",
+            }
+        )
         output = {"test1": "result1", "test2": "result2"}
         self.assertDictEqual(output, p.nv_pairs)
 
@@ -72,7 +76,10 @@ class TestPayload(unittest.TestCase):
         p = payload.Payload()
         p.add("name1", "value1")
         p.add("name2", "value2")
-        output = {"name1": "value1", "name2": "value2", }
+        output = {
+            "name1": "value1",
+            "name2": "value2",
+        }
         self.assertDictEqual(output, p.nv_pairs)
 
     def test_add_empty_val(self) -> None:
@@ -88,51 +95,58 @@ class TestPayload(unittest.TestCase):
         self.assertDictEqual(output, p.nv_pairs)
 
     def test_add_dict(self) -> None:
-        p = payload.Payload({"n1": "v1", "n2": "v2", })
-        p.add_dict({"name4": 4, "name3": 3})            # Order doesn't matter
+        p = payload.Payload(
+            {
+                "n1": "v1",
+                "n2": "v2",
+            }
+        )
+        p.add_dict({"name4": 4, "name3": 3})  # Order doesn't matter
         output = {"n1": "v1", "n2": "v2", "name3": 3, "name4": 4}
         self.assertDictEqual(output, p.nv_pairs)
 
     def test_add_json_empty(self) -> None:
-        p = payload.Payload({'name': 'value'})
+        p = payload.Payload({"name": "value"})
         input = {}
-        p.add_json(input, False, 'ue_px', 'ue_pr')
-        output = {'name': 'value'}
+        p.add_json(input, False, "ue_px", "ue_pr")
+        output = {"name": "value"}
         self.assertDictEqual(output, p.nv_pairs)
 
     def test_add_json_none(self) -> None:
-        p = payload.Payload({'name': 'value'})
+        p = payload.Payload({"name": "value"})
         input = None
-        p.add_json(input, False, 'ue_px', 'ue_pr')
-        output = {'name': 'value'}
+        p.add_json(input, False, "ue_px", "ue_pr")
+        output = {"name": "value"}
         self.assertDictEqual(output, p.nv_pairs)
 
     def test_add_json_encode_false(self) -> None:
         p = payload.Payload()
-        input = {'a': 1}
-        p.add_json(input, False, 'ue_px', 'ue_pr')
-        self.assertTrue('ue_pr' in p.nv_pairs.keys())
-        self.assertFalse('ue_px' in p.nv_pairs.keys())
+        input = {"a": 1}
+        p.add_json(input, False, "ue_px", "ue_pr")
+        self.assertTrue("ue_pr" in p.nv_pairs.keys())
+        self.assertFalse("ue_px" in p.nv_pairs.keys())
 
     def test_add_json_encode_true(self) -> None:
         p = payload.Payload()
-        input = {'a': 1}
-        p.add_json(input, True, 'ue_px', 'ue_pr')
-        self.assertFalse('ue_pr' in p.nv_pairs.keys())
-        self.assertTrue('ue_px' in p.nv_pairs.keys())
+        input = {"a": 1}
+        p.add_json(input, True, "ue_px", "ue_pr")
+        self.assertFalse("ue_pr" in p.nv_pairs.keys())
+        self.assertTrue("ue_px" in p.nv_pairs.keys())
 
     def test_add_json_unicode_encode_false(self) -> None:
         p = payload.Payload()
-        input = {'a': u'\u0107', u'\u0107': 'b'}
-        p.add_json(input, False, 'ue_px', 'ue_pr')
+        input = {"a": "\u0107", "\u0107": "b"}
+        p.add_json(input, False, "ue_px", "ue_pr")
         ue_pr = json.loads(p.nv_pairs["ue_pr"])
         self.assertDictEqual(input, ue_pr)
 
     def test_add_json_unicode_encode_true(self) -> None:
         p = payload.Payload()
-        input = {'a': '\u0107', '\u0107': 'b'}
-        p.add_json(input, True, 'ue_px', 'ue_pr')
-        ue_px = json.loads(base64.urlsafe_b64decode(p.nv_pairs["ue_px"]).decode('utf-8'))
+        input = {"a": "\u0107", "\u0107": "b"}
+        p.add_json(input, True, "ue_px", "ue_pr")
+        ue_px = json.loads(
+            base64.urlsafe_b64decode(p.nv_pairs["ue_px"]).decode("utf-8")
+        )
         self.assertDictEqual(input, ue_px)
 
     def test_add_json_with_custom_enc(self) -> None:
@@ -148,5 +162,5 @@ class TestPayload(unittest.TestCase):
         self.assertTrue(is_subset({"key1": "2020-02-01"}, results))
 
     def test_subject_get(self) -> None:
-        p = payload.Payload({'name1': 'val1'})
+        p = payload.Payload({"name1": "val1"})
         self.assertDictEqual(p.get(), p.nv_pairs)

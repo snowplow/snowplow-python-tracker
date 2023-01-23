@@ -1,7 +1,7 @@
 # """
 #     redis_worker.py
 
-#     Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
+#     Copyright (c) 2013-2023 Snowplow Analytics Ltd. All rights reserved.
 
 #     This program is licensed to you under the Apache License Version 2.0,
 #     and you may not use this file except in compliance with the Apache License
@@ -14,8 +14,8 @@
 #     express or implied. See the Apache License Version 2.0 for the specific
 #     language governing permissions and limitations there under.
 
-#     Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
-#     Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
+#     Authors: Anuj More, Alex Dean, Fred Blundun, Jack Keene, Paul Boocock
+#     Copyright: Copyright (c) 2013-2023 Snowplow Analytics Ltd
 #     License: Apache License Version 2.0
 # """
 
@@ -39,11 +39,17 @@ DEFAULT_KEY = "snowplow"
 
 class RedisWorker(object):
     """
-        Asynchronously take events from redis and send them to an emitter
+    Asynchronously take events from redis and send them to an emitter
     """
+
     if _REDIS_OPT:
 
-        def __init__(self, emitter: EmitterProtocol, rdb: Optional[RedisProtocol] = None, key: str = DEFAULT_KEY) -> None:
+        def __init__(
+            self,
+            emitter: EmitterProtocol,
+            rdb: Optional[RedisProtocol] = None,
+            key: str = DEFAULT_KEY,
+        ) -> None:
             self.emitter = emitter
             self.key = key
             if rdb is None:
@@ -57,14 +63,14 @@ class RedisWorker(object):
 
         def send(self, payload: PayloadDict) -> None:
             """
-                Send an event to an emitter
+            Send an event to an emitter
             """
             self.emitter.input(payload)
 
         def pop_payload(self) -> None:
             """
-                Get a single event from Redis and send it
-                If the Redis queue is empty, sleep to avoid making continual requests
+            Get a single event from Redis and send it
+            If the Redis queue is empty, sleep to avoid making continual requests
             """
             payload = self.rdb.lpop(self.key)
             if payload:
@@ -74,7 +80,7 @@ class RedisWorker(object):
 
         def run(self) -> None:
             """
-                Run indefinitely
+            Run indefinitely
             """
             self._shutdown = False
 
@@ -84,11 +90,13 @@ class RedisWorker(object):
 
         def request_shutdown(self, *args: Any) -> None:
             """
-                Halt the worker
+            Halt the worker
             """
             self._shutdown = True
 
     else:
 
-        def __new__(cls, *args: Any, **kwargs: Any) -> 'RedisWorker':
-            raise RuntimeError('RedisWorker is not available. To use: `pip install snowplow-tracker[redis]`')
+        def __new__(cls, *args: Any, **kwargs: Any) -> "RedisWorker":
+            raise RuntimeError(
+                "RedisWorker is not available. To use: `pip install snowplow-tracker[redis]`"
+            )
