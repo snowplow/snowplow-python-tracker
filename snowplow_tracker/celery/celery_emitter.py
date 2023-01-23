@@ -1,7 +1,7 @@
 # """
 #     celery_emitter.py
 
-#     Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
+#     Copyright (c) 2013-2023 Snowplow Analytics Ltd. All rights reserved.
 
 #     This program is licensed to you under the Apache License Version 2.0,
 #     and you may not use this file except in compliance with the Apache License
@@ -13,10 +13,6 @@
 #     an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 #     express or implied. See the Apache License Version 2.0 for the specific
 #     language governing permissions and limitations there under.
-
-#     Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
-#     Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
-#     License: Apache License Version 2.0
 # """
 
 import logging
@@ -39,27 +35,32 @@ logger.setLevel(logging.INFO)
 
 class CeleryEmitter(Emitter):
     """
-        Uses a Celery worker to send HTTP requests asynchronously.
-        Works like the base Emitter class,
-        but on_success and on_failure callbacks cannot be set.
+    Uses a Celery worker to send HTTP requests asynchronously.
+    Works like the base Emitter class,
+    but on_success and on_failure callbacks cannot be set.
     """
+
     if _CELERY_OPT:
 
         celery_app = None
 
         def __init__(
-                self,
-                endpoint: str,
-                protocol: HttpProtocol = "http",
-                port: Optional[int] = None,
-                method: Method = "post",
-                batch_size: Optional[int] = None,
-                byte_limit: Optional[int] = None) -> None:
-            super(CeleryEmitter, self).__init__(endpoint, protocol, port, method, batch_size, None, None, byte_limit)
+            self,
+            endpoint: str,
+            protocol: HttpProtocol = "http",
+            port: Optional[int] = None,
+            method: Method = "post",
+            batch_size: Optional[int] = None,
+            byte_limit: Optional[int] = None,
+        ) -> None:
+            super(CeleryEmitter, self).__init__(
+                endpoint, protocol, port, method, batch_size, None, None, byte_limit
+            )
 
             try:
                 # Check whether a custom Celery configuration module named "snowplow_celery_config" exists
                 import snowplow_celery_config
+
                 self.celery_app = Celery()
                 self.celery_app.config_from_object(snowplow_celery_config)
             except ImportError:
@@ -80,6 +81,10 @@ class CeleryEmitter(Emitter):
 
     else:
 
-        def __new__(cls, *args: Any, **kwargs: Any) -> 'CeleryEmitter':
-            logger.error("CeleryEmitter is not available. Please install snowplow-tracker with celery extra dependency.")
-            raise RuntimeError('CeleryEmitter is not available. To use: `pip install snowplow-tracker[celery]`')
+        def __new__(cls, *args: Any, **kwargs: Any) -> "CeleryEmitter":
+            logger.error(
+                "CeleryEmitter is not available. Please install snowplow-tracker with celery extra dependency."
+            )
+            raise RuntimeError(
+                "CeleryEmitter is not available. To use: `pip install snowplow-tracker[celery]`"
+            )

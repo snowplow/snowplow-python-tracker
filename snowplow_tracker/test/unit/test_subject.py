@@ -1,7 +1,7 @@
 # """
 #     test_subject.py
 
-#     Copyright (c) 2013-2022 Snowplow Analytics Ltd. All rights reserved.
+#     Copyright (c) 2013-2023 Snowplow Analytics Ltd. All rights reserved.
 
 #     This program is licensed to you under the Apache License Version 2.0,
 #     and you may not use this file except in compliance with the Apache License
@@ -13,10 +13,6 @@
 #     an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 #     express or implied. See the Apache License Version 2.0 for the specific
 #     language governing permissions and limitations there under.
-
-#     Authors: Anuj More, Alex Dean, Fred Blundun, Paul Boocock
-#     Copyright: Copyright (c) 2013-2022 Snowplow Analytics Ltd
-#     License: Apache License Version 2.0
 # """
 
 import unittest
@@ -26,7 +22,6 @@ from snowplow_tracker import subject as _subject
 
 
 class TestSubject(unittest.TestCase):
-
     def setUp(self) -> None:
         pass
 
@@ -61,18 +56,14 @@ class TestSubject(unittest.TestCase):
             "duid": "domain-user-id",
             "sid": "domain-session-id",
             "vid": 1,
-            "tnuid": "network-user-id"
+            "tnuid": "network-user-id",
         }
         self.assertDictEqual(s.standard_nv_pairs, exp)
 
     def test_subject_1(self) -> None:
         s = _subject.Subject().set_platform("srv").set_user_id("1234").set_lang("EN")
 
-        exp = {
-            "p": "srv",
-            "uid": "1234",
-            "lang": "EN"
-        }
+        exp = {"p": "srv", "uid": "1234", "lang": "EN"}
         self.assertDictEqual(s.standard_nv_pairs, exp)
 
         with pytest.raises(KeyError):

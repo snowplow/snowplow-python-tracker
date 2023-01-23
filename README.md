@@ -47,7 +47,7 @@ Assuming [docker](https://www.docker.com/) is installed
 Copyright and license
 ---------------------
 
-The Snowplow Python Tracker is copyright 2013-2022 Snowplow Analytics
+The Snowplow Python Tracker is copyright 2013-2023 Snowplow Analytics
 Ltd.
 
 Licensed under the [Apache License, Version
