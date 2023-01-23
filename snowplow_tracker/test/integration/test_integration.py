@@ -125,10 +125,10 @@ class IntegrationTest(unittest.TestCase):
 
         self.assertEqual(from_querystring("ttm", querystrings[-3]), from_querystring("ttm", querystrings[-2]))
 
-    def test_integration_screen_view(self) -> None:
+    def test_integration_mobile_screen_view(self) -> None:
         t = tracker.Tracker([get_emitter], default_subject, encode_base64=False)
         with HTTMock(pass_response_content):
-            t.track_screen_view("Game HUD 2", id_="534")
+            t.track_mobile_screen_view("534", "Game HUD 2")
         expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEqual(from_querystring(key, querystrings[-1]), expected_fields[key])
@@ -137,10 +137,10 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(envelope, {
             "schema": "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0",
             "data": {
-                "schema": "iglu:com.snowplowanalytics.snowplow/screen_view/jsonschema/1-0-0",
+                "schema": "iglu:com.snowplowanalytics.mobile/screen_view/jsonschema/1-0-0",
                 "data": {
-                    "name": "Game HUD 2",
-                    "id": "534"
+                    "id": "534",
+                    "name": "Game HUD 2"                    
                 }
             }
         })
@@ -380,7 +380,7 @@ class IntegrationTest(unittest.TestCase):
         test_ctx = SelfDescribingJson('iglu:a.b/c/jsonschema/1-0-0', {'test': unicode_a})
         with HTTMock(pass_response_content):
             t.track_page_view(unicode_b, context=[test_ctx])
-            t.track_screen_view(unicode_b, context=[test_ctx])
+            t.track_mobile_screen_view(unicode_b, context=[test_ctx])
 
         url_string = unquote_plus(from_querystring("url", querystrings[-2]))
         try:
@@ -394,7 +394,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(actual_a, unicode_a)
 
         uepr_string = unquote_plus(from_querystring("ue_pr", querystrings[-1]))
-        actual_b = json.loads(uepr_string)['data']['data']['name']
+        actual_b = json.loads(uepr_string)['data']['data']['id']
         self.assertEqual(actual_b, unicode_b)
 
     def test_unicode_post(self) -> None:
@@ -404,7 +404,7 @@ class IntegrationTest(unittest.TestCase):
         test_ctx = SelfDescribingJson('iglu:a.b/c/jsonschema/1-0-0', {'test': unicode_a})
         with HTTMock(pass_post_response_content):
             t.track_page_view(unicode_b, context=[test_ctx])
-            t.track_screen_view(unicode_b, context=[test_ctx])
+            t.track_mobile_screen_view(unicode_b, context=[test_ctx])
 
         pv_event = querystrings[-2]
         self.assertEqual(pv_event['data'][0]['url'], unicode_b)
@@ -413,5 +413,5 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(in_test_ctx, unicode_a)
 
         sv_event = querystrings[-1]
-        in_uepr_name = json.loads(sv_event['data'][0]['ue_pr'])['data']['data']['name']
+        in_uepr_name = json.loads(sv_event['data'][0]['ue_pr'])['data']['data']['id']
         self.assertEqual(in_uepr_name, unicode_b)

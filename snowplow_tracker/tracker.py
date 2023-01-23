@@ -44,6 +44,7 @@ Constants & config
 VERSION = "py-%s" % _version.__version__
 DEFAULT_ENCODE_BASE64 = True
 BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow"
+MOBILE_SCHEMA_PATH = "iglu:com.snowplowanalytics.mobile"
 SCHEMA_TAG = "jsonschema"
 CONTEXT_SCHEMA = "%s/contexts/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
 UNSTRUCT_EVENT_SCHEMA = "%s/unstruct_event/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
@@ -719,6 +720,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 tracker
         """
+        warn(
+            "track_screen_view will be deprecated in future versions. Please use track_mobile_screen_view.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         screen_view_properties = {}
         if name is not None:
             screen_view_properties["name"] = name
@@ -730,6 +736,70 @@ class Tracker:
             screen_view_properties,
         )
 
+        return self.track_self_describing_event(
+            event_json, context, tstamp, event_subject
+        )
+
+    def track_mobile_screen_view(
+        self,
+        id_: Optional[str] = None,
+        name: Optional[str] = None,
+        type: Optional[str] = None,
+        previous_name: Optional[str] = None,
+        previous_id: Optional[str] = None,
+        previous_type: Optional[str] = None,
+        transition_type: Optional[str] = None,
+        context: Optional[List[SelfDescribingJson]] = None,
+        tstamp: Optional[float] = None,
+        event_subject: Optional[_subject.Subject] = None,
+    ) -> "Tracker":
+        """
+        :param  id_:            Screen view ID. This must be of type UUID.
+        :type   id_:            string | None
+        :param  name:           The name of the screen view event
+        :type   name:           string_or_none
+        :param  type:           The type of screen that was viewed e.g feed / carousel.
+        :type   type:           string | None
+        :param  previous_name:  The name of the previous screen.
+        :type   previous_name:  string | None
+        :param  previous_id:    The screenview ID of the previous screenview.
+        :type   previous_id:    string | None
+        :param  previous_type   The screen type of the previous screenview
+        :type   previous_type   string | None
+        :param  transition_type The type of transition that led to the screen being viewed.
+        :type   transition_type string | None
+        :param  context:        Custom context for the event
+        :type   context:        context_array | None
+        :param  tstamp:         Optional event timestamp in milliseconds
+        :type   tstamp:         int | float | None
+        :param  event_subject:  Optional per event subject
+        :type   event_subject:  subject | None
+        :rtype:                 tracker
+        """
+        screen_view_properties = {}
+
+        if id_ is None:
+            id_ = self.get_uuid()
+
+        screen_view_properties["id"] = id_
+
+        if name is not None:
+            screen_view_properties["name"] = name
+        if type is not None:
+            screen_view_properties["type"] = type
+        if previous_name is not None:
+            screen_view_properties["previousName"] = previous_name
+        if previous_id is not None:
+            screen_view_properties["previousId"] = previous_id
+        if previous_type is not None:
+            screen_view_properties["previousType"] = previous_type
+        if transition_type is not None:
+            screen_view_properties["transitionType"] = transition_type
+
+        event_json = SelfDescribingJson(
+            "%s/screen_view/%s/1-0-0" % (MOBILE_SCHEMA_PATH, SCHEMA_TAG),
+            screen_view_properties,
+        )
         return self.track_self_describing_event(
             event_json, context, tstamp, event_subject
         )
