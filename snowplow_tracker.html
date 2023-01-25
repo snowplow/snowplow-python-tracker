@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>snowplow_tracker package &mdash; Snowplow Python Tracker 0.12 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>snowplow_tracker package &mdash; Snowplow Python Tracker 0.13 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -130,7 +130,7 @@
 <span id="snowplow-tracker-emitters-module"></span><h2>snowplow_tracker.emitters module<a class="headerlink" href="#module-snowplow_tracker.emitters" title="Permalink to this headline"></a></h2>
 <dl class="class">
 <dt id="snowplow_tracker.emitters.AsyncEmitter">
-<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">AsyncEmitter</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str, protocol: Literal[http, https] = 'http', port: Optional[int] = None, method: Literal[get, post] = 'post', buffer_size: Optional[int] = None, on_success: Optional[Callable[[List[Dict[str, Any]]], None]] = None, on_failure: Optional[Callable[[int, List[Dict[str, Any]]], None]] = None, thread_count: int = 1, byte_limit: Optional[int] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.AsyncEmitter" title="Permalink to this definition"></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">AsyncEmitter</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str, protocol: Literal[http, https] = 'http', port: Optional[int] = None, method: Literal[get, post] = 'post', batch_size: Optional[int] = None, on_success: Optional[Callable[[List[Dict[str, Any]]], None]] = None, on_failure: Optional[Callable[[int, List[Dict[str, Any]]], None]] = None, thread_count: int = 1, byte_limit: Optional[int] = None, max_retry_delay_seconds: int = 60, buffer_capacity: int = None, event_store: Optional[snowplow_tracker.event_store.EventStore] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.AsyncEmitter" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#snowplow_tracker.emitters.Emitter" title="snowplow_tracker.emitters.Emitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">snowplow_tracker.emitters.Emitter</span></code></a></p>
 <p>Uses threads to send HTTP requests asynchronously</p>
 <dl class="method">
@@ -156,7 +156,7 @@ This is guaranteed to be blocking, not asynchronous.</p>
 
 <dl class="class">
 <dt id="snowplow_tracker.emitters.Emitter">
-<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">Emitter</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str, protocol: Literal[http, https] = 'https', port: Optional[int] = None, method: Literal[get, post] = 'post', buffer_size: Optional[int] = None, on_success: Optional[Callable[[List[Dict[str, Any]]], None]] = None, on_failure: Optional[Callable[[int, List[Dict[str, Any]]], None]] = None, byte_limit: Optional[int] = None, request_timeout: Union[float, Tuple[float, float], None] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.Emitter" title="Permalink to this definition"></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">Emitter</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str, protocol: Literal[http, https] = 'https', port: Optional[int] = None, method: Literal[get, post] = 'post', batch_size: Optional[int] = None, on_success: Optional[Callable[[List[Dict[str, Any]]], None]] = None, on_failure: Optional[Callable[[int, List[Dict[str, Any]]], None]] = None, byte_limit: Optional[int] = None, request_timeout: Union[float, Tuple[float, float], None] = None, max_retry_delay_seconds: int = 60, buffer_capacity: Optional[int] = None, custom_retry_codes: Dict[int, bool] = {}, event_store: Optional[snowplow_tracker.event_store.EventStore] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.Emitter" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Synchronously send Snowplow events to a Snowplow collector
 Supports both GET and POST requests</p>
@@ -207,7 +207,7 @@ as <cite>stm</cite> param</p>
 
 <dl class="method">
 <dt id="snowplow_tracker.emitters.Emitter.http_get">
-<code class="sig-name descname">http_get</code><span class="sig-paren">(</span><em class="sig-param">payload: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#snowplow_tracker.emitters.Emitter.http_get" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname">http_get</code><span class="sig-paren">(</span><em class="sig-param">payload: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#snowplow_tracker.emitters.Emitter.http_get" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>payload</strong> (<em>dict</em><em>(</em><em>string:*</em><em>)</em>) – The event properties</p>
@@ -217,7 +217,7 @@ as <cite>stm</cite> param</p>
 
 <dl class="method">
 <dt id="snowplow_tracker.emitters.Emitter.http_post">
-<code class="sig-name descname">http_post</code><span class="sig-paren">(</span><em class="sig-param">data: str</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#snowplow_tracker.emitters.Emitter.http_post" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname">http_post</code><span class="sig-paren">(</span><em class="sig-param">data: str</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#snowplow_tracker.emitters.Emitter.http_post" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>data</strong> (<em>string</em>) – The array of JSONs to be sent</p>
@@ -273,16 +273,10 @@ If the maximum size has been reached, flushes the buffer.</p>
 
 <dl class="method">
 <dt id="snowplow_tracker.emitters.Emitter.set_flush_timer">
-<code class="sig-name descname">set_flush_timer</code><span class="sig-paren">(</span><em class="sig-param">timeout: float</em>, <em class="sig-param">flush_now: bool = False</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#snowplow_tracker.emitters.Emitter.set_flush_timer" title="Permalink to this definition"></a></dt>
-<dd><p>Set an interval at which the buffer will be flushed</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>timeout</strong> (<em>int | float</em>) – interval in seconds</p></li>
-<li><p><strong>flush_now</strong> (<em>bool</em>) – immediately flush buffer</p></li>
-</ul>
-</dd>
-</dl>
+<code class="sig-name descname">set_flush_timer</code><span class="sig-paren">(</span><em class="sig-param">timeout: float</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#snowplow_tracker.emitters.Emitter.set_flush_timer" title="Permalink to this definition"></a></dt>
+<dd><p>Set an interval at which the buffer will be flushed
+:param timeout:   interval in seconds
+:type  timeout:   int | float</p>
 </dd></dl>
 
 <dl class="method">
@@ -291,6 +285,28 @@ If the maximum size has been reached, flushes the buffer.</p>
 <dd><p>Calls the flush method of the base Emitter class.
 This is guaranteed to be blocking, not asynchronous.</p>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="snowplow_tracker.emitters.FlushTimer">
+<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">FlushTimer</code><span class="sig-paren">(</span><em class="sig-param">emitter: snowplow_tracker.emitters.Emitter</em>, <em class="sig-param">repeating: bool</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.FlushTimer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Internal class used by the Emitter to schedule flush calls for later.</p>
+<dl class="method">
+<dt id="snowplow_tracker.emitters.FlushTimer.cancel">
+<code class="sig-name descname">cancel</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#snowplow_tracker.emitters.FlushTimer.cancel" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="snowplow_tracker.emitters.FlushTimer.is_active">
+<code class="sig-name descname">is_active</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#snowplow_tracker.emitters.FlushTimer.is_active" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="snowplow_tracker.emitters.FlushTimer.start">
+<code class="sig-name descname">start</code><span class="sig-paren">(</span><em class="sig-param">timeout: float</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#snowplow_tracker.emitters.FlushTimer.start" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -608,6 +624,11 @@ to the Payload object irrespective of the tracked event.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="snowplow_tracker.tracker.Tracker.get_namespace">
+<code class="sig-name descname">get_namespace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.tracker.Tracker.get_namespace" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="snowplow_tracker.tracker.Tracker.get_timestamp">
 <em class="property">static </em><code class="sig-name descname">get_timestamp</code><span class="sig-paren">(</span><em class="sig-param">tstamp: Optional[float] = None</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#snowplow_tracker.tracker.Tracker.get_timestamp" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
@@ -799,6 +820,33 @@ It is not for public use.</p>
 <dd class="field-even"><p>tracker</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="snowplow_tracker.tracker.Tracker.track_mobile_screen_view">
+<code class="sig-name descname">track_mobile_screen_view</code><span class="sig-paren">(</span><em class="sig-param">id_: Optional[str] = None</em>, <em class="sig-param">name: Optional[str] = None</em>, <em class="sig-param">type: Optional[str] = None</em>, <em class="sig-param">previous_name: Optional[str] = None</em>, <em class="sig-param">previous_id: Optional[str] = None</em>, <em class="sig-param">previous_type: Optional[str] = None</em>, <em class="sig-param">transition_type: Optional[str] = None</em>, <em class="sig-param">context: Optional[List[snowplow_tracker.self_describing_json.SelfDescribingJson]] = None</em>, <em class="sig-param">tstamp: Optional[float] = None</em>, <em class="sig-param">event_subject: Optional[snowplow_tracker.subject.Subject] = None</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.tracker.Tracker<a class="headerlink" href="#snowplow_tracker.tracker.Tracker.track_mobile_screen_view" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>string | None</em>) – Screen view ID. This must be of type UUID.</p></li>
+<li><p><strong>name</strong> (<em>string_or_none</em>) – The name of the screen view event</p></li>
+<li><p><strong>type</strong> (<em>string | None</em>) – The type of screen that was viewed e.g feed / carousel.</p></li>
+<li><p><strong>previous_name</strong> (<em>string | None</em>) – The name of the previous screen.</p></li>
+<li><p><strong>previous_id</strong> (<em>string | None</em>) – The screenview ID of the previous screenview.</p></li>
+</ul>
+</dd>
+</dl>
+<p>:param  previous_type   The screen type of the previous screenview
+:type   previous_type   string | None
+:param  transition_type The type of transition that led to the screen being viewed.
+:type   transition_type string | None
+:param  context:        Custom context for the event
+:type   context:        context_array | None
+:param  tstamp:         Optional event timestamp in milliseconds
+:type   tstamp:         int | float | None
+:param  event_subject:  Optional per event subject
+:type   event_subject:  subject | None
+:rtype:                 tracker</p>
 </dd></dl>
 
 <dl class="method">
@@ -1017,7 +1065,7 @@ A “schema” field identifying the schema against which the data is validated<
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Alex Dean, Paul Boocock, Matus Tomlein, Jack Keene.</p>
+    <p>&#169; Copyright 2023, Alex Dean, Paul Boocock, Matus Tomlein, Jack Keene.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
