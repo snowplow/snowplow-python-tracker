@@ -345,6 +345,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 tracker
         """
+        warn(
+            "track_add_to_cart will be deprecated in future versions.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty_string(sku)
 
         properties = {}
@@ -400,6 +405,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 tracker
         """
+        warn(
+            "track_remove_from_cart will be deprecated in future versions.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty_string(sku)
 
         properties = {}
@@ -606,6 +616,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:              tracker
         """
+        warn(
+            "track_ecommerce_transaction_item will be deprecated in future versions.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty_string(order_id)
         non_empty_string(sku)
 
@@ -666,6 +681,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 tracker
         """
+        warn(
+            "track_ecommerce_transaction will be deprecated in future versions.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty_string(order_id)
 
         pb = payload.Payload()
