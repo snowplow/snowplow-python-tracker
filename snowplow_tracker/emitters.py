@@ -439,10 +439,8 @@ class AsyncEmitter(Emitter):
         on_failure: Optional[FailureCallback] = None,
         thread_count: int = 1,
         byte_limit: Optional[int] = None,
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
         max_retry_delay_seconds: int = 60,
         buffer_capacity: int = None,
-        custom_retry_codes: Dict[int, bool] = {},
         event_store: Optional[EventStore] = None,
     ) -> None:
         """
@@ -478,19 +476,17 @@ class AsyncEmitter(Emitter):
         :type   event_store:    EventStore
         """
         super(AsyncEmitter, self).__init__(
-            endpoint=endpoint,
-            protocol=protocol,
-            port=port,
-            method=method,
-            batch_size=batch_size,
-            on_success=on_success,
-            on_failure=on_failure,
-            byte_limit=byte_limit,
-            request_timeout=request_timeout,
-            max_retry_delay_seconds=max_retry_delay_seconds,
-            buffer_capacity=buffer_capacity,
-            custom_retry_codes=custom_retry_codes,
-            event_store=event_store,
+            endpoint,
+            protocol,
+            port,
+            method,
+            batch_size,
+            on_success,
+            on_failure,
+            byte_limit,
+            max_retry_delay_seconds,
+            buffer_capacity,
+            event_store,
         )
         self.queue = Queue()
         for i in range(thread_count):
