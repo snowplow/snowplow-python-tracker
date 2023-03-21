@@ -1,3 +1,10 @@
+Version 0.14.0 (2023-03-21)
+---------------------------
+Adds deprecation warnings for V1 changes (#315)
+Update GH actions to use Node16 (#317)
+Adds event store parameter to Snowplow interface (#320)
+Adds missing parameters to async emitter (#323)
+
 Version 0.13.0 (2023-01-24)
 ---------------------------
 Adds Snowplow Interface (#295)

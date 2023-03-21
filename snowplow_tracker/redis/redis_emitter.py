@@ -18,6 +18,7 @@
 import json
 import logging
 from typing import Any, Optional
+from warnings import warn
 from snowplow_tracker.typing import PayloadDict, RedisProtocol
 
 _REDIS_OPT = True
@@ -48,6 +49,11 @@ class RedisEmitter(object):
             :param key:  The Redis key for the list of events
             :type  key:  string
             """
+            warn(
+                "The Redis Emitter will be deprecated in future versions.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             if rdb is None:
                 rdb = redis.StrictRedis()
 

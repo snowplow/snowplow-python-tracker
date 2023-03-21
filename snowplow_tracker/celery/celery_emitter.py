@@ -17,6 +17,7 @@
 
 import logging
 from typing import Any, Optional
+from warnings import warn
 
 from snowplow_tracker.emitters import Emitter
 from snowplow_tracker.typing import HttpProtocol, Method
@@ -41,7 +42,6 @@ class CeleryEmitter(Emitter):
     """
 
     if _CELERY_OPT:
-
         celery_app = None
 
         def __init__(
@@ -53,6 +53,11 @@ class CeleryEmitter(Emitter):
             batch_size: Optional[int] = None,
             byte_limit: Optional[int] = None,
         ) -> None:
+            warn(
+                "The Celery Emitter will be deprecated in future versions.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
             super(CeleryEmitter, self).__init__(
                 endpoint, protocol, port, method, batch_size, None, None, byte_limit
             )
