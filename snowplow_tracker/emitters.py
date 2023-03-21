@@ -439,8 +439,10 @@ class AsyncEmitter(Emitter):
         on_failure: Optional[FailureCallback] = None,
         thread_count: int = 1,
         byte_limit: Optional[int] = None,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
         max_retry_delay_seconds: int = 60,
         buffer_capacity: int = None,
+        custom_retry_codes: Dict[int, bool] = {},
         event_store: Optional[EventStore] = None,
     ) -> None:
         """
