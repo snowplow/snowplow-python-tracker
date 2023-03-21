@@ -478,17 +478,19 @@ class AsyncEmitter(Emitter):
         :type   event_store:    EventStore
         """
         super(AsyncEmitter, self).__init__(
-            endpoint,
-            protocol,
-            port,
-            method,
-            batch_size,
-            on_success,
-            on_failure,
-            byte_limit,
-            max_retry_delay_seconds,
-            buffer_capacity,
-            event_store,
+            endpoint=endpoint,
+            protocol=protocol,
+            port=port,
+            method=method,
+            batch_size=batch_size,
+            on_success=on_success,
+            on_failure=on_failure,
+            byte_limit=byte_limit,
+            request_timeout=request_timeout,
+            max_retry_delay_seconds=max_retry_delay_seconds,
+            buffer_capacity=buffer_capacity,
+            custom_retry_codes=custom_retry_codes,
+            event_store=event_store,
         )
         self.queue = Queue()
         for i in range(thread_count):
