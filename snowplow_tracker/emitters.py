@@ -69,6 +69,7 @@ class Emitter(object):
         buffer_capacity: Optional[int] = None,
         custom_retry_codes: Dict[int, bool] = {},
         event_store: Optional[EventStore] = None,
+        session: requests.Session = None,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -107,6 +108,8 @@ class Emitter(object):
         :type   custom_retry_codes: dict
         :param  event_store:    Stores the event buffer and buffer capacity. Default is an InMemoryEventStore object with buffer_capacity of 10,000 events.
         :type   event_store:    EventStore | None
+        :param  session:    Persist parameters across requests by using a session object
+        :type   session:    request.Session
         """
         one_of(protocol, PROTOCOLS)
         one_of(method, METHODS)
