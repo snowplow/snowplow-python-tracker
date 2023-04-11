@@ -33,3 +33,16 @@ class RedisEmitter(object):
     def sync_flush(self) -> None:
         self.flush()
 
+
+def main():
+    emitter = RedisEmitter()
+
+    t = Tracker(emitter)
+
+    t.track_page_view("https://www.snowplow.io", "Homepage")
+    t.track_page_ping("https://www.snowplow.io", "Homepage")
+    t.track_link_click("https://www.snowplow.io")
+
+
+if __name__ == "__main__":
+    main()
