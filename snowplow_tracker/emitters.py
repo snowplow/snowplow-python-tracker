@@ -251,7 +251,7 @@ class Emitter(object):
         logger.info("Sending POST request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % data)
         try:
-            r = requests.post(
+            r = self.session.post(
                 self.endpoint,
                 data=data,
                 headers={"Content-Type": "application/json; charset=utf-8"},
@@ -271,7 +271,7 @@ class Emitter(object):
         logger.info("Sending GET request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % payload)
         try:
-            r = requests.get(
+            r = self.session.get(
                 self.endpoint, params=payload, timeout=self.request_timeout
             )
         except requests.RequestException as e:
