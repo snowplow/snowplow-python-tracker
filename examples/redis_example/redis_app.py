@@ -1,3 +1,15 @@
+from snowplow_tracker import Tracker
+from snowplow_tracker.typing import PayloadDict
+import json
+import redis
+import logging
+
+# logging
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
 class RedisEmitter(object):
     """
     Sends Snowplow events to a Redis database
