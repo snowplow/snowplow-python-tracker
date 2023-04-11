@@ -156,6 +156,11 @@ class Emitter(object):
         self.custom_retry_codes = custom_retry_codes
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
+        if session is None:
+            session = requests.Session()
+
+        self.session = session
+
     @staticmethod
     def as_collector_uri(
         endpoint: str,
