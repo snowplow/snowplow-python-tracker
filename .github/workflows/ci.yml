@@ -55,7 +55,8 @@ jobs:
       
     - name: Demo
       run: |
-        cd examples/tracker_api_example
+        cd examples
+        cd tracker_api_example
         python app.py "localhost:9090"
 
     - name: Coveralls
