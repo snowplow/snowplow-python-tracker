@@ -1,18 +1,7 @@
 import sys
-from snowplow_tracker import (
-    Snowplow,
-    EmitterConfiguration,
-    Subject,
-    TrackerConfiguration,
-    SelfDescribingJson,
-    EventStore,
-    Emitter,
-    RedisEmitter,
-    Tracker,
-    AsyncEmitter,
-)
-from typing import Optional, Any
-from snowplow_tracker.typing import PayloadDict, PayloadDictList
+from snowplow_tracker import Emitter
+from typing import Any
+from snowplow_tracker.typing import PayloadDict
 import json
 import redis
 import signal
