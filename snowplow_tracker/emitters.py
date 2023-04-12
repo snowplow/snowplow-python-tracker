@@ -69,7 +69,7 @@ class Emitter(object):
         buffer_capacity: Optional[int] = None,
         custom_retry_codes: Dict[int, bool] = {},
         event_store: Optional[EventStore] = None,
-        session: requests.Session = None,
+        session: Optional[requests.Session] = None,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
