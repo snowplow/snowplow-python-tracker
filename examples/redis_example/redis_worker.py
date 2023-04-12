@@ -63,22 +63,10 @@ def main():
     collector_url = get_url_from_args()
 
     # Configure Emitter
-    emitter_config = EmitterConfiguration(batch_size=3)
+    emitter = Emitter(collector_url, batch_size=1)
 
-    # Configure Tracker
-    tracker_config = TrackerConfiguration(encode_base64=True)
-
-    Snowplow.create_tracker(
-        namespace="ns",
-        endpoint=collector_url,
-        app_id="app1",
-        tracker_config=tracker_config,
-        emitter_config=emitter_config,
-    )
-
-    tracker = Snowplow.get_tracker("ns")
-    worker = RedisWorker(emitter=tracker.emitters[0], key="redis_key")
-
+    # Setup worker
+    worker = RedisWorker(emitter=emitter, key="redis_key")
     worker.run()
 
 
