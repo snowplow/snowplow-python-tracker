@@ -4,7 +4,6 @@ from snowplow_tracker import (
     Emitter,
     Subject,
     SelfDescribingJson,
-    CeleryEmitter,
 )
 import sys
 
@@ -18,9 +17,7 @@ def get_url_from_args():
 def main():
     collector_url = get_url_from_args()
 
-    # e = Emitter(collector_url)
-
-    e = CeleryEmitter(collector_url)
+    e = Emitter(collector_url)
 
     s = Subject().set_platform("pc")
     s.set_lang("en").set_user_id("test_user")
