@@ -109,7 +109,7 @@ class Emitter(object):
         :param  event_store:    Stores the event buffer and buffer capacity. Default is an InMemoryEventStore object with buffer_capacity of 10,000 events.
         :type   event_store:    EventStore | None
         :param  session:    Persist parameters across requests by using a session object
-        :type   session:    request.Session
+        :type   session:    requests.Session | None
         """
         one_of(protocol, PROTOCOLS)
         one_of(method, METHODS)
