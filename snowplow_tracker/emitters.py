@@ -157,9 +157,9 @@ class Emitter(object):
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
         if session is None:
-            session = requests.Session()
+            session = requests
 
-        self.session = session
+        self.request_method = session
 
     @staticmethod
     def as_collector_uri(
@@ -251,7 +251,7 @@ class Emitter(object):
         logger.info("Sending POST request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % data)
         try:
-            r = self.session.post(
+            r = self.request_method.post(
                 self.endpoint,
                 data=data,
                 headers={"Content-Type": "application/json; charset=utf-8"},
@@ -271,7 +271,7 @@ class Emitter(object):
         logger.info("Sending GET request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % payload)
         try:
-            r = self.session.get(
+            r = self.request_method.get(
                 self.endpoint, params=payload, timeout=self.request_timeout
             )
         except requests.RequestException as e:
