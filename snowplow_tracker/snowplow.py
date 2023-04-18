@@ -81,6 +81,7 @@ class Snowplow:
             request_timeout=emitter_config.request_timeout,
             custom_retry_codes=emitter_config.custom_retry_codes,
             event_store=emitter_config.event_store,
+            session=emitter_config.session,
         )
 
         tracker = Tracker(
