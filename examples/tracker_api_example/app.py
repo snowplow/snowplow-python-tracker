@@ -1,5 +1,10 @@
 from distutils.log import error
-from snowplow_tracker import Tracker, Emitter, Subject, SelfDescribingJson
+from snowplow_tracker import (
+    Tracker,
+    Emitter,
+    Subject,
+    SelfDescribingJson,
+)
 import sys
 
 
