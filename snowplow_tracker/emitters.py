@@ -449,6 +449,7 @@ class AsyncEmitter(Emitter):
         buffer_capacity: int = None,
         custom_retry_codes: Dict[int, bool] = {},
         event_store: Optional[EventStore] = None,
+        session: Optional[requests.Session] = None,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -481,6 +482,8 @@ class AsyncEmitter(Emitter):
         :type buffer_capacity: int
         :param  event_store:    Stores the event buffer and buffer capacity. Default is an InMemoryEventStore object with buffer_capacity of 10,000 events.
         :type   event_store:    EventStore
+        :param  session:    Persist parameters across requests by using a session object
+        :type   session:    requests.Session | None
         """
         super(AsyncEmitter, self).__init__(
             endpoint=endpoint,
@@ -496,6 +499,7 @@ class AsyncEmitter(Emitter):
             buffer_capacity=buffer_capacity,
             custom_retry_codes=custom_retry_codes,
             event_store=event_store,
+            session=session,
         )
         self.queue = Queue()
         for i in range(thread_count):
