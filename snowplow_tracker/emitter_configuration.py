@@ -18,6 +18,7 @@
 from typing import Optional, Union, Tuple, Dict
 from snowplow_tracker.typing import SuccessCallback, FailureCallback
 from snowplow_tracker.event_store import EventStore
+import requests
 
 
 class EmitterConfiguration(object):
@@ -31,6 +32,7 @@ class EmitterConfiguration(object):
         buffer_capacity: Optional[int] = None,
         custom_retry_codes: Dict[int, bool] = {},
         event_store: Optional[EventStore] = None,
+        session: Optional[requests.Session] = None,
     ) -> None:
         """
         Configuration for the emitter that sends events to the Snowplow collector.
@@ -57,6 +59,8 @@ class EmitterConfiguration(object):
         :type   custom_retry_codes: dict
         :param  event_store:    Stores the event buffer and buffer capacity. Default is an InMemoryEventStore object with buffer_capacity of 10,000 events.
         :type   event_store:    EventStore | None
+        :param  session:    Persist parameters across requests by using a session object
+        :type   session:    request.Session | None
         """
 
         self.batch_size = batch_size
@@ -67,6 +71,7 @@ class EmitterConfiguration(object):
         self.buffer_capacity = buffer_capacity
         self.custom_retry_codes = custom_retry_codes
         self.event_store = event_store
+        self.session = session
 
     @property
     def batch_size(self) -> Optional[int]:
@@ -197,3 +202,14 @@ class EmitterConfiguration(object):
     @event_store.setter
     def event_store(self, value: Optional[EventStore]):
         self._event_store = value
+
+    @property
+    def session(self) -> Optional[requests.Session]:
+        """
+        Persist parameters across requests using a requests.Session object
+        """
+        return self._session
+
+    @session.setter
+    def session(self, value: Optional[requests.Session]):
+        self._session = value

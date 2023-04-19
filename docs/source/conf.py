@@ -28,7 +28,7 @@ copyright = "2023, Alex Dean, Paul Boocock, Matus Tomlein, Jack Keene"
 author = 'Alex Dean, Paul Boocock, Matus Tomlein, Jack Keene'
 
 # The full version, including alpha/beta/rc tags
-release = "0.14"
+release = "0.15"
 
 
 # -- General configuration ---------------------------------------------------
