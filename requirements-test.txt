@@ -5,4 +5,3 @@ httmock==1.4.0
 freezegun==1.1.0
 pytest-cov
 coveralls==3.3.1
-fakeredis==1.7.0
