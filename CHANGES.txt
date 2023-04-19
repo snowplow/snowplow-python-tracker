@@ -1,3 +1,8 @@
+Version 0.15.0 (2023-04-19)
+---------------------------
+Use Requests Session for sending eventss (#221)
+Add Redis example app (#322)
+
 Version 0.14.0 (2023-03-21)
 ---------------------------
 Adds deprecation warnings for V1 changes (#315)
