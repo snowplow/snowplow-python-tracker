@@ -27,7 +27,6 @@ from typing import Any, Dict, Optional
 
 from snowplow_tracker import tracker, _version, emitters, subject
 from snowplow_tracker.self_describing_json import SelfDescribingJson
-from snowplow_tracker.redis import redis_emitter
 
 
 querystrings = [""]
@@ -413,36 +412,6 @@ class IntegrationTest(unittest.TestCase):
             self.assertEqual(
                 from_querystring(key, querystrings[-1]), expected_fields[key]
             )
-
-    def test_integration_redis_default(self) -> None:
-        try:
-            import fakeredis
-
-            r = fakeredis.FakeStrictRedis()
-            t = tracker.Tracker([redis_emitter.RedisEmitter(rdb=r)], default_subject)
-            t.track_page_view("http://www.example.com")
-            event_string = r.rpop("snowplow")
-            event_dict = json.loads(event_string.decode("utf-8"))
-            self.assertEqual(event_dict["e"], "pv")
-        except ImportError:
-            with pytest.raises(RuntimeError):
-                redis_emitter.RedisEmitter()
-
-    def test_integration_redis_custom(self) -> None:
-        try:
-            import fakeredis
-
-            r = fakeredis.FakeStrictRedis()
-            t = tracker.Tracker(
-                [redis_emitter.RedisEmitter(rdb=r, key="custom_key")], default_subject
-            )
-            t.track_page_view("http://www.example.com")
-            event_string = r.rpop("custom_key")
-            event_dict = json.loads(event_string.decode("utf-8"))
-            self.assertEqual(event_dict["e"], "pv")
-        except ImportError:
-            with pytest.raises(RuntimeError):
-                redis_emitter.RedisEmitter("arg", key="kwarg")
 
     def test_integration_success_callback(self) -> None:
         callback_success_queue = []
