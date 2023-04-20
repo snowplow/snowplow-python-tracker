@@ -13,7 +13,6 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9, "3.10", "3.11"]
-        extras-required: ["."]
 
     steps:
     - name: Checkout
@@ -31,7 +30,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade "${{ env.pip_v }}" setuptools wheel
-        python -m pip install -e ${{ matrix.extras-required }}
+        python -m pip install -e .
         python -m pip install -r requirements-test.txt
 
     - name: Build
