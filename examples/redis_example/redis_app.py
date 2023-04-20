@@ -49,7 +49,7 @@ class RedisEmitter(object):
 def main():
     emitter = RedisEmitter()
 
-    t = Tracker(emitter)
+    t = Tracker("snowplow_tracker", emitter)
 
     t.track_page_view("https://www.snowplow.io", "Homepage")
     t.track_page_ping("https://www.snowplow.io", "Homepage")
