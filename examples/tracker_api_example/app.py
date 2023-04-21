@@ -22,7 +22,7 @@ def main():
     s = Subject().set_platform("pc")
     s.set_lang("en").set_user_id("test_user")
 
-    t = Tracker("snowplow_tracker", e, s)
+    t = Tracker(namespace="snowplow_tracker", emitters=e, subject=s)
 
     print("Sending events to " + e.endpoint)
 
