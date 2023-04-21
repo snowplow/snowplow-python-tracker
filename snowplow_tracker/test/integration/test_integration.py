@@ -64,7 +64,7 @@ def fail_response_content(url: str, request: Any) -> Dict[str, Any]:
 
 class IntegrationTest(unittest.TestCase):
     def test_integration_page_view(self) -> None:
-        t = tracker.Tracker([get_emitter], default_subject)
+        t = tracker.Tracker("namespace", [get_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_page_view(
                 "http://savethearctic.org", "Save The Arctic", "http://referrer.com"
@@ -81,7 +81,7 @@ class IntegrationTest(unittest.TestCase):
             )
 
     def test_integration_ecommerce_transaction_item(self) -> None:
-        t = tracker.Tracker([get_emitter], default_subject)
+        t = tracker.Tracker("namespace", [get_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_ecommerce_transaction_item(
                 "12345", "pbz0025", 7.99, 2, "black-tarot", "tarot", currency="GBP"
@@ -102,7 +102,7 @@ class IntegrationTest(unittest.TestCase):
             )
 
     def test_integration_ecommerce_transaction(self) -> None:
-        t = tracker.Tracker([get_emitter], default_subject)
+        t = tracker.Tracker("namespace", [get_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_ecommerce_transaction(
                 "6a8078be",
@@ -157,7 +157,9 @@ class IntegrationTest(unittest.TestCase):
         )
 
     def test_integration_mobile_screen_view(self) -> None:
-        t = tracker.Tracker([get_emitter], default_subject, encode_base64=False)
+        t = tracker.Tracker(
+            "namespace", [get_emitter], default_subject, encode_base64=False
+        )
         with HTTMock(pass_response_content):
             t.track_mobile_screen_view("534", "Game HUD 2")
         expected_fields = {"e": "ue"}
@@ -179,7 +181,7 @@ class IntegrationTest(unittest.TestCase):
         )
 
     def test_integration_struct_event(self) -> None:
-        t = tracker.Tracker([get_emitter], default_subject)
+        t = tracker.Tracker("namespace", [get_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_struct_event(
                 "Ecomm", "add-to-basket", "dog-skateboarding-video", "hd", 13.99
@@ -198,7 +200,9 @@ class IntegrationTest(unittest.TestCase):
             )
 
     def test_integration_self_describing_event_non_base64(self) -> None:
-        t = tracker.Tracker([get_emitter], default_subject, encode_base64=False)
+        t = tracker.Tracker(
+            "namespace", [get_emitter], default_subject, encode_base64=False
+        )
         with HTTMock(pass_response_content):
             t.track_self_describing_event(
                 SelfDescribingJson(
@@ -229,7 +233,9 @@ class IntegrationTest(unittest.TestCase):
         )
 
     def test_integration_self_describing_event_base64(self) -> None:
-        t = tracker.Tracker([get_emitter], default_subject, encode_base64=True)
+        t = tracker.Tracker(
+            "namespace", [get_emitter], default_subject, encode_base64=True
+        )
         with HTTMock(pass_response_content):
             t.track_self_describing_event(
                 SelfDescribingJson(
@@ -264,7 +270,9 @@ class IntegrationTest(unittest.TestCase):
         )
 
     def test_integration_context_non_base64(self) -> None:
-        t = tracker.Tracker([get_emitter], default_subject, encode_base64=False)
+        t = tracker.Tracker(
+            "namespace", [get_emitter], default_subject, encode_base64=False
+        )
         with HTTMock(pass_response_content):
             t.track_page_view(
                 "localhost",
@@ -293,7 +301,9 @@ class IntegrationTest(unittest.TestCase):
         )
 
     def test_integration_context_base64(self) -> None:
-        t = tracker.Tracker([get_emitter], default_subject, encode_base64=True)
+        t = tracker.Tracker(
+            "namespace", [get_emitter], default_subject, encode_base64=True
+        )
         with HTTMock(pass_response_content):
             t.track_page_view(
                 "localhost",
@@ -335,9 +345,9 @@ class IntegrationTest(unittest.TestCase):
         s.set_lang("en")
 
         t = tracker.Tracker(
+            "cf",
             [emitters.Emitter("localhost", method="get")],
             s,
-            "cf",
             app_id="angry-birds-android",
         )
         with HTTMock(pass_response_content):
@@ -371,9 +381,9 @@ class IntegrationTest(unittest.TestCase):
         s.set_network_user_id("fbc6c76c-bce5-43ce-8d5a-31c5")
 
         t = tracker.Tracker(
+            "cf",
             [emitters.Emitter("localhost", method="get")],
             s,
-            "cf",
             app_id="angry-birds-android",
         )
         with HTTMock(pass_response_content):
@@ -397,9 +407,9 @@ class IntegrationTest(unittest.TestCase):
         s.set_lang("ES")
 
         t = tracker.Tracker(
+            "namespace",
             [emitters.Emitter("localhost", method="get")],
             s,
-            "cf",
             app_id="angry-birds-android",
         )
         evSubject = (
@@ -422,7 +432,7 @@ class IntegrationTest(unittest.TestCase):
             on_success=lambda x: callback_success_queue.append(x),
             on_failure=lambda x, y: callback_failure_queue.append(x),
         )
-        t = tracker.Tracker([callback_emitter], default_subject)
+        t = tracker.Tracker("namespace", [callback_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_page_view("http://www.example.com")
         expected = {
@@ -443,14 +453,14 @@ class IntegrationTest(unittest.TestCase):
             on_success=lambda x: callback_success_queue.append(x),
             on_failure=lambda x, y: callback_failure_queue.append(x),
         )
-        t = tracker.Tracker([callback_emitter], default_subject)
+        t = tracker.Tracker("namespace", [callback_emitter], default_subject)
         with HTTMock(fail_response_content):
             t.track_page_view("http://www.example.com")
         self.assertEqual(callback_success_queue, [])
         self.assertEqual(callback_failure_queue[0], 0)
 
     def test_post_page_view(self) -> None:
-        t = tracker.Tracker([default_emitter], default_subject)
+        t = tracker.Tracker("namespace", [default_emitter], default_subject)
         with HTTMock(pass_post_response_content):
             t.track_page_view("localhost", "local host", None)
         expected_fields = {"e": "pv", "page": "local host", "url": "localhost"}
@@ -466,7 +476,7 @@ class IntegrationTest(unittest.TestCase):
         default_emitter = emitters.Emitter(
             "localhost", protocol="http", port=80, batch_size=2
         )
-        t = tracker.Tracker(default_emitter, default_subject)
+        t = tracker.Tracker("namespace", default_emitter, default_subject)
         with HTTMock(pass_post_response_content):
             t.track_struct_event("Test", "A")
             t.track_struct_event("Test", "B")
@@ -476,7 +486,7 @@ class IntegrationTest(unittest.TestCase):
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
     def test_timestamps(self) -> None:
         emitter = emitters.Emitter("localhost", protocol="http", port=80, batch_size=3)
-        t = tracker.Tracker([emitter], default_subject)
+        t = tracker.Tracker("namespace", [emitter], default_subject)
         with HTTMock(pass_post_response_content):
             t.track_page_view("localhost", "stamp0", None, tstamp=None)
             t.track_page_view("localhost", "stamp1", None, tstamp=1358933694000)
@@ -502,19 +512,21 @@ class IntegrationTest(unittest.TestCase):
 
     def test_bytelimit(self) -> None:
         default_emitter = emitters.Emitter(
-            "localhost", protocol="http", port=80, batch_size=5, byte_limit=420
+            "localhost", protocol="http", port=80, batch_size=5, byte_limit=483
         )
-        t = tracker.Tracker(default_emitter, default_subject)
+        t = tracker.Tracker("namespace", default_emitter, default_subject)
         with HTTMock(pass_post_response_content):
-            t.track_struct_event("Test", "A")  # 140 bytes
-            t.track_struct_event("Test", "A")  # 280 bytes
-            t.track_struct_event("Test", "A")  # 420 bytes. Send
-            t.track_struct_event("Test", "AA")  # 141
+            t.track_struct_event("Test", "A")  # 161 bytes
+            t.track_struct_event("Test", "A")  # 322 bytes
+            t.track_struct_event("Test", "A")  # 483 bytes. Send
+            t.track_struct_event("Test", "AA")  # 162
         self.assertEqual(len(querystrings[-1]["data"]), 3)
-        self.assertEqual(default_emitter.bytes_queued, 136 + len(_version.__version__))
+        self.assertEqual(default_emitter.bytes_queued, 156 + len(_version.__version__))
 
     def test_unicode_get(self) -> None:
-        t = tracker.Tracker([get_emitter], default_subject, encode_base64=False)
+        t = tracker.Tracker(
+            "namespace", [get_emitter], default_subject, encode_base64=False
+        )
         unicode_a = "\u0107"
         unicode_b = "test.\u0107om"
         test_ctx = SelfDescribingJson(
@@ -540,7 +552,9 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(actual_b, unicode_b)
 
     def test_unicode_post(self) -> None:
-        t = tracker.Tracker([default_emitter], default_subject, encode_base64=False)
+        t = tracker.Tracker(
+            "namespace", [default_emitter], default_subject, encode_base64=False
+        )
         unicode_a = "\u0107"
         unicode_b = "test.\u0107om"
         test_ctx = SelfDescribingJson(

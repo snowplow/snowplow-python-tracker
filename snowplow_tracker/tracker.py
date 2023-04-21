@@ -54,20 +54,20 @@ Tracker class
 class Tracker:
     def __init__(
         self,
+        namespace: str,
         emitters: Union[List[EmitterProtocol], EmitterProtocol],
         subject: Optional[_subject.Subject] = None,
-        namespace: Optional[str] = None,
         app_id: Optional[str] = None,
         encode_base64: bool = DEFAULT_ENCODE_BASE64,
         json_encoder: Optional[JsonEncoderFunction] = None,
     ) -> None:
         """
+        :param namespace:        Identifier for the Tracker instance
+        :type  namespace:        string
         :param emitters:         Emitters to which events will be sent
         :type  emitters:         list[>0](emitter) | emitter
         :param subject:          Subject to be tracked
         :type  subject:          subject | None
-        :param namespace:        Identifier for the Tracker instance
-        :type  namespace:        string_or_none
         :param app_id:           Application ID
         :type  app_id:           string_or_none
         :param encode_base64:    Whether JSONs in the payload should be base-64 encoded
@@ -966,5 +966,5 @@ class Tracker:
         self.emitters.append(emitter)
         return self
 
-    def get_namespace(self):
+    def get_namespace(self) -> str:
         return self.standard_nv_pairs["tna"]

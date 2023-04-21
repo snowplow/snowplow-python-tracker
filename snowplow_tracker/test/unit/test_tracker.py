@@ -96,7 +96,7 @@ class TestTracker(unittest.TestCase):
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
 
-        t = Tracker([e], namespace="cloudfront", encode_base64=False, app_id="AF003")
+        t = Tracker("cloudfront", [e], encode_base64=False, app_id="AF003")
         self.assertEqual(t.standard_nv_pairs["tna"], "cloudfront")
         self.assertEqual(t.standard_nv_pairs["aid"], "AF003")
         self.assertEqual(t.encode_base64, False)
@@ -105,9 +105,8 @@ class TestTracker(unittest.TestCase):
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         self.assertEqual(t.emitters, [e])
-        self.assertTrue(t.standard_nv_pairs["tna"] is None)
         self.assertTrue(t.standard_nv_pairs["aid"] is None)
         self.assertEqual(t.encode_base64, True)
 
@@ -116,19 +115,19 @@ class TestTracker(unittest.TestCase):
         e1 = mokEmitter()
         e2 = mokEmitter()
 
-        t = Tracker([e1, e2])
+        t = Tracker("namespace", [e1, e2])
         self.assertEqual(t.emitters, [e1, e2])
 
     def test_initialisation_error(self) -> None:
         with self.assertRaises(ValueError):
-            Tracker([])
+            Tracker("namespace", [])
 
     def test_initialization_with_subject(self) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
 
         s = Subject()
-        t = Tracker(e, subject=s)
+        t = Tracker("namespace", e, subject=s)
         self.assertIs(t.subject, s)
 
     def test_get_uuid(self) -> None:
@@ -163,7 +162,7 @@ class TestTracker(unittest.TestCase):
         e = mokEmitter()
 
         mok_track.side_effect = mocked_track
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         evJson = SelfDescribingJson("test.schema", {"n": "v"})
         # call the alias
         t.track_self_describing_event(evJson)
@@ -174,7 +173,7 @@ class TestTracker(unittest.TestCase):
         e1 = mokEmitter()
         e2 = mokEmitter()
 
-        t = Tracker([e1, e2])
+        t = Tracker("namespace", [e1, e2])
         t.flush()
         e1.flush.assert_not_called()
         self.assertEqual(e1.sync_flush.call_count, 1)
@@ -186,7 +185,7 @@ class TestTracker(unittest.TestCase):
         e1 = mokEmitter()
         e2 = mokEmitter()
 
-        t = Tracker([e1, e2])
+        t = Tracker("namespace", [e1, e2])
         t.flush(is_async=True)
         self.assertEqual(e1.flush.call_count, 1)
         e1.sync_flush.assert_not_called()
@@ -197,7 +196,7 @@ class TestTracker(unittest.TestCase):
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         new_subject = Subject()
         self.assertIsNot(t.subject, new_subject)
         t.set_subject(new_subject)
@@ -208,7 +207,7 @@ class TestTracker(unittest.TestCase):
         e1 = mokEmitter()
         e2 = mokEmitter()
 
-        t = Tracker(e1)
+        t = Tracker("namespace", e1)
         t.add_emitter(e2)
         self.assertEqual(t.emitters, [e1, e2])
 
@@ -222,7 +221,7 @@ class TestTracker(unittest.TestCase):
         e2 = mokEmitter()
         e3 = mokEmitter()
 
-        t = Tracker([e1, e2, e3])
+        t = Tracker("namespace", [e1, e2, e3])
 
         p = Payload({"test": "track"})
         t.track(p)
@@ -241,7 +240,7 @@ class TestTracker(unittest.TestCase):
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         p = Payload()
         t.complete_payload(p, None, None, None)
 
@@ -255,6 +254,7 @@ class TestTracker(unittest.TestCase):
             "dtm": 1618790401000,
             "tv": TRACKER_VERSION,
             "p": "pc",
+            "tna": "namespace",
         }
         self.assertDictEqual(passed_nv_pairs, expected)
 
@@ -268,7 +268,7 @@ class TestTracker(unittest.TestCase):
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         p = Payload()
         time_in_millis = 100010001000
         t.complete_payload(p, None, time_in_millis, None)
@@ -279,6 +279,7 @@ class TestTracker(unittest.TestCase):
         passed_nv_pairs = trackArgsTuple[0].nv_pairs
 
         expected = {
+            "tna": "namespace",
             "eid": _TEST_UUID,
             "dtm": 1618790401000,
             "ttm": time_in_millis,
@@ -297,7 +298,7 @@ class TestTracker(unittest.TestCase):
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         p = Payload()
         time_in_millis = 100010001000
         t.complete_payload(p, None, time_in_millis, None)
@@ -308,6 +309,7 @@ class TestTracker(unittest.TestCase):
         passed_nv_pairs = trackArgsTuple[0].nv_pairs
 
         expected = {
+            "tna": "namespace",
             "eid": _TEST_UUID,
             "dtm": 1618790401000,
             "ttm": time_in_millis,
@@ -326,7 +328,7 @@ class TestTracker(unittest.TestCase):
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         p = Payload()
         time_in_millis = 100010001000
         t.complete_payload(p, None, time_in_millis, None)
@@ -337,6 +339,7 @@ class TestTracker(unittest.TestCase):
         passed_nv_pairs = trackArgsTuple[0].nv_pairs
 
         expected = {
+            "tna": "namespace",
             "eid": _TEST_UUID,
             "dtm": 1618790401000,
             "ttm": time_in_millis,
@@ -355,7 +358,7 @@ class TestTracker(unittest.TestCase):
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
 
-        t = Tracker(e, encode_base64=False)
+        t = Tracker("namespace", e, encode_base64=False)
         p = Payload()
 
         geo_ctx = SelfDescribingJson(geoSchema, geoData)
@@ -388,7 +391,7 @@ class TestTracker(unittest.TestCase):
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
 
-        t = Tracker(e, encode_base64=True)
+        t = Tracker("namespace", e, encode_base64=True)
         p = Payload()
 
         geo_ctx = SelfDescribingJson(geoSchema, geoData)
@@ -415,7 +418,7 @@ class TestTracker(unittest.TestCase):
         mok_uuid.side_effect = mocked_uuid
         mok_track.side_effect = mocked_track
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         p = Payload()
         evSubject = Subject().set_lang("EN").set_user_id("tester")
         t.complete_payload(p, None, None, evSubject)
@@ -426,6 +429,7 @@ class TestTracker(unittest.TestCase):
         passed_nv_pairs = trackArgsTuple[0].nv_pairs
 
         expected = {
+            "tna": "namespace",
             "eid": _TEST_UUID,
             "dtm": 1618790401000,
             "tv": TRACKER_VERSION,
@@ -446,7 +450,7 @@ class TestTracker(unittest.TestCase):
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
-        t = Tracker(e, encode_base64=False)
+        t = Tracker("namespace", e, encode_base64=False)
         evJson = SelfDescribingJson("test.sde.schema", {"n": "v"})
         t.track_self_describing_event(evJson)
         self.assertEqual(mok_complete_payload.call_count, 1)
@@ -481,7 +485,7 @@ class TestTracker(unittest.TestCase):
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
-        t = Tracker(e, encode_base64=False)
+        t = Tracker("namespace", e, encode_base64=False)
         evJson = SelfDescribingJson("test.schema", {"n": "v"})
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evContext = [ctx]
@@ -519,7 +523,7 @@ class TestTracker(unittest.TestCase):
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
-        t = Tracker(e, encode_base64=True)
+        t = Tracker("namespace", e, encode_base64=True)
         evJson = SelfDescribingJson("test.sde.schema", {"n": "v"})
         t.track_self_describing_event(evJson)
         self.assertEqual(mok_complete_payload.call_count, 1)
@@ -537,7 +541,7 @@ class TestTracker(unittest.TestCase):
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
         t.track_struct_event(
@@ -577,7 +581,7 @@ class TestTracker(unittest.TestCase):
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
         t.track_page_view(
@@ -609,7 +613,7 @@ class TestTracker(unittest.TestCase):
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
         t.track_page_ping(
@@ -653,7 +657,7 @@ class TestTracker(unittest.TestCase):
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
         t.track_ecommerce_transaction_item(
@@ -699,7 +703,7 @@ class TestTracker(unittest.TestCase):
 
         mok_complete_payload.side_effect = mocked_complete_payload
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
         t.track_ecommerce_transaction(
@@ -750,7 +754,7 @@ class TestTracker(unittest.TestCase):
         mok_complete_payload.side_effect = mocked_complete_payload
         mok_track_trans_item.side_effect = mocked_track_trans_item
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
         transItems = [
@@ -839,7 +843,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
@@ -877,7 +881,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
 
         t.track_link_click("example.com")
 
@@ -901,7 +905,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
@@ -941,7 +945,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
 
         t.track_add_to_cart("sku1234", 1)
 
@@ -963,7 +967,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
@@ -1005,7 +1009,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
 
         t.track_remove_from_cart("sku1234", 1)
 
@@ -1027,7 +1031,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
@@ -1067,7 +1071,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         t.track_form_change("testFormId", "testElemId", "INPUT", "testValue")
 
         expected = {
@@ -1093,7 +1097,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
         elems = [
@@ -1137,7 +1141,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
         elems = [
@@ -1167,7 +1171,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
         elems = [
@@ -1210,7 +1214,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         t.track_form_submit("testFormId")
 
         expected = {"schema": FORM_SUBMIT_SCHEMA, "data": {"formId": "testFormId"}}
@@ -1228,7 +1232,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         t.track_form_submit("testFormId", elements=[])
 
         expected = {"schema": FORM_SUBMIT_SCHEMA, "data": {"formId": "testFormId"}}
@@ -1244,7 +1248,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
@@ -1275,7 +1279,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         t.track_site_search(["track", "search"])
 
         expected = {
@@ -1296,7 +1300,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
@@ -1322,7 +1326,7 @@ class TestTracker(unittest.TestCase):
 
         mok_track_unstruct.side_effect = mocked_track_unstruct
 
-        t = Tracker(e)
+        t = Tracker("namespace", e)
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
         evTstamp = 1399021242030
 
