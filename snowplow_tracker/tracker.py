@@ -142,7 +142,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]],
         tstamp: Optional[float],
         event_subject: Optional[_subject.Subject],
-    ) -> "Tracker":
+    ) -> str:
         """
         Called by all tracking events to add the standard name-value pairs
         to the Payload object irrespective of the tracked event.
@@ -155,7 +155,7 @@ class Tracker:
         :type   tstamp:          int | float | None
         :param  event_subject:   Optional per event subject
         :type   event_subject:   subject | None
-        :rtype:                  tracker
+        :rtype:                  String
         """
         pb.add("eid", Tracker.get_uuid())
 
@@ -187,7 +187,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  page_url:       URL of the viewed page
         :type   page_url:       non_empty_string
@@ -201,7 +201,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 str
         """
         non_empty_string(page_url)
 
@@ -225,7 +225,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  page_url:       URL of the viewed page
         :type   page_url:       non_empty_string
@@ -247,7 +247,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 str
         """
         non_empty_string(page_url)
 
@@ -273,7 +273,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  target_url:     Target URL of the link
         :type   target_url:     non_empty_string
@@ -291,7 +291,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 str
         """
         non_empty_string(target_url)
 
@@ -325,7 +325,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  sku:            Item SKU or ID
         :type   sku:            non_empty_string
@@ -345,7 +345,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 str
         """
         warn(
             "track_add_to_cart will be deprecated in future versions.",
@@ -385,7 +385,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  sku:            Item SKU or ID
         :type   sku:            non_empty_string
@@ -405,7 +405,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 str
         """
         warn(
             "track_remove_from_cart will be deprecated in future versions.",
@@ -445,7 +445,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  form_id:        ID attribute of the HTML form
         :type   form_id:        non_empty_string
@@ -465,7 +465,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 str
         """
         non_empty_string(form_id)
         one_of(node_name, FORM_NODE_NAMES)
@@ -498,7 +498,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  form_id:        ID attribute of the HTML form
         :type   form_id:        non_empty_string
@@ -512,7 +512,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 str
         """
         non_empty_string(form_id)
         for element in elements or []:
@@ -542,7 +542,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  terms:          Search terms
         :type   terms:          seq[>=1](str)
@@ -558,7 +558,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 str
         """
         non_empty(terms)
 
@@ -591,7 +591,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         This is an internal method called by track_ecommerce_transaction.
         It is not for public use.
@@ -616,7 +616,7 @@ class Tracker:
         :type   tstamp:      int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:              tracker
+        :rtype:              str
         """
         warn(
             "track_ecommerce_transaction_item will be deprecated in future versions.",
@@ -653,7 +653,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  order_id:       ID of the eCommerce transaction
         :type   order_id:       non_empty_string
@@ -681,7 +681,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 str
         """
         warn(
             "track_ecommerce_transaction will be deprecated in future versions.",
@@ -724,7 +724,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  name:           The name of the screen view event
         :type   name:           string_or_none
@@ -736,7 +736,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 str
         """
         warn(
             "track_screen_view will be deprecated in future versions. Please use track_mobile_screen_view.",
@@ -770,7 +770,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  id_:            Screen view ID. This must be of type UUID.
         :type   id_:            string | None
@@ -792,7 +792,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 str
         """
         screen_view_properties = {}
 
@@ -832,7 +832,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  category:       Category of the event
         :type   category:       non_empty_string
@@ -852,7 +852,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 str
         """
         non_empty_string(category)
         non_empty_string(action)
@@ -873,7 +873,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  event_json:      The properties of the event. Has two field:
                                  A "data" field containing the event properties and
@@ -885,7 +885,7 @@ class Tracker:
         :type   tstamp:          int | float | None
         :param  event_subject:   Optional per event subject
         :type   event_subject:   subject | None
-        :rtype:                  tracker
+        :rtype:                  str
         """
 
         envelope = SelfDescribingJson(
@@ -906,7 +906,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[_subject.Subject] = None,
-    ) -> "Tracker":
+    ) -> str:
         """
         :param  event_json:      The properties of the event. Has two field:
                                  A "data" field containing the event properties and
@@ -918,7 +918,7 @@ class Tracker:
         :type   tstamp:          int | float | None
         :param  event_subject:   Optional per event subject
         :type   event_subject:   subject | None
-        :rtype:                  tracker
+        :rtype:                  str
         """
         warn(
             "track_unstruct_event will be deprecated in future versions. Please use track_self_describing_event.",
