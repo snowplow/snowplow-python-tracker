@@ -122,17 +122,19 @@ class Tracker:
     Tracking methods
     """
 
-    def track(self, pb: payload.Payload) -> "Tracker":
+    def track(self, pb: payload.Payload) -> str:
         """
         Send the payload to a emitter
 
         :param  pb:              Payload builder
         :type   pb:              payload
-        :rtype:                  tracker
+        :rtype:                  String
         """
         for emitter in self.emitters:
             emitter.input(pb.nv_pairs)
-        return self
+
+        if "eid" in pb.nv_pairs.keys():
+            return pb.nv_pairs["eid"]
 
     def complete_payload(
         self,
