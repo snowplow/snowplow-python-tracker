@@ -122,7 +122,7 @@ class Tracker:
     Tracking methods
     """
 
-    def track(self, pb: payload.Payload) -> str:
+    def track(self, pb: payload.Payload) -> Optional[str]:
         """
         Send the payload to a emitter
 
