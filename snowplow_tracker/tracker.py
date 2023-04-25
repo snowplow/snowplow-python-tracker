@@ -124,7 +124,7 @@ class Tracker:
 
     def track(self, pb: payload.Payload) -> Optional[str]:
         """
-        Send the payload to a emitter
+        Send the payload to a emitter. Returns the tracked event ID.
 
         :param  pb:              Payload builder
         :type   pb:              payload
@@ -142,7 +142,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]],
         tstamp: Optional[float],
         event_subject: Optional[_subject.Subject],
-    ) -> str:
+    ) -> Optional[str]:
         """
         Called by all tracking events to add the standard name-value pairs
         to the Payload object irrespective of the tracked event.
