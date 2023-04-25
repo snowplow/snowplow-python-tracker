@@ -224,13 +224,13 @@ class TestTracker(unittest.TestCase):
         t = Tracker("namespace", [e1, e2, e3])
 
         p = Payload({"eid": "event_id"})
-        tracker = t.track(p)
+        event_id = t.track(p)
 
         e1.input.assert_called_once_with({"eid": "event_id"})
         e2.input.assert_called_once_with({"eid": "event_id"})
         e3.input.assert_called_once_with({"eid": "event_id"})
 
-        self.assertEqual(tracker, "event_id")
+        self.assertEqual(event_id, "event_id")
 
     @freeze_time("2021-04-19 00:00:01")  # unix: 1618790401000
     @mock.patch("snowplow_tracker.Tracker.track")
