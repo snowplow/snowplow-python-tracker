@@ -122,17 +122,19 @@ class Tracker:
     Tracking methods
     """
 
-    def track(self, pb: payload.Payload) -> "Tracker":
+    def track(self, pb: payload.Payload) -> Optional[str]:
         """
-        Send the payload to a emitter
+        Send the payload to a emitter. Returns the tracked event ID.
 
         :param  pb:              Payload builder
         :type   pb:              payload
-        :rtype:                  tracker
+        :rtype:                  String
         """
         for emitter in self.emitters:
             emitter.input(pb.nv_pairs)
-        return self
+
+        if "eid" in pb.nv_pairs.keys():
+            return pb.nv_pairs["eid"]
 
     def complete_payload(
         self,
@@ -140,7 +142,7 @@ class Tracker:
         context: Optional[List[SelfDescribingJson]],
         tstamp: Optional[float],
         event_subject: Optional[_subject.Subject],
-    ) -> "Tracker":
+    ) -> Optional[str]:
         """
         Called by all tracking events to add the standard name-value pairs
         to the Payload object irrespective of the tracked event.
@@ -153,7 +155,7 @@ class Tracker:
         :type   tstamp:          int | float | None
         :param  event_subject:   Optional per event subject
         :type   event_subject:   subject | None
-        :rtype:                  tracker
+        :rtype:                  String
         """
         pb.add("eid", Tracker.get_uuid())
 
@@ -199,7 +201,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 Tracker
         """
         non_empty_string(page_url)
 
@@ -209,7 +211,8 @@ class Tracker:
         pb.add("page", page_title)
         pb.add("refr", referrer)
 
-        return self.complete_payload(pb, context, tstamp, event_subject)
+        self.complete_payload(pb, context, tstamp, event_subject)
+        return self
 
     def track_page_ping(
         self,
@@ -245,7 +248,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 Tracker
         """
         non_empty_string(page_url)
 
@@ -259,7 +262,8 @@ class Tracker:
         pb.add("pp_miy", min_y)
         pb.add("pp_may", max_y)
 
-        return self.complete_payload(pb, context, tstamp, event_subject)
+        self.complete_payload(pb, context, tstamp, event_subject)
+        return self
 
     def track_link_click(
         self,
@@ -289,7 +293,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 Tracker
         """
         non_empty_string(target_url)
 
@@ -308,9 +312,8 @@ class Tracker:
             "%s/link_click/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        return self.track_self_describing_event(
-            event_json, context, tstamp, event_subject
-        )
+        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        return self
 
     def track_add_to_cart(
         self,
@@ -343,7 +346,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 Tracker
         """
         warn(
             "track_add_to_cart will be deprecated in future versions.",
@@ -368,9 +371,8 @@ class Tracker:
             "%s/add_to_cart/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        return self.track_self_describing_event(
-            event_json, context, tstamp, event_subject
-        )
+        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        return self
 
     def track_remove_from_cart(
         self,
@@ -403,7 +405,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 Tracker
         """
         warn(
             "track_remove_from_cart will be deprecated in future versions.",
@@ -428,9 +430,8 @@ class Tracker:
             "%s/remove_from_cart/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        return self.track_self_describing_event(
-            event_json, context, tstamp, event_subject
-        )
+        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        return self
 
     def track_form_change(
         self,
@@ -463,7 +464,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 Tracker
         """
         non_empty_string(form_id)
         one_of(node_name, FORM_NODE_NAMES)
@@ -484,9 +485,8 @@ class Tracker:
             "%s/change_form/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        return self.track_self_describing_event(
-            event_json, context, tstamp, event_subject
-        )
+        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        return self
 
     def track_form_submit(
         self,
@@ -510,7 +510,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 Tracker
         """
         non_empty_string(form_id)
         for element in elements or []:
@@ -527,9 +527,8 @@ class Tracker:
             "%s/submit_form/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        return self.track_self_describing_event(
-            event_json, context, tstamp, event_subject
-        )
+        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        return self
 
     def track_site_search(
         self,
@@ -556,7 +555,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 Tracker
         """
         non_empty(terms)
 
@@ -573,9 +572,8 @@ class Tracker:
             "%s/site_search/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        return self.track_self_describing_event(
-            event_json, context, tstamp, event_subject
-        )
+        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        return self
 
     def track_ecommerce_transaction_item(
         self,
@@ -614,7 +612,7 @@ class Tracker:
         :type   tstamp:      int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:              tracker
+        :rtype:              Tracker
         """
         warn(
             "track_ecommerce_transaction_item will be deprecated in future versions.",
@@ -634,7 +632,8 @@ class Tracker:
         pb.add("ti_qu", quantity)
         pb.add("ti_cu", currency)
 
-        return self.complete_payload(pb, context, tstamp, event_subject)
+        self.complete_payload(pb, context, tstamp, event_subject)
+        return self
 
     def track_ecommerce_transaction(
         self,
@@ -679,7 +678,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 Tracker
         """
         warn(
             "track_ecommerce_transaction will be deprecated in future versions.",
@@ -734,7 +733,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 Tracker
         """
         warn(
             "track_screen_view will be deprecated in future versions. Please use track_mobile_screen_view.",
@@ -752,9 +751,8 @@ class Tracker:
             screen_view_properties,
         )
 
-        return self.track_self_describing_event(
-            event_json, context, tstamp, event_subject
-        )
+        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        return self
 
     def track_mobile_screen_view(
         self,
@@ -790,7 +788,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 Tracker
         """
         screen_view_properties = {}
 
@@ -816,9 +814,8 @@ class Tracker:
             "%s/screen_view/%s/1-0-0" % (MOBILE_SCHEMA_PATH, SCHEMA_TAG),
             screen_view_properties,
         )
-        return self.track_self_describing_event(
-            event_json, context, tstamp, event_subject
-        )
+        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        return self
 
     def track_struct_event(
         self,
@@ -850,7 +847,7 @@ class Tracker:
         :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:                 tracker
+        :rtype:                 Tracker
         """
         non_empty_string(category)
         non_empty_string(action)
@@ -863,7 +860,8 @@ class Tracker:
         pb.add("se_pr", property_)
         pb.add("se_va", value)
 
-        return self.complete_payload(pb, context, tstamp, event_subject)
+        self.complete_payload(pb, context, tstamp, event_subject)
+        return self
 
     def track_self_describing_event(
         self,
@@ -883,7 +881,7 @@ class Tracker:
         :type   tstamp:          int | float | None
         :param  event_subject:   Optional per event subject
         :type   event_subject:   subject | None
-        :rtype:                  tracker
+        :rtype:                  Tracker
         """
 
         envelope = SelfDescribingJson(
@@ -895,7 +893,8 @@ class Tracker:
         pb.add("e", "ue")
         pb.add_json(envelope, self.encode_base64, "ue_px", "ue_pr", self.json_encoder)
 
-        return self.complete_payload(pb, context, tstamp, event_subject)
+        self.complete_payload(pb, context, tstamp, event_subject)
+        return self
 
     # Alias
     def track_unstruct_event(
@@ -916,16 +915,15 @@ class Tracker:
         :type   tstamp:          int | float | None
         :param  event_subject:   Optional per event subject
         :type   event_subject:   subject | None
-        :rtype:                  tracker
+        :rtype:                  Tracker
         """
         warn(
             "track_unstruct_event will be deprecated in future versions. Please use track_self_describing_event.",
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.track_self_describing_event(
-            event_json, context, tstamp, event_subject
-        )
+        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        return self
 
     def flush(self, is_async: bool = False) -> "Tracker":
         """
