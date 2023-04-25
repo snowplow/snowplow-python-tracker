@@ -47,7 +47,7 @@ jobs:
         cd tracker_api_example
         python app.py "localhost:9090"
 
-    - name: Demo
+    - name: Snowplow Demo
       run: |
         cd examples
         cd snowplow_api_example
