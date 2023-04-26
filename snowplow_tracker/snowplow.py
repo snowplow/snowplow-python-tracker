@@ -72,7 +72,7 @@ class Snowplow:
             raise TypeError("Emitter or Collector URL must be provided")
 
         emitter = Emitter(
-            endpoint,
+            endpoint=endpoint,
             method=method,
             batch_size=emitter_config.batch_size,
             on_success=emitter_config.on_success,
