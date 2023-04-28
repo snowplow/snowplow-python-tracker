@@ -47,6 +47,12 @@ jobs:
         cd tracker_api_example
         python app.py "localhost:9090"
 
+    - name: Snowplow Demo
+      run: |
+        cd examples
+        cd snowplow_api_example
+        python snowplow_app.py "localhost:9090"
+
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
       with:
