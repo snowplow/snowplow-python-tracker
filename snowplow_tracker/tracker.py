@@ -23,6 +23,14 @@ from warnings import warn
 from snowplow_tracker import payload, _version, SelfDescribingJson
 from snowplow_tracker import subject as _subject
 from snowplow_tracker.contracts import non_empty_string, one_of, non_empty, form_element
+from snowplow_tracker.constants import (
+    VERSION,
+    DEFAULT_ENCODE_BASE64,
+    BASE_SCHEMA_PATH,
+    MOBILE_SCHEMA_PATH,
+    SCHEMA_TAG,
+)
+
 from snowplow_tracker.events import (
     Event,
     PagePing,
@@ -39,19 +47,6 @@ from snowplow_tracker.typing import (
     ElementClasses,
     FormClasses,
 )
-
-"""
-Constants & config
-"""
-
-VERSION = "py-%s" % _version.__version__
-DEFAULT_ENCODE_BASE64 = True
-BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow"
-MOBILE_SCHEMA_PATH = "iglu:com.snowplowanalytics.mobile"
-SCHEMA_TAG = "jsonschema"
-CONTEXT_SCHEMA = "%s/contexts/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
-UNSTRUCT_EVENT_SCHEMA = "%s/unstruct_event/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
-ContextArray = List[SelfDescribingJson]
 
 """
 Tracker class
