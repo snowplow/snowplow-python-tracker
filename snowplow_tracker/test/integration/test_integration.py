@@ -105,8 +105,8 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker("namespace", [get_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_ecommerce_transaction(
-                "6a8078be",
-                35,
+                order_id="6a8078be",
+                total_value=35,
                 city="London",
                 currency="GBP",
                 items=[
