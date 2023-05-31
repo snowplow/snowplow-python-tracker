@@ -23,6 +23,13 @@ from warnings import warn
 from snowplow_tracker import payload, _version, SelfDescribingJson
 from snowplow_tracker import subject as _subject
 from snowplow_tracker.contracts import non_empty_string, one_of, non_empty, form_element
+from snowplow_tracker.events import (
+    Event,
+    PagePing,
+    Pageview,
+    SelfDescribing,
+    StructEvent,
+)
 from snowplow_tracker.typing import (
     JsonEncoderFunction,
     EmitterProtocol,
