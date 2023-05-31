@@ -8,3 +8,10 @@ from snowplow_tracker.tracker_configuration import TrackerConfiguration
 from snowplow_tracker.snowplow import Snowplow
 from snowplow_tracker.contracts import disable_contracts, enable_contracts
 from snowplow_tracker.event_store import EventStore
+from snowplow_tracker.events import (
+    Event,
+    Pageview,
+    PagePing,
+    SelfDescribing,
+    StructEvent,
+)
