@@ -129,14 +129,34 @@ class Tracker:
     Tracking methods
     """
 
-    def track(self, pb: payload.Payload) -> Optional[str]:
+    def track(
+        self,
+        event: Event,
+        event_subject: Optional[_subject.Subject] = None,
+        context: Optional[List[SelfDescribingJson]] = None,
+        tstamp: Optional[float] = None,
+    ) -> Optional[str]:
         """
-        Send the payload to a emitter. Returns the tracked event ID.
+        Send the event payload to a emitter. Returns the tracked event ID.
 
-        :param  pb:              Payload builder
-        :type   pb:              payload
+        :param  event:           Event
+        :type   event:           events.Event
+        :param  context:         Custom context for the event
+        :type   context:         context_array | None
+        :param  tstamp:          Optional event timestamp in milliseconds
+        :type   tstamp:          int | float | None
+        :param  event_subject:   Optional per event subject
+        :type   event_subject:   subject | None
         :rtype:                  String
         """
+
+        pb = self.complete_payload(
+            event=event,
+            tstamp=tstamp,
+            event_subject=event_subject,
+            context=context,
+        )
+
         for emitter in self.emitters:
             emitter.input(pb.nv_pairs)
 
