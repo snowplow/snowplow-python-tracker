@@ -211,13 +211,14 @@ class Tracker:
         """
         non_empty_string(page_url)
 
-        pb = payload.Payload()
-        pb.add("e", "pv")  # pv: page view
-        pb.add("url", page_url)
-        pb.add("page", page_title)
-        pb.add("refr", referrer)
+        pv = Pageview(page_url=page_url)
+        pv.page_title = page_title
+        pv.page_url = page_url
+        pv.referrer = referrer
 
-        self.complete_payload(pb, context, tstamp, event_subject)
+        self.track(
+            event=pv, context=context, tstamp=tstamp, event_subject=event_subject
+        )
         return self
 
     def track_page_ping(
@@ -258,17 +259,18 @@ class Tracker:
         """
         non_empty_string(page_url)
 
-        pb = payload.Payload()
-        pb.add("e", "pp")  # pp: page ping
-        pb.add("url", page_url)
-        pb.add("page", page_title)
-        pb.add("refr", referrer)
-        pb.add("pp_mix", min_x)
-        pb.add("pp_max", max_x)
-        pb.add("pp_miy", min_y)
-        pb.add("pp_may", max_y)
+        pp = PagePing(page_url)
+        pp.page_title = page_title
+        pp.page_url = page_url
+        pp.referrer = referrer
+        pp.min_x = min_x
+        pp.max_x = max_x
+        pp.min_y = min_y
+        pp.max_y = max_y
 
-        self.complete_payload(pb, context, tstamp, event_subject)
+        self.track(
+            event=pp, context=context, tstamp=tstamp, event_subject=event_subject
+        )
         return self
 
     def track_link_click(
@@ -628,17 +630,19 @@ class Tracker:
         non_empty_string(order_id)
         non_empty_string(sku)
 
-        pb = payload.Payload()
-        pb.add("e", "ti")
-        pb.add("ti_id", order_id)
-        pb.add("ti_sk", sku)
-        pb.add("ti_nm", name)
-        pb.add("ti_ca", category)
-        pb.add("ti_pr", price)
-        pb.add("ti_qu", quantity)
-        pb.add("ti_cu", currency)
+        event = Event()
+        event.pb.add("e", "ti")
+        event.pb.add("ti_id", order_id)
+        event.pb.add("ti_sk", sku)
+        event.pb.add("ti_nm", name)
+        event.pb.add("ti_ca", category)
+        event.pb.add("ti_pr", price)
+        event.pb.add("ti_qu", quantity)
+        event.pb.add("ti_cu", currency)
 
-        self.complete_payload(pb, context, tstamp, event_subject)
+        self.track(
+            event=event, event_subject=event_subject, context=context, tstamp=tstamp
+        )
         return self
 
     def track_ecommerce_transaction(
@@ -693,21 +697,23 @@ class Tracker:
         )
         non_empty_string(order_id)
 
-        pb = payload.Payload()
-        pb.add("e", "tr")
-        pb.add("tr_id", order_id)
-        pb.add("tr_tt", total_value)
-        pb.add("tr_af", affiliation)
-        pb.add("tr_tx", tax_value)
-        pb.add("tr_sh", shipping)
-        pb.add("tr_ci", city)
-        pb.add("tr_st", state)
-        pb.add("tr_co", country)
-        pb.add("tr_cu", currency)
+        event = Event()
+        event.pb.add("e", "tr")
+        event.pb.add("tr_id", order_id)
+        event.pb.add("tr_tt", total_value)
+        event.pb.add("tr_af", affiliation)
+        event.pb.add("tr_tx", tax_value)
+        event.pb.add("tr_sh", shipping)
+        event.pb.add("tr_ci", city)
+        event.pb.add("tr_st", state)
+        event.pb.add("tr_co", country)
+        event.pb.add("tr_cu", currency)
 
         tstamp = Tracker.get_timestamp(tstamp)
 
-        self.complete_payload(pb, context, tstamp, event_subject)
+        self.track(
+            event=event, event_subject=event_subject, context=context, tstamp=tstamp
+        )
 
         if items is None:
             items = []
@@ -858,15 +864,13 @@ class Tracker:
         non_empty_string(category)
         non_empty_string(action)
 
-        pb = payload.Payload()
-        pb.add("e", "se")
-        pb.add("se_ca", category)
-        pb.add("se_ac", action)
-        pb.add("se_la", label)
-        pb.add("se_pr", property_)
-        pb.add("se_va", value)
-
-        self.complete_payload(pb, context, tstamp, event_subject)
+        se = StructEvent(category=category, action=action)
+        se.label = label
+        se.property_ = property_
+        se.value = value
+        self.track(
+            event=se, context=context, tstamp=tstamp, event_subject=event_subject
+        )
         return self
 
     def track_self_describing_event(
@@ -890,16 +894,10 @@ class Tracker:
         :rtype:                  Tracker
         """
 
-        envelope = SelfDescribingJson(
-            UNSTRUCT_EVENT_SCHEMA, event_json.to_json()
-        ).to_json()
-
-        pb = payload.Payload()
-
-        pb.add("e", "ue")
-        pb.add_json(envelope, self.encode_base64, "ue_px", "ue_pr", self.json_encoder)
-
-        self.complete_payload(pb, context, tstamp, event_subject)
+        sd = SelfDescribing(event_json, self.encode_base64, self.json_encoder)
+        self.track(
+            event=sd, context=context, tstamp=tstamp, event_subject=event_subject
+        )
         return self
 
     # Alias
