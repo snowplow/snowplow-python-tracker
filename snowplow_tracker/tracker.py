@@ -718,10 +718,11 @@ class Tracker:
         if items is None:
             items = []
         for item in items:
-            item["tstamp"] = tstamp
-            item["event_subject"] = event_subject
             item["order_id"] = order_id
             item["currency"] = currency
+            item["tstamp"] = tstamp
+            item["event_subject"] = event_subject
+            item["context"] = context
             self.track_ecommerce_transaction_item(**item)
 
         return self
