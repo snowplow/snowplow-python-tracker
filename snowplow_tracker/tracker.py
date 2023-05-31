@@ -145,46 +145,25 @@ class Tracker:
 
     def complete_payload(
         self,
-        pb: payload.Payload,
+        event: Event,
+        event_subject: Optional[_subject.Subject],
         context: Optional[List[SelfDescribingJson]],
         tstamp: Optional[float],
-        event_subject: Optional[_subject.Subject],
-    ) -> Optional[str]:
-        """
-        Called by all tracking events to add the standard name-value pairs
-        to the Payload object irrespective of the tracked event.
+    ) -> payload.Payload:
+        fin_subject = event_subject if event_subject is not None else self.subject
+        pb = event.build_payload(
+            encode_base64=self.encode_base64,
+            json_encoder=self.json_encoder,
+            tstamp=tstamp,
+            event_subject=fin_subject,
+            context=context,
+        )
 
-        :param  pb:              Payload builder
-        :type   pb:              payload
-        :param  context:         Custom context for the event
-        :type   context:         context_array | None
-        :param  tstamp:          Optional event timestamp in milliseconds
-        :type   tstamp:          int | float | None
-        :param  event_subject:   Optional per event subject
-        :type   event_subject:   subject | None
-        :rtype:                  String
-        """
         pb.add("eid", Tracker.get_uuid())
-
         pb.add("dtm", Tracker.get_timestamp())
-        if tstamp is not None:
-            pb.add("ttm", Tracker.get_timestamp(tstamp))
-
-        if context is not None:
-            context_jsons = list(map(lambda c: c.to_json(), context))
-            context_envelope = SelfDescribingJson(
-                CONTEXT_SCHEMA, context_jsons
-            ).to_json()
-            pb.add_json(
-                context_envelope, self.encode_base64, "cx", "co", self.json_encoder
-            )
-
         pb.add_dict(self.standard_nv_pairs)
 
-        fin_subject = event_subject if event_subject is not None else self.subject
-        pb.add_dict(fin_subject.standard_nv_pairs)
-
-        return self.track(pb)
+        return pb
 
     def track_page_view(
         self,
