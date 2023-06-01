@@ -14,11 +14,14 @@
 #     express or implied. See the Apache License Version 2.0 for the specific
 #     language governing permissions and limitations there under.
 # """
-from typing import Optional
+from typing import Optional, List
 from snowplow_tracker.typing import JsonEncoderFunction
 from snowplow_tracker.events.event import Event
 from snowplow_tracker import SelfDescribingJson
 from snowplow_tracker.constants import UNSTRUCT_EVENT_SCHEMA
+from snowplow_tracker import payload
+from snowplow_tracker import subject as _subject
+from snowplow_tracker.constants import CONTEXT_SCHEMA
 
 
 class SelfDescribing(Event):
