@@ -25,8 +25,6 @@ class SelfDescribing(Event):
     def __init__(
         self,
         event_json: SelfDescribingJson,
-        encode_base64: bool,
-        json_encoder: Optional[JsonEncoderFunction],
     ) -> None:
         """
         :param  event_json:      The properties of the event. Has two field:
@@ -40,8 +38,6 @@ class SelfDescribing(Event):
         """
         super(SelfDescribing, self).__init__()
         self.payload.add("e", "ue")
-        self.encode_base64 = encode_base64
-        self.json_encoder = json_encoder
         self.event_json = event_json
 
     @property
@@ -56,7 +52,6 @@ class SelfDescribing(Event):
     @event_json.setter
     def event_json(self, value: SelfDescribingJson):
         self._event_json = value
-        self.set_payload()
 
     def build_payload(
         self,
