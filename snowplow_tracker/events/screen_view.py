@@ -30,6 +30,12 @@ from snowplow_tracker import subject as _subject
 
 
 class ScreenView(Event):
+    """
+    Constructs a ScreenView event object.
+
+    When tracked, generates a SelfDescribing event (event type "ue").
+    """
+
     def __init__(
         self,
         id_: Optional[str] = None,

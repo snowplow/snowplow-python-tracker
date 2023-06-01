@@ -26,6 +26,17 @@ from snowplow_tracker.typing import JsonEncoderFunction, PayloadDict
 
 
 class Event(object):
+    """
+    Event class which contains
+    elements that can be set in all events. These are context, trueTimestamp, and Subject.
+
+    Context is a list of custom SelfDescribingJson entities.
+    TrueTimestamp is a user-defined timestamp.
+    Subject is an event-specific Subject. Its fields will override those of the
+    Tracker-associated Subject, if present.
+
+    """
+
     def __init__(self, dict_: Optional[PayloadDict] = None) -> None:
         """
         Constructor

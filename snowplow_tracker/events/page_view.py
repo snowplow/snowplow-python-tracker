@@ -19,6 +19,13 @@ from typing import Optional
 
 
 class PageView(Event):
+    """
+    Constructs a PageView event object.
+
+    When tracked, generates a "pv" or "page_view" event.
+
+    """
+
     def __init__(
         self,
         page_url: Optional[str] = None,

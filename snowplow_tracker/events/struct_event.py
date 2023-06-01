@@ -19,6 +19,19 @@ from typing import Optional
 
 
 class StructEvent(Event):
+    """
+    Constructs a Structured event object.
+
+    This event type is provided to be roughly equivalent to Google Analytics-style events.
+    Note that it is not automatically clear what data should be placed in what field.
+    To aid data quality and modeling, agree on business-wide definitions when designing
+    your tracking strategy.
+
+    We recommend using SelfDescribing - fully custom - events instead.
+
+    When tracked, generates a "struct" or "se" event.
+    """
+
     def __init__(
         self,
         category: str,

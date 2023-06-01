@@ -19,6 +19,13 @@ from typing import Optional
 
 
 class PagePing(Event):
+    """
+    Constructs a PagePing event object.
+
+    When tracked, generates a "pp" or "page_ping" event.
+
+    """
+
     def __init__(
         self,
         page_url: Optional[str] = None,

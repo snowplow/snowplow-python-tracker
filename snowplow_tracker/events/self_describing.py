@@ -25,6 +25,15 @@ from snowplow_tracker.constants import CONTEXT_SCHEMA
 
 
 class SelfDescribing(Event):
+    """
+    Constructs a SelfDescribing event object.
+
+    This is a customisable event type which allows you to track anything describable
+    by a JsonSchema.
+
+    When tracked, generates a self-describing event (event type "ue").
+    """
+
     def __init__(
         self,
         event_json: SelfDescribingJson,
