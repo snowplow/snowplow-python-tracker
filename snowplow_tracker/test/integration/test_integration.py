@@ -161,7 +161,7 @@ class IntegrationTest(unittest.TestCase):
             "namespace", [get_emitter], default_subject, encode_base64=False
         )
         with HTTMock(pass_response_content):
-            t.track_mobile_screen_view("534", "Game HUD 2")
+            t.track_mobile_screen_view(id_="534", name="Game HUD 2")
         expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEqual(
