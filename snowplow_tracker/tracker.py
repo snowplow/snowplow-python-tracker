@@ -890,7 +890,7 @@ class Tracker:
         :rtype:                  Tracker
         """
 
-        sd = SelfDescribing(event_json, self.encode_base64, self.json_encoder)
+        sd = SelfDescribing(event_json)
         self.track(
             event=sd, context=context, tstamp=tstamp, event_subject=event_subject
         )
