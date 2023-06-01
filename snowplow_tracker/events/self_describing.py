@@ -1,6 +1,3 @@
-from snowplow_tracker.events.event import Event
-from snowplow_tracker import SelfDescribingJson
-
 # """
 #     self_describing.py
 
@@ -19,7 +16,8 @@ from snowplow_tracker import SelfDescribingJson
 # """
 from typing import Optional
 from snowplow_tracker.typing import JsonEncoderFunction
-
+from snowplow_tracker.events.event import Event
+from snowplow_tracker import SelfDescribingJson
 from snowplow_tracker.constants import UNSTRUCT_EVENT_SCHEMA
 
 
