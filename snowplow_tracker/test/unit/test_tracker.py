@@ -381,7 +381,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(complete_args_dict), 4)
 
         # payload
-        actual_payload_arg = complete_args_dict["event"].pb
+        actual_payload_arg = complete_args_dict["event"].payload
         actual_pairs = actual_payload_arg.nv_pairs
         actual_ue_pr = json.loads(actual_pairs["ue_pr"])
         # context
@@ -418,7 +418,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(complete_args_dict), 4)
 
         # payload
-        actual_payload_arg = complete_args_dict["event"].pb
+        actual_payload_arg = complete_args_dict["event"].payload
         actualPairs = actual_payload_arg.nv_pairs
         actualUePr = json.loads(actualPairs["ue_pr"])
         # context
@@ -450,7 +450,7 @@ class TestTracker(unittest.TestCase):
         complete_args_dict = mok_track.call_args_list[0][1]
         self.assertEqual(len(complete_args_dict), 4)
 
-        actual_payload_arg = complete_args_dict["event"].pb
+        actual_payload_arg = complete_args_dict["event"].payload
         actual_pairs = actual_payload_arg.nv_pairs
         self.assertTrue("ue_px" in actual_pairs.keys())
 
@@ -477,7 +477,7 @@ class TestTracker(unittest.TestCase):
         complete_args_dict = mok_track.call_args_list[0][1]
         self.assertEqual(len(complete_args_dict), 4)
 
-        actual_payload_arg = complete_args_dict["event"].pb
+        actual_payload_arg = complete_args_dict["event"].payload
         actual_context_arg = complete_args_dict["context"]
         actual_tstamp_arg = complete_args_dict["tstamp"]
         actual_pairs = actual_payload_arg.nv_pairs
@@ -515,7 +515,7 @@ class TestTracker(unittest.TestCase):
         complete_args_dict = mok_track.call_args_list[0][1]
         self.assertEqual(len(complete_args_dict), 4)
 
-        actual_payload_arg = complete_args_dict["event"].pb
+        actual_payload_arg = complete_args_dict["event"].payload
         actual_context_arg = complete_args_dict["context"]
         actual_tstamp_arg = complete_args_dict["tstamp"]
         actualPairs = actual_payload_arg.nv_pairs
@@ -555,7 +555,7 @@ class TestTracker(unittest.TestCase):
         complete_args_dict = mok_track.call_args_list[0][1]
         self.assertEqual(len(complete_args_dict), 4)
 
-        actual_payload_arg = complete_args_dict["event"].pb
+        actual_payload_arg = complete_args_dict["event"].payload
         actual_context_arg = complete_args_dict["context"]
         actual_tstamp_arg = complete_args_dict["tstamp"]
         actual_pairs = actual_payload_arg.nv_pairs
@@ -599,7 +599,7 @@ class TestTracker(unittest.TestCase):
         complete_args_list = mok_track.call_args_list[0][1]
         self.assertEqual(len(complete_args_list), 4)
 
-        actual_payload_arg = complete_args_list["event"].pb
+        actual_payload_arg = complete_args_list["event"].payload
         actual_context_arg = complete_args_list["context"]
         actual_tstamp_arg = complete_args_list["tstamp"]
         actual_pairs = actual_payload_arg.nv_pairs
@@ -645,7 +645,7 @@ class TestTracker(unittest.TestCase):
         completeArgsList = mok_track.call_args_list[0][1]
         self.assertEqual(len(completeArgsList), 4)
 
-        actualPayloadArg = completeArgsList["event"].pb
+        actualPayloadArg = completeArgsList["event"].payload
         actualContextArg = completeArgsList["context"]
         actualTstampArg = completeArgsList["tstamp"]
         actualPairs = actualPayloadArg.nv_pairs
@@ -704,7 +704,7 @@ class TestTracker(unittest.TestCase):
         firstCallArgsList = callCompleteArgsList[0][1]
         self.assertEqual(len(firstCallArgsList), 4)
 
-        actualPayloadArg = firstCallArgsList["event"].pb
+        actualPayloadArg = firstCallArgsList["event"].payload
         actualContextArg = firstCallArgsList["context"]
         actualTstampArg = firstCallArgsList["tstamp"]
         actualPairs = actualPayloadArg.nv_pairs

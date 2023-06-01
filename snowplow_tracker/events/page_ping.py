@@ -46,7 +46,7 @@ class PagePing(Event):
         :type   max_y:          int | None
         """
         super(PagePing, self).__init__()
-        self.pb.add("e", "pp")
+        self.payload.add("e", "pp")
         self.page_url = page_url
         self.page_title = page_title
         self.referrer = referrer
@@ -65,7 +65,7 @@ class PagePing(Event):
     @page_url.setter
     def page_url(self, value: Optional[str]):
         self._page_url = value
-        self.pb.add("url", self._page_url)
+        self.payload.add("url", self._page_url)
 
     @property
     def page_title(self) -> Optional[str]:
@@ -77,7 +77,7 @@ class PagePing(Event):
     @page_title.setter
     def page_title(self, value: Optional[str]):
         self._page_title = value
-        self.pb.add("page", self._page_title)
+        self.payload.add("page", self._page_title)
 
     @property
     def referrer(self) -> Optional[str]:
@@ -89,7 +89,7 @@ class PagePing(Event):
     @referrer.setter
     def referrer(self, value: Optional[str]):
         self._referrer = value
-        self.pb.add("refr", self._referrer)
+        self.payload.add("refr", self._referrer)
 
     @property
     def min_x(self) -> Optional[int]:
@@ -101,7 +101,7 @@ class PagePing(Event):
     @min_x.setter
     def min_x(self, value: Optional[int]):
         self._min_x = value
-        self.pb.add("pp_mix", self._min_x)
+        self.payload.add("pp_mix", self._min_x)
 
     @property
     def max_x(self) -> Optional[int]:
@@ -113,7 +113,7 @@ class PagePing(Event):
     @min_x.setter
     def max_x(self, value: Optional[int]):
         self._max_x = value
-        self.pb.add("pp_max", self._max_x)
+        self.payload.add("pp_max", self._max_x)
 
     @property
     def min_y(self) -> Optional[int]:
@@ -125,7 +125,7 @@ class PagePing(Event):
     @min_y.setter
     def min_y(self, value: Optional[int]):
         self._min_y = value
-        self.pb.add("pp_miy", self._min_y)
+        self.payload.add("pp_miy", self._min_y)
 
     @property
     def max_y(self) -> Optional[int]:
@@ -137,4 +137,4 @@ class PagePing(Event):
     @min_y.setter
     def max_y(self, value: Optional[int]):
         self._max_y = value
-        self.pb.add("pp_may", self._max_y)
+        self.payload.add("pp_may", self._max_y)

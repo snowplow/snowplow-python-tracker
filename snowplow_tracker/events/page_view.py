@@ -34,7 +34,7 @@ class PageView(Event):
         :type   referrer:       string_or_none
         """
         super(PageView, self).__init__()
-        self.pb.add("e", "pv")
+        self.payload.add("e", "pv")
         self.page_url = page_url
         self.page_title = page_title
         self.referrer = referrer
@@ -49,7 +49,7 @@ class PageView(Event):
     @page_url.setter
     def page_url(self, value: Optional[str]):
         self._page_url = value
-        self.pb.add("url", self._page_url)
+        self.payload.add("url", self._page_url)
 
     @property
     def page_title(self) -> Optional[str]:
@@ -61,7 +61,7 @@ class PageView(Event):
     @page_title.setter
     def page_title(self, value: Optional[str]):
         self._page_title = value
-        self.pb.add("page", self._page_title)
+        self.payload.add("page", self._page_title)
 
     @property
     def referrer(self) -> Optional[str]:
@@ -73,4 +73,4 @@ class PageView(Event):
     @referrer.setter
     def referrer(self, value: Optional[str]):
         self._referrer = value
-        self.pb.add("refr", self._referrer)
+        self.payload.add("refr", self._referrer)

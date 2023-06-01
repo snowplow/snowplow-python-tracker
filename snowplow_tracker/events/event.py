@@ -30,7 +30,7 @@ class Event(object):
         """
         Constructor
         """
-        self.pb = payload.Payload(dict_=dict_)
+        self.payload = payload.Payload(dict_=dict_)
 
     def build_payload(
         self,
@@ -58,7 +58,9 @@ class Event(object):
             context_envelope = SelfDescribingJson(
                 CONTEXT_SCHEMA, context_jsons
             ).to_json()
-            self.pb.add_json(context_envelope, encode_base64, "cx", "co", json_encoder)
+            self.payload.add_json(
+                context_envelope, encode_base64, "cx", "co", json_encoder
+            )
 
         if isinstance(
             tstamp,
@@ -67,7 +69,7 @@ class Event(object):
                 float,
             ),
         ):
-            self.pb.add("ttm", int(tstamp))
+            self.payload.add("ttm", int(tstamp))
 
-        self.pb.add_dict(event_subject.standard_nv_pairs)
-        return self.pb
+        self.payload.add_dict(event_subject.standard_nv_pairs)
+        return self.payload

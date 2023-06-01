@@ -41,7 +41,7 @@ class SelfDescribing(Event):
         :type  json_encoder:     function | None
         """
         super(SelfDescribing, self).__init__()
-        self.pb.add("e", "ue")
+        self.payload.add("e", "ue")
         self.encode_base64 = encode_base64
         self.json_encoder = json_encoder
         self.event_json = event_json
@@ -86,6 +86,6 @@ class SelfDescribing(Event):
         envelope = SelfDescribingJson(
             UNSTRUCT_EVENT_SCHEMA, self.event_json.to_json()
         ).to_json()
-        self.pb.add_json(
+        self.payload.add_json(
             envelope, self.encode_base64, "ue_px", "ue_pr", self.json_encoder
         )

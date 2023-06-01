@@ -30,21 +30,21 @@ class TestEvent(unittest.TestCase):
 
     def test_init(self):
         event = Event()
-        self.assertEqual(event.pb.nv_pairs, {})
+        self.assertEqual(event.payload.nv_pairs, {})
 
     def test_build_payload(self):
         event = Event()
         event_subject = Subject()
-        pb = event.build_payload(event_subject, None, None, None, None)
+        payload = event.build_payload(event_subject, None, None, None, None)
 
-        self.assertEqual(pb.nv_pairs, {"p": "pc"})
+        self.assertEqual(payload.nv_pairs, {"p": "pc"})
 
     def test_build_payload_tstamp(self):
         event = Event()
         event_subject = Subject()
 
         tstamp = 1399021242030
-        pb = event.build_payload(
+        payload = event.build_payload(
             event_subject=event_subject,
             context=None,
             json_encoder=None,
@@ -52,7 +52,7 @@ class TestEvent(unittest.TestCase):
             tstamp=tstamp,
         )
 
-        self.assertEqual(pb.nv_pairs, {"p": "pc", "ttm": 1399021242030})
+        self.assertEqual(payload.nv_pairs, {"p": "pc", "ttm": 1399021242030})
 
     def test_build_payload_context(self):
         event = Event()
@@ -60,7 +60,7 @@ class TestEvent(unittest.TestCase):
 
         context = SelfDescribingJson("test.context.schema", {"user": "tester"})
         event_context = [context]
-        pb = event.build_payload(
+        payload = event.build_payload(
             event_subject=event_subject,
             context=event_context,
             json_encoder=None,
@@ -72,6 +72,6 @@ class TestEvent(unittest.TestCase):
             "schema": CONTEXT_SCHEMA,
             "data": [{"schema": "test.context.schema", "data": {"user": "tester"}}],
         }
-        actual_context = json.loads(pb.nv_pairs["co"])
+        actual_context = json.loads(payload.nv_pairs["co"])
 
         self.assertDictEqual(actual_context, expected_context)

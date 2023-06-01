@@ -145,7 +145,7 @@ class Tracker:
         :rtype:                  String
         """
 
-        pb = self.complete_payload(
+        payload = self.complete_payload(
             event=event,
             tstamp=tstamp,
             event_subject=event_subject,
@@ -153,10 +153,10 @@ class Tracker:
         )
 
         for emitter in self.emitters:
-            emitter.input(pb.nv_pairs)
+            emitter.input(payload.nv_pairs)
 
-        if "eid" in pb.nv_pairs.keys():
-            return pb.nv_pairs["eid"]
+        if "eid" in payload.nv_pairs.keys():
+            return payload.nv_pairs["eid"]
 
     def complete_payload(
         self,
@@ -166,7 +166,7 @@ class Tracker:
         tstamp: Optional[float],
     ) -> payload.Payload:
         fin_subject = event_subject if event_subject is not None else self.subject
-        pb = event.build_payload(
+        payload = event.build_payload(
             encode_base64=self.encode_base64,
             json_encoder=self.json_encoder,
             tstamp=tstamp,
@@ -174,11 +174,11 @@ class Tracker:
             context=context,
         )
 
-        pb.add("eid", Tracker.get_uuid())
-        pb.add("dtm", Tracker.get_timestamp())
-        pb.add_dict(self.standard_nv_pairs)
+        payload.add("eid", Tracker.get_uuid())
+        payload.add("dtm", Tracker.get_timestamp())
+        payload.add_dict(self.standard_nv_pairs)
 
-        return pb
+        return payload
 
     def track_page_view(
         self,
@@ -626,14 +626,14 @@ class Tracker:
         non_empty_string(sku)
 
         event = Event()
-        event.pb.add("e", "ti")
-        event.pb.add("ti_id", order_id)
-        event.pb.add("ti_sk", sku)
-        event.pb.add("ti_nm", name)
-        event.pb.add("ti_ca", category)
-        event.pb.add("ti_pr", price)
-        event.pb.add("ti_qu", quantity)
-        event.pb.add("ti_cu", currency)
+        event.payload.add("e", "ti")
+        event.payload.add("ti_id", order_id)
+        event.payload.add("ti_sk", sku)
+        event.payload.add("ti_nm", name)
+        event.payload.add("ti_ca", category)
+        event.payload.add("ti_pr", price)
+        event.payload.add("ti_qu", quantity)
+        event.payload.add("ti_cu", currency)
 
         self.track(
             event=event, event_subject=event_subject, context=context, tstamp=tstamp
@@ -693,16 +693,16 @@ class Tracker:
         non_empty_string(order_id)
 
         event = Event()
-        event.pb.add("e", "tr")
-        event.pb.add("tr_id", order_id)
-        event.pb.add("tr_tt", total_value)
-        event.pb.add("tr_af", affiliation)
-        event.pb.add("tr_tx", tax_value)
-        event.pb.add("tr_sh", shipping)
-        event.pb.add("tr_ci", city)
-        event.pb.add("tr_st", state)
-        event.pb.add("tr_co", country)
-        event.pb.add("tr_cu", currency)
+        event.payload.add("e", "tr")
+        event.payload.add("tr_id", order_id)
+        event.payload.add("tr_tt", total_value)
+        event.payload.add("tr_af", affiliation)
+        event.payload.add("tr_tx", tax_value)
+        event.payload.add("tr_sh", shipping)
+        event.payload.add("tr_ci", city)
+        event.payload.add("tr_st", state)
+        event.payload.add("tr_co", country)
+        event.payload.add("tr_cu", currency)
 
         tstamp = Tracker.get_timestamp(tstamp)
 

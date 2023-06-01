@@ -42,7 +42,7 @@ class StructEvent(Event):
         :type   value:          int | float | None
         """
         super(StructEvent, self).__init__()
-        self.pb.add("e", "se")
+        self.payload.add("e", "se")
         self.category = category
         self.action = action
         self.label = label
@@ -59,7 +59,7 @@ class StructEvent(Event):
     @category.setter
     def category(self, value: Optional[str]):
         self._category = value
-        self.pb.add("se_ca", self._category)
+        self.payload.add("se_ca", self._category)
 
     @property
     def action(self) -> Optional[str]:
@@ -71,7 +71,7 @@ class StructEvent(Event):
     @action.setter
     def action(self, value: Optional[str]):
         self._action = value
-        self.pb.add("se_ac", self._action)
+        self.payload.add("se_ac", self._action)
 
     @property
     def label(self) -> Optional[str]:
@@ -83,7 +83,7 @@ class StructEvent(Event):
     @label.setter
     def label(self, value: Optional[str]):
         self._label = value
-        self.pb.add("se_la", self._label)
+        self.payload.add("se_la", self._label)
 
     @property
     def property_(self) -> Optional[str]:
@@ -95,7 +95,7 @@ class StructEvent(Event):
     @property_.setter
     def property_(self, value: Optional[str]):
         self._property_ = value
-        self.pb.add("se_pr", self._property_)
+        self.payload.add("se_pr", self._property_)
 
     @property
     def value(self) -> Optional[int]:
@@ -107,4 +107,4 @@ class StructEvent(Event):
     @value.setter
     def value(self, value: Optional[int]):
         self._value = value
-        self.pb.add("se_va", self._value)
+        self.payload.add("se_va", self._value)
