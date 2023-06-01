@@ -58,32 +58,50 @@ class SelfDescribing(Event):
         self._event_json = value
         self.set_payload()
 
-    @property
-    def encode_base64(self) -> Optional[bool]:
+    def build_payload(
+        self,
+        event_subject: Optional[_subject.Subject],
+        encode_base64: bool,
+        json_encoder: Optional[JsonEncoderFunction],
+        tstamp: Optional[float],
+        context: Optional[List[SelfDescribingJson]],
+    ) -> "payload.Payload":
         """
-        Whether JSONs in the payload should be base-64 encoded
+        :param  event_subject:   Optional per event subject
+        :type   event_subject:   subject | None
+        :param encode_base64:    Whether JSONs in the payload should be base-64 encoded
+        :type  encode_base64:    bool
+        :param json_encoder:     Custom JSON serializer that gets called on non-serializable object
+        :type  json_encoder:     function | None
+        :param  tstamp:          Optional event timestamp in milliseconds
+        :type   tstamp:          int | float | None
+        :param  context:         Custom context for the event
+        :type   context:         context_array | None
+        :rtype:                  payload.Payload
         """
-        return self._encode_base64
+        if context is not None:
+            context_jsons = list(map(lambda c: c.to_json(), context))
+            context_envelope = SelfDescribingJson(
+                CONTEXT_SCHEMA, context_jsons
+            ).to_json()
+            self.payload.add_json(
+                context_envelope, encode_base64, "cx", "co", json_encoder
+            )
 
-    @encode_base64.setter
-    def encode_base64(self, value: Optional[bool]):
-        self._encode_base64 = value
+        if isinstance(
+            tstamp,
+            (
+                int,
+                float,
+            ),
+        ):
+            self.payload.add("ttm", int(tstamp))
 
-    @property
-    def json_encoder(self) -> Optional[JsonEncoderFunction]:
-        """
-        Custom JSON serializer that gets called on non-serializable object
-        """
-        return self._json_encoder
+        self.payload.add_dict(event_subject.standard_nv_pairs)
 
-    @json_encoder.setter
-    def json_encoder(self, value: Optional[JsonEncoderFunction]):
-        self._json_encoder = value
-
-    def set_payload(self):
         envelope = SelfDescribingJson(
             UNSTRUCT_EVENT_SCHEMA, self.event_json.to_json()
         ).to_json()
-        self.payload.add_json(
-            envelope, self.encode_base64, "ue_px", "ue_pr", self.json_encoder
-        )
+        self.payload.add_json(envelope, encode_base64, "ue_px", "ue_pr", json_encoder)
+
+        return self.payload
