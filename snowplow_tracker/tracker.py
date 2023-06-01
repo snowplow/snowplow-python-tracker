@@ -205,6 +205,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
+        warn(
+            "track_page_view will be deprecated in future versions. Please use the new Event API to create events.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty_string(page_url)
 
         pv = PageView(page_url=page_url)
@@ -253,6 +258,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
+        warn(
+            "track_page_ping will be deprecated in future versions. Please use the new Event API to create events.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty_string(page_url)
 
         pp = PagePing(page_url)
@@ -299,6 +309,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
+        warn(
+            "track_link_click will be deprecated in future versions. Please use the new Event API to create events.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty_string(target_url)
 
         properties = {}
@@ -470,6 +485,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
+        warn(
+            "track_form_change will be deprecated in future versions. Please use the new Event API to create events.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty_string(form_id)
         one_of(node_name, FORM_NODE_NAMES)
         if type_ is not None:
@@ -516,6 +536,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
+        warn(
+            "track_form_submit will be deprecated in future versions. Please use the new Event API to create events.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty_string(form_id)
         for element in elements or []:
             form_element(element)
@@ -561,6 +586,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
+        warn(
+            "track_site_search will be deprecated in future versions. Please use the new Event API to create events.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty(terms)
 
         properties = {}
@@ -799,6 +829,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
+        warn(
+            "track_mobile_screen_view will be deprecated in future versions. Please use the new Event API to create events.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         if id_ is None:
             id_ = self.get_uuid()
 
@@ -848,6 +883,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
+        warn(
+            "track_struct_event will be deprecated in future versions. Please use the new Event API to create events.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty_string(category)
         non_empty_string(action)
 
@@ -880,7 +920,11 @@ class Tracker:
         :type   event_subject:   subject | None
         :rtype:                  Tracker
         """
-
+        warn(
+            "track_self_describing_event will be deprecated in future versions. Please use the new Event API to create events.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         sd = SelfDescribing(event_json)
         self.track(
             event=sd, context=context, tstamp=tstamp, event_subject=event_subject
