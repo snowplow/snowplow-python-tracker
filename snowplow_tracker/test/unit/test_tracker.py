@@ -29,7 +29,7 @@ from snowplow_tracker.tracker import VERSION as TRACKER_VERSION
 from snowplow_tracker.subject import Subject
 from snowplow_tracker.payload import Payload
 from snowplow_tracker.self_describing_json import SelfDescribingJson
-from snowplow_tracker.events import Event
+from snowplow_tracker.events import Event, SelfDescribing
 
 UNSTRUCT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0"
 CONTEXT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1"
@@ -374,16 +374,24 @@ class TestTracker(unittest.TestCase):
 
         t = Tracker("namespace", e, encode_base64=False)
         event_json = SelfDescribingJson("test.sde.schema", {"n": "v"})
+        event = SelfDescribing(event_json=event_json)
+        actual_pairs = event.build_payload(
+            event_subject=t.subject,
+            encode_base64=t.encode_base64,
+            json_encoder=t.json_encoder,
+            tstamp=None,
+            context=None,
+        ).nv_pairs
+
         t.track_self_describing_event(event_json)
         self.assertEqual(mok_track.call_count, 1)
-        complete_args_dict = mok_track.call_args_list[0][1]
 
+        complete_args_dict = mok_track.call_args_list[0][1]
         self.assertEqual(len(complete_args_dict), 4)
 
         # payload
-        actual_payload_arg = complete_args_dict["event"].payload
-        actual_pairs = actual_payload_arg.nv_pairs
         actual_ue_pr = json.loads(actual_pairs["ue_pr"])
+
         # context
         actual_context_arg = complete_args_dict["context"]
 
@@ -408,19 +416,27 @@ class TestTracker(unittest.TestCase):
         mok_track.side_effect = mocked_track
 
         t = Tracker("namespace", e, encode_base64=False)
-        evJson = SelfDescribingJson("test.schema", {"n": "v"})
+        event_json = SelfDescribingJson("test.schema", {"n": "v"})
         ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
-        evContext = [ctx]
-        evTstamp = 1399021242030
-        t.track_self_describing_event(evJson, evContext, evTstamp)
+        event_context = [ctx]
+        event_tstamp = 1399021242030
+
+        event = SelfDescribing(event_json=event_json)
+        actual_pairs = event.build_payload(
+            event_subject=t.subject,
+            encode_base64=t.encode_base64,
+            json_encoder=t.json_encoder,
+            tstamp=event_tstamp,
+            context=event_context,
+        ).nv_pairs
+
+        t.track_self_describing_event(event_json, event_context, event_tstamp)
         self.assertEqual(mok_track.call_count, 1)
         complete_args_dict = mok_track.call_args_list[0][1]
         self.assertEqual(len(complete_args_dict), 4)
 
         # payload
-        actual_payload_arg = complete_args_dict["event"].payload
-        actualPairs = actual_payload_arg.nv_pairs
-        actualUePr = json.loads(actualPairs["ue_pr"])
+        actualUePr = json.loads(actual_pairs["ue_pr"])
         # context
         actualContextArg = complete_args_dict["context"]
         # tstamp
@@ -432,9 +448,9 @@ class TestTracker(unittest.TestCase):
         }
 
         self.assertDictEqual(actualUePr, expectedUePr)
-        self.assertEqual(actualPairs["e"], "ue")
+        self.assertEqual(actual_pairs["e"], "ue")
         self.assertIs(actualContextArg[0], ctx)
-        self.assertEqual(actualTstampArg, evTstamp)
+        self.assertEqual(actualTstampArg, event_tstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track")
     def test_track_self_describing_event_encode(self, mok_track: Any) -> None:
@@ -444,14 +460,21 @@ class TestTracker(unittest.TestCase):
         mok_track.side_effect = mocked_track
 
         t = Tracker("namespace", e, encode_base64=True)
-        evJson = SelfDescribingJson("test.sde.schema", {"n": "v"})
-        t.track_self_describing_event(evJson)
+        event_json = SelfDescribingJson("test.sde.schema", {"n": "v"})
+
+        event = SelfDescribing(event_json=event_json)
+        actual_pairs = event.build_payload(
+            event_subject=t.subject,
+            encode_base64=t.encode_base64,
+            json_encoder=t.json_encoder,
+            tstamp=None,
+            context=None,
+        ).nv_pairs
+
+        t.track_self_describing_event(event_json)
         self.assertEqual(mok_track.call_count, 1)
         complete_args_dict = mok_track.call_args_list[0][1]
         self.assertEqual(len(complete_args_dict), 4)
-
-        actual_payload_arg = complete_args_dict["event"].payload
-        actual_pairs = actual_payload_arg.nv_pairs
         self.assertTrue("ue_px" in actual_pairs.keys())
 
     @mock.patch("snowplow_tracker.Tracker.track")
