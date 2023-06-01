@@ -37,6 +37,7 @@ from snowplow_tracker.events import (
     PageView,
     SelfDescribing,
     StructEvent,
+    ScreenView,
 )
 from snowplow_tracker.typing import (
     JsonEncoderFunction,
@@ -798,31 +799,21 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
-        screen_view_properties = {}
-
         if id_ is None:
             id_ = self.get_uuid()
 
-        screen_view_properties["id"] = id_
+        sv = ScreenView()
+        sv.id_ = id_
+        sv.name = name
+        sv.type = type
+        sv.previous_name = previous_name
+        sv.previous_id = previous_id
+        sv.previous_type = previous_type
+        sv.transition_type = transition_type
 
-        if name is not None:
-            screen_view_properties["name"] = name
-        if type is not None:
-            screen_view_properties["type"] = type
-        if previous_name is not None:
-            screen_view_properties["previousName"] = previous_name
-        if previous_id is not None:
-            screen_view_properties["previousId"] = previous_id
-        if previous_type is not None:
-            screen_view_properties["previousType"] = previous_type
-        if transition_type is not None:
-            screen_view_properties["transitionType"] = transition_type
-
-        event_json = SelfDescribingJson(
-            "%s/screen_view/%s/1-0-0" % (MOBILE_SCHEMA_PATH, SCHEMA_TAG),
-            screen_view_properties,
+        self.track(
+            event=sv, event_subject=event_subject, context=context, tstamp=tstamp
         )
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
         return self
 
     def track_struct_event(
