@@ -14,4 +14,5 @@ from snowplow_tracker.events import (
     PagePing,
     SelfDescribing,
     StructEvent,
+    ScreenView,
 )
