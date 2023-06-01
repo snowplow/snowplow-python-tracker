@@ -4,6 +4,11 @@ from snowplow_tracker import (
     Emitter,
     Subject,
     SelfDescribingJson,
+    PageView,
+    PagePing,
+    SelfDescribing,
+    ScreenView,
+    StructEvent,
 )
 import sys
 
@@ -26,17 +31,27 @@ def main():
 
     print("Sending events to " + e.endpoint)
 
-    t.track_page_view("https://www.snowplow.io", "Homepage")
-    t.track_page_ping("https://www.snowplow.io", "Homepage")
-    t.track_link_click("https://www.snowplow.io")
+    page_view = PageView(page_url="https://www.snowplow.io", page_title="Homepage")
+    t.track(page_view)
 
-    t.track_self_describing_event(
+    page_ping = PagePing(page_url="https://www.snowplow.io", page_title="Homepage")
+    t.track(page_ping)
+
+    link_click = SelfDescribing(
         SelfDescribingJson(
             "iglu:com.snowplowanalytics.snowplow/link_click/jsonschema/1-0-1",
-            {"targetUrl": "example.com"},
+            {"targetUrl": "https://www.snowplow.io"},
         )
     )
-    t.track_struct_event("shop", "add-to-basket", None, "pcs", 2)
+    t.track(link_click)
+
+    screen_view = ScreenView(id_="id", name="name")
+    t.track(screen_view)
+
+    struct_event = StructEvent(
+        category="shop", action="add-to-basket", property_="pcs", value=2
+    )
+    t.track(struct_event)
     t.flush()
 
 
