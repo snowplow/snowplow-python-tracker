@@ -10,7 +10,7 @@ from snowplow_tracker.contracts import disable_contracts, enable_contracts
 from snowplow_tracker.event_store import EventStore
 from snowplow_tracker.events import (
     Event,
-    Pageview,
+    PageView,
     PagePing,
     SelfDescribing,
     StructEvent,

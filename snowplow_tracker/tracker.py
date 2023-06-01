@@ -34,7 +34,7 @@ from snowplow_tracker.constants import (
 from snowplow_tracker.events import (
     Event,
     PagePing,
-    Pageview,
+    PageView,
     SelfDescribing,
     StructEvent,
 )
@@ -206,7 +206,7 @@ class Tracker:
         """
         non_empty_string(page_url)
 
-        pv = Pageview(page_url=page_url)
+        pv = PageView(page_url=page_url)
         pv.page_title = page_title
         pv.page_url = page_url
         pv.referrer = referrer

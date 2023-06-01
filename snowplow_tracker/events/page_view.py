@@ -1,5 +1,5 @@
 # """
-#     pageview.py
+#     page_view.py
 
 #     Copyright (c) 2013-2023 Snowplow Analytics Ltd. All rights reserved.
 
@@ -18,7 +18,7 @@ from snowplow_tracker.events.event import Event
 from typing import Optional
 
 
-class Pageview(Event):
+class PageView(Event):
     def __init__(
         self,
         page_url: Optional[str] = None,
@@ -33,7 +33,7 @@ class Pageview(Event):
         :param  referrer:       Referrer of the page
         :type   referrer:       string_or_none
         """
-        super(Pageview, self).__init__()
+        super(PageView, self).__init__()
         self.pb.add("e", "pv")
         self.page_url = page_url
         self.page_title = page_title
