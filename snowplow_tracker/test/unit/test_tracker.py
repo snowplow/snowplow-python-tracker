@@ -29,7 +29,7 @@ from snowplow_tracker.tracker import VERSION as TRACKER_VERSION
 from snowplow_tracker.subject import Subject
 from snowplow_tracker.payload import Payload
 from snowplow_tracker.self_describing_json import SelfDescribingJson
-from snowplow_tracker.events import Event, SelfDescribing
+from snowplow_tracker.events import Event, SelfDescribing, ScreenView
 
 UNSTRUCT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0"
 CONTEXT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1"
@@ -1244,31 +1244,39 @@ class TestTracker(unittest.TestCase):
         self.assertTrue(callArgs[1] is None)
         self.assertTrue(callArgs[2] is None)
 
-    @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
-    def test_track_mobile_screen_view(self, mok_track_unstruct: Any) -> None:
+    @mock.patch("snowplow_tracker.Tracker.track")
+    def test_track_mobile_screen_view(self, mok_track: Any) -> None:
         mokEmitter = self.create_patch("snowplow_tracker.Emitter")
         e = mokEmitter()
 
-        mok_track_unstruct.side_effect = mocked_track_unstruct
+        mok_track.side_effect = mocked_track
 
         t = Tracker("namespace", e)
-        ctx = SelfDescribingJson("test.context.schema", {"user": "tester"})
-        evTstamp = 1399021242030
 
-        t.track_mobile_screen_view(
-            "screenId", "screenName", context=[ctx], tstamp=evTstamp
-        )
+        screen_view = ScreenView(name="screenName", id_="screenId")
+        actual_pairs = screen_view.build_payload(
+            event_subject=t.subject,
+            encode_base64=False,
+            json_encoder=t.json_encoder,
+            tstamp=None,
+            context=None,
+        ).nv_pairs
+
+        t.track_mobile_screen_view(screen_view)
+
+        self.assertEqual(mok_track.call_count, 1)
+        complete_args_dict = mok_track.call_args_list[0][1]
+        self.assertEqual(len(complete_args_dict), 4)
+        actual_ue_pr = json.loads(actual_pairs["ue_pr"])
 
         expected = {
             "schema": MOBILE_SCREEN_VIEW_SCHEMA,
-            "data": {"name": "screenName", "id": "screenId"},
+            "data": {"id": "screenId", "name": "screenName"},
         }
 
-        callArgs = mok_track_unstruct.call_args_list[0][0]
-        self.assertEqual(len(callArgs), 4)
-        self.assertDictEqual(callArgs[0].to_json(), expected)
-        self.assertIs(callArgs[1][0], ctx)
-        self.assertEqual(callArgs[2], evTstamp)
+        complete_args_dict = mok_track.call_args_list[0][1]
+        complete_args_dict = mok_track.call_args_list[0][1]
+        self.assertDictEqual(actual_ue_pr["data"], expected)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_screen_view(self, mok_track_unstruct: Any) -> None:
