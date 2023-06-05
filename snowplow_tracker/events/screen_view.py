@@ -50,12 +50,26 @@ class ScreenView(Event):
         transition_type: Optional[str] = None,
     ) -> None:
         """
-        :param  page_url:       URL of the viewed page
-        :type   page_url:       non_empty_string
-        :param  page_title:     Title of the viewed page
-        :type   page_title:     string_or_none
-        :param  referrer:       Referrer of the page
-        :type   referrer:       string_or_none
+        :param  event_subject:   Optional per event subject
+        :type   event_subject:   subject | None
+        :param  context:         Custom context for the event
+        :type   context:         context_array | None
+        :param  tstamp:          Optional event timestamp in milliseconds
+        :type   tstamp:          int | float | None
+        :param  id_:            Screen view ID. This must be of type UUID.
+        :type   id_:            string | None
+        :param  name:           The name of the screen view event
+        :type   name:           string_or_none
+        :param  type:           The type of screen that was viewed e.g feed / carousel.
+        :type   type:           string | None
+        :param  previous_name:  The name of the previous screen.
+        :type   previous_name:  string | None
+        :param  previous_id:    The screenview ID of the previous screenview.
+        :type   previous_id:    string | None
+        :param  previous_type   The screen type of the previous screenview
+        :type   previous_type   string | None
+        :param  transition_type The type of transition that led to the screen being viewed.
+        :type   transition_type string | None
         """
         super(ScreenView, self).__init__(
             event_subject=event_subject, context=context, tstamp=tstamp
@@ -73,7 +87,7 @@ class ScreenView(Event):
     @property
     def id_(self) -> Optional[str]:
         """
-        URL of the viewed page
+        Screen view ID. This must be of type UUID.
         """
         return self._id_
 
@@ -86,7 +100,7 @@ class ScreenView(Event):
     @property
     def name(self) -> Optional[str]:
         """
-        URL of the viewed page
+        The name of the screen view event
         """
         return self._name
 
@@ -99,7 +113,7 @@ class ScreenView(Event):
     @property
     def type(self) -> Optional[str]:
         """
-        URL of the viewed page
+        The type of screen that was viewed e.g feed / carousel
         """
         return self._type
 
@@ -112,7 +126,7 @@ class ScreenView(Event):
     @property
     def previous_name(self) -> Optional[str]:
         """
-        URL of the viewed page
+        The name of the previous screen.
         """
         return self._previous_name
 
@@ -125,7 +139,7 @@ class ScreenView(Event):
     @property
     def previous_id(self) -> Optional[str]:
         """
-        URL of the viewed page
+        The screenview ID of the previous screenview.
         """
         return self._previous_id
 
@@ -138,7 +152,7 @@ class ScreenView(Event):
     @property
     def previous_type(self) -> Optional[str]:
         """
-        URL of the viewed page
+        The screen type of the previous screenview
         """
         return self._previous_type
 
@@ -151,7 +165,7 @@ class ScreenView(Event):
     @property
     def transition_type(self) -> Optional[str]:
         """
-        URL of the viewed page
+        The type of transition that led to the screen being viewed
         """
         return self._transition_type
 
