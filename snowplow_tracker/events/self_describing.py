@@ -37,6 +37,9 @@ class SelfDescribing(Event):
     def __init__(
         self,
         event_json: SelfDescribingJson,
+        event_subject: Optional[_subject.Subject] = None,
+        context: Optional[List[SelfDescribingJson]] = None,
+        tstamp: Optional[float] = None,
     ) -> None:
         """
         :param  event_json:      The properties of the event. Has two field:
@@ -48,7 +51,9 @@ class SelfDescribing(Event):
         :param json_encoder:     Custom JSON serializer that gets called on non-serializable object
         :type  json_encoder:     function | None
         """
-        super(SelfDescribing, self).__init__()
+        super(SelfDescribing, self).__init__(
+            event_subject=event_subject, context=context, tstamp=tstamp
+        )
         self.payload.add("e", "ue")
         self.event_json = event_json
 
@@ -67,11 +72,8 @@ class SelfDescribing(Event):
 
     def build_payload(
         self,
-        event_subject: Optional[_subject.Subject],
         encode_base64: bool,
         json_encoder: Optional[JsonEncoderFunction],
-        tstamp: Optional[float],
-        context: Optional[List[SelfDescribingJson]],
     ) -> "payload.Payload":
         """
         :param  event_subject:   Optional per event subject
@@ -86,8 +88,8 @@ class SelfDescribing(Event):
         :type   context:         context_array | None
         :rtype:                  payload.Payload
         """
-        if context is not None:
-            context_jsons = list(map(lambda c: c.to_json(), context))
+        if self.context is not None:
+            context_jsons = list(map(lambda c: c.to_json(), self.context))
             context_envelope = SelfDescribingJson(
                 CONTEXT_SCHEMA, context_jsons
             ).to_json()
@@ -96,15 +98,16 @@ class SelfDescribing(Event):
             )
 
         if isinstance(
-            tstamp,
+            self.tstamp,
             (
                 int,
                 float,
             ),
         ):
-            self.payload.add("ttm", int(tstamp))
+            self.payload.add("ttm", int(self.tstamp))
 
-        self.payload.add_dict(event_subject.standard_nv_pairs)
+        if self.event_subject is not None:
+            self.payload.add_dict(self.event_subject.standard_nv_pairs)
 
         envelope = SelfDescribingJson(
             UNSTRUCT_EVENT_SCHEMA, self.event_json.to_json()
