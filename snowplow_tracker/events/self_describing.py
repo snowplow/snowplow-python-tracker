@@ -46,10 +46,12 @@ class SelfDescribing(Event):
                                  A "data" field containing the event properties and
                                  A "schema" field identifying the schema against which the data is validated
         :type   event_json:      self_describing_json
-        :param encode_base64:    Whether JSONs in the payload should be base-64 encoded
-        :type  encode_base64:    bool
-        :param json_encoder:     Custom JSON serializer that gets called on non-serializable object
-        :type  json_encoder:     function | None
+        :param  event_subject:   Optional per event subject
+        :type   event_subject:   subject | None
+        :param  context:         Custom context for the event
+        :type   context:         context_array | None
+        :param  tstamp:          Optional event timestamp in milliseconds
+        :type   tstamp:          int | float | None
         """
         super(SelfDescribing, self).__init__(
             event_subject=event_subject, context=context, tstamp=tstamp
