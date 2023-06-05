@@ -33,39 +33,34 @@ class TestEvent(unittest.TestCase):
         self.assertEqual(event.payload.nv_pairs, {})
 
     def test_build_payload(self):
-        event = Event()
         event_subject = Subject()
-        payload = event.build_payload(event_subject, None, None, None, None)
+        event = Event(event_subject=event_subject)
+        payload = event.build_payload(encode_base64=None, json_encoder=None)
 
         self.assertEqual(payload.nv_pairs, {"p": "pc"})
 
     def test_build_payload_tstamp(self):
-        event = Event()
         event_subject = Subject()
-
         tstamp = 1399021242030
+
+        event = Event(event_subject=event_subject, tstamp=tstamp)
+
         payload = event.build_payload(
-            event_subject=event_subject,
-            context=None,
             json_encoder=None,
             encode_base64=None,
-            tstamp=tstamp,
         )
 
         self.assertEqual(payload.nv_pairs, {"p": "pc", "ttm": 1399021242030})
 
     def test_build_payload_context(self):
-        event = Event()
         event_subject = Subject()
-
         context = SelfDescribingJson("test.context.schema", {"user": "tester"})
         event_context = [context]
+        event = Event(event_subject=event_subject, context=event_context)
+
         payload = event.build_payload(
-            event_subject=event_subject,
-            context=event_context,
             json_encoder=None,
             encode_base64=False,
-            tstamp=None,
         )
 
         expected_context = {
