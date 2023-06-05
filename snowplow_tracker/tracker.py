@@ -20,7 +20,7 @@ import uuid
 from typing import Any, Optional, Union, List, Dict, Sequence
 from warnings import warn
 
-from snowplow_tracker import payload, _version, SelfDescribingJson
+from snowplow_tracker import payload, SelfDescribingJson
 from snowplow_tracker import subject as _subject
 from snowplow_tracker.contracts import non_empty_string, one_of, non_empty, form_element
 from snowplow_tracker.constants import (
@@ -128,9 +128,6 @@ class Tracker:
     def track(
         self,
         event: Event,
-        event_subject: Optional[_subject.Subject] = None,
-        context: Optional[List[SelfDescribingJson]] = None,
-        tstamp: Optional[float] = None,
     ) -> Optional[str]:
         """
         Send the event payload to a emitter. Returns the tracked event ID.
@@ -148,9 +145,6 @@ class Tracker:
 
         payload = self.complete_payload(
             event=event,
-            tstamp=tstamp,
-            event_subject=event_subject,
-            context=context,
         )
 
         for emitter in self.emitters:
@@ -162,17 +156,10 @@ class Tracker:
     def complete_payload(
         self,
         event: Event,
-        event_subject: Optional[_subject.Subject],
-        context: Optional[List[SelfDescribingJson]],
-        tstamp: Optional[float],
     ) -> payload.Payload:
-        fin_subject = event_subject if event_subject is not None else self.subject
         payload = event.build_payload(
             encode_base64=self.encode_base64,
             json_encoder=self.json_encoder,
-            tstamp=tstamp,
-            event_subject=fin_subject,
-            context=context,
         )
 
         payload.add("eid", Tracker.get_uuid())
@@ -212,14 +199,16 @@ class Tracker:
         )
         non_empty_string(page_url)
 
-        pv = PageView(page_url=page_url)
+        fin_subject = event_subject if event_subject is not None else self.subject
+
+        pv = PageView(
+            page_url=page_url, event_subject=fin_subject, context=context, tstamp=tstamp
+        )
         pv.page_title = page_title
         pv.page_url = page_url
         pv.referrer = referrer
 
-        self.track(
-            event=pv, context=context, tstamp=tstamp, event_subject=event_subject
-        )
+        self.track(event=pv)
         return self
 
     def track_page_ping(
@@ -265,7 +254,14 @@ class Tracker:
         )
         non_empty_string(page_url)
 
-        pp = PagePing(page_url)
+        fin_subject = event_subject if event_subject is not None else self.subject
+
+        pp = PagePing(
+            page_url=page_url,
+            context=context,
+            tstamp=tstamp,
+            event_subject=fin_subject,
+        )
         pp.page_title = page_title
         pp.page_url = page_url
         pp.referrer = referrer
@@ -274,9 +270,7 @@ class Tracker:
         pp.min_y = min_y
         pp.max_y = max_y
 
-        self.track(
-            event=pp, context=context, tstamp=tstamp, event_subject=event_subject
-        )
+        self.track(event=pp)
         return self
 
     def track_link_click(
@@ -316,6 +310,8 @@ class Tracker:
         )
         non_empty_string(target_url)
 
+        fin_subject = event_subject if event_subject is not None else self.subject
+
         properties = {}
         properties["targetUrl"] = target_url
         if element_id is not None:
@@ -331,7 +327,12 @@ class Tracker:
             "%s/link_click/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            tstamp=tstamp,
+            event_subject=fin_subject,
+        )
         return self
 
     def track_add_to_cart(
@@ -374,6 +375,8 @@ class Tracker:
         )
         non_empty_string(sku)
 
+        fin_subject = event_subject if event_subject is not None else self.subject
+
         properties = {}
         properties["sku"] = sku
         properties["quantity"] = quantity
@@ -390,7 +393,12 @@ class Tracker:
             "%s/add_to_cart/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            tstamp=tstamp,
+            event_subject=fin_subject,
+        )
         return self
 
     def track_remove_from_cart(
@@ -433,6 +441,8 @@ class Tracker:
         )
         non_empty_string(sku)
 
+        fin_subject = event_subject if event_subject is not None else self.subject
+
         properties = {}
         properties["sku"] = sku
         properties["quantity"] = quantity
@@ -449,7 +459,12 @@ class Tracker:
             "%s/remove_from_cart/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            tstamp=tstamp,
+            event_subject=fin_subject,
+        )
         return self
 
     def track_form_change(
@@ -490,6 +505,9 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
+
+        fin_subject = event_subject if event_subject is not None else self.subject
+
         non_empty_string(form_id)
         one_of(node_name, FORM_NODE_NAMES)
         if type_ is not None:
@@ -509,7 +527,12 @@ class Tracker:
             "%s/change_form/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            tstamp=tstamp,
+            event_subject=fin_subject,
+        )
         return self
 
     def track_form_submit(
@@ -542,6 +565,9 @@ class Tracker:
             stacklevel=2,
         )
         non_empty_string(form_id)
+
+        fin_subject = event_subject if event_subject is not None else self.subject
+
         for element in elements or []:
             form_element(element)
 
@@ -556,7 +582,12 @@ class Tracker:
             "%s/submit_form/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            tstamp=tstamp,
+            event_subject=fin_subject,
+        )
         return self
 
     def track_site_search(
@@ -592,6 +623,7 @@ class Tracker:
             stacklevel=2,
         )
         non_empty(terms)
+        fin_subject = event_subject if event_subject is not None else self.subject
 
         properties = {}
         properties["terms"] = terms
@@ -606,7 +638,12 @@ class Tracker:
             "%s/site_search/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            tstamp=tstamp,
+            event_subject=fin_subject,
+        )
         return self
 
     def track_ecommerce_transaction_item(
@@ -656,7 +693,9 @@ class Tracker:
         non_empty_string(order_id)
         non_empty_string(sku)
 
-        event = Event()
+        fin_subject = event_subject if event_subject is not None else self.subject
+
+        event = Event(event_subject=fin_subject, context=context, tstamp=tstamp)
         event.payload.add("e", "ti")
         event.payload.add("ti_id", order_id)
         event.payload.add("ti_sk", sku)
@@ -666,9 +705,7 @@ class Tracker:
         event.payload.add("ti_qu", quantity)
         event.payload.add("ti_cu", currency)
 
-        self.track(
-            event=event, event_subject=event_subject, context=context, tstamp=tstamp
-        )
+        self.track(event=event)
         return self
 
     def track_ecommerce_transaction(
@@ -723,7 +760,9 @@ class Tracker:
         )
         non_empty_string(order_id)
 
-        event = Event()
+        fin_subject = event_subject if event_subject is not None else self.subject
+
+        event = Event(event_subject=fin_subject, context=context, tstamp=tstamp)
         event.payload.add("e", "tr")
         event.payload.add("tr_id", order_id)
         event.payload.add("tr_tt", total_value)
@@ -737,9 +776,7 @@ class Tracker:
 
         tstamp = Tracker.get_timestamp(tstamp)
 
-        self.track(
-            event=event, event_subject=event_subject, context=context, tstamp=tstamp
-        )
+        self.track(event=event)
 
         if items is None:
             items = []
@@ -779,6 +816,8 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
+        fin_subject = event_subject if event_subject is not None else self.subject
+
         screen_view_properties = {}
         if name is not None:
             screen_view_properties["name"] = name
@@ -790,7 +829,12 @@ class Tracker:
             screen_view_properties,
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            tstamp=tstamp,
+            event_subject=fin_subject,
+        )
         return self
 
     def track_mobile_screen_view(
@@ -834,10 +878,12 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
+        fin_subject = event_subject if event_subject is not None else self.subject
+
         if id_ is None:
             id_ = self.get_uuid()
 
-        sv = ScreenView()
+        sv = ScreenView(event_subject=fin_subject, context=context, tstamp=tstamp)
         sv.id_ = id_
         sv.name = name
         sv.type = type
@@ -846,9 +892,7 @@ class Tracker:
         sv.previous_type = previous_type
         sv.transition_type = transition_type
 
-        self.track(
-            event=sv, event_subject=event_subject, context=context, tstamp=tstamp
-        )
+        self.track(event=sv)
         return self
 
     def track_struct_event(
@@ -890,13 +934,20 @@ class Tracker:
         )
         non_empty_string(category)
         non_empty_string(action)
+        fin_subject = event_subject if event_subject is not None else self.subject
 
-        se = StructEvent(category=category, action=action)
+        se = StructEvent(
+            category=category,
+            action=action,
+            context=context,
+            tstamp=tstamp,
+            event_subject=fin_subject,
+        )
         se.label = label
         se.property_ = property_
         se.value = value
         self.track(
-            event=se, context=context, tstamp=tstamp, event_subject=event_subject
+            event=se,
         )
         return self
 
@@ -925,9 +976,16 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
-        sd = SelfDescribing(event_json)
+        fin_subject = event_subject if event_subject is not None else self.subject
+
+        sd = SelfDescribing(
+            event_json=event_json,
+            context=context,
+            tstamp=tstamp,
+            event_subject=fin_subject,
+        )
         self.track(
-            event=sd, context=context, tstamp=tstamp, event_subject=event_subject
+            event=sd,
         )
         return self
 
@@ -957,7 +1015,14 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        fin_subject = event_subject if event_subject is not None else self.subject
+
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            tstamp=tstamp,
+            event_subject=fin_subject,
+        )
         return self
 
     def flush(self, is_async: bool = False) -> "Tracker":
