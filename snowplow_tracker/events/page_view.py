@@ -15,7 +15,9 @@
 #     language governing permissions and limitations there under.
 # """
 from snowplow_tracker.events.event import Event
-from typing import Optional
+from typing import Optional, List
+from snowplow_tracker import subject as _subject
+from snowplow_tracker.self_describing_json import SelfDescribingJson
 
 
 class PageView(Event):
@@ -28,6 +30,9 @@ class PageView(Event):
 
     def __init__(
         self,
+        event_subject: Optional[_subject.Subject] = None,
+        context: Optional[List[SelfDescribingJson]] = None,
+        tstamp: Optional[float] = None,
         page_url: Optional[str] = None,
         page_title: Optional[str] = None,
         referrer: Optional[str] = None,
@@ -40,7 +45,9 @@ class PageView(Event):
         :param  referrer:       Referrer of the page
         :type   referrer:       string_or_none
         """
-        super(PageView, self).__init__()
+        super(PageView, self).__init__(
+            event_subject=event_subject, context=context, tstamp=tstamp
+        )
         self.payload.add("e", "pv")
         self.page_url = page_url
         self.page_title = page_title
