@@ -15,7 +15,9 @@
 #     language governing permissions and limitations there under.
 # """
 from snowplow_tracker.events.event import Event
-from typing import Optional
+from typing import Optional, List
+from snowplow_tracker import subject as _subject
+from snowplow_tracker.self_describing_json import SelfDescribingJson
 
 
 class StructEvent(Event):
@@ -36,6 +38,9 @@ class StructEvent(Event):
         self,
         category: str,
         action: str,
+        event_subject: Optional[_subject.Subject] = None,
+        context: Optional[List[SelfDescribingJson]] = None,
+        tstamp: Optional[float] = None,
         label: Optional[str] = None,
         property_: Optional[str] = None,
         value: Optional[int] = None,
@@ -54,7 +59,9 @@ class StructEvent(Event):
         :param  value:          A value associated with the user action
         :type   value:          int | float | None
         """
-        super(StructEvent, self).__init__()
+        super(StructEvent, self).__init__(
+            event_subject=event_subject, context=context, tstamp=tstamp
+        )
         self.payload.add("e", "se")
         self.category = category
         self.action = action
