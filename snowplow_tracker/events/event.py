@@ -91,3 +91,36 @@ class Event(object):
         if self.event_subject is not None:
             self.payload.add_dict(self.event_subject.standard_nv_pairs)
         return self.payload
+
+    @property
+    def event_subject(self) -> Optional[_subject.Subject]:
+        """
+        Optional per event subject
+        """
+        return self._event_subject
+
+    @event_subject.setter
+    def event_subject(self, value: Optional[_subject.Subject]):
+        self._event_subject = value
+
+    @property
+    def context(self) -> Optional[List[SelfDescribingJson]]:
+        """
+        Custom context for the event
+        """
+        return self._context
+
+    @context.setter
+    def context(self, value: Optional[List[SelfDescribingJson]]):
+        self._context = value
+
+    @property
+    def tstamp(self) -> Optional[str]:
+        """
+        Optional event timestamp in milliseconds
+        """
+        return self._tstamp
+
+    @tstamp.setter
+    def tstamp(self, value: Optional[_subject.Subject]):
+        self._tstamp = value
