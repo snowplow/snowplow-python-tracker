@@ -113,6 +113,7 @@ class IntegrationTest(unittest.TestCase):
                     {"sku": "pbz0026", "price": 20, "quantity": 1},
                     {"sku": "pbz0038", "price": 15, "quantity": 1},
                 ],
+                tstamp=1399021242240,
             )
 
         expected_fields = {
@@ -512,16 +513,18 @@ class IntegrationTest(unittest.TestCase):
 
     def test_bytelimit(self) -> None:
         default_emitter = emitters.Emitter(
-            "localhost", protocol="http", port=80, batch_size=5, byte_limit=483
+            "localhost", protocol="http", port=80, batch_size=5, byte_limit=450
         )
         t = tracker.Tracker("namespace", default_emitter, default_subject)
         with HTTMock(pass_post_response_content):
-            t.track_struct_event("Test", "A")  # 161 bytes
-            t.track_struct_event("Test", "A")  # 322 bytes
-            t.track_struct_event("Test", "A")  # 483 bytes. Send
-            t.track_struct_event("Test", "AA")  # 162
+            t.track_struct_event("Test", "A")  # 150 bytes
+            t.track_struct_event("Test", "A")  # 300 bytes
+            t.track_struct_event("Test", "A")  # 450 bytes. Send
+            t.track_struct_event("Test", "AA")  # 151
+
+        print(querystrings[-1]["data"])
         self.assertEqual(len(querystrings[-1]["data"]), 3)
-        self.assertEqual(default_emitter.bytes_queued, 156 + len(_version.__version__))
+        self.assertEqual(default_emitter.bytes_queued, 145 + len(_version.__version__))
 
     def test_unicode_get(self) -> None:
         t = tracker.Tracker(
