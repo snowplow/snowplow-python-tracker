@@ -38,6 +38,9 @@ class ScreenView(Event):
 
     def __init__(
         self,
+        event_subject: Optional[_subject.Subject] = None,
+        context: Optional[List[SelfDescribingJson]] = None,
+        tstamp: Optional[float] = None,
         id_: Optional[str] = None,
         name: Optional[str] = None,
         type: Optional[str] = None,
@@ -54,7 +57,9 @@ class ScreenView(Event):
         :param  referrer:       Referrer of the page
         :type   referrer:       string_or_none
         """
-        super(ScreenView, self).__init__()
+        super(ScreenView, self).__init__(
+            event_subject=event_subject, context=context, tstamp=tstamp
+        )
         self.payload.add("e", "ue")
         self.screen_view_properties = {}
         self.id_ = id_
@@ -158,11 +163,8 @@ class ScreenView(Event):
 
     def build_payload(
         self,
-        event_subject: Optional[_subject.Subject],
         encode_base64: bool,
         json_encoder: Optional[JsonEncoderFunction],
-        tstamp: Optional[float],
-        context: Optional[List[SelfDescribingJson]],
     ) -> "payload.Payload":
         """
         :param  event_subject:   Optional per event subject
@@ -177,8 +179,8 @@ class ScreenView(Event):
         :type   context:         context_array | None
         :rtype:                  payload.Payload
         """
-        if context is not None:
-            context_jsons = list(map(lambda c: c.to_json(), context))
+        if self.context is not None:
+            context_jsons = list(map(lambda c: c.to_json(), self.context))
             context_envelope = SelfDescribingJson(
                 CONTEXT_SCHEMA, context_jsons
             ).to_json()
@@ -187,15 +189,16 @@ class ScreenView(Event):
             )
 
         if isinstance(
-            tstamp,
+            self.tstamp,
             (
                 int,
                 float,
             ),
         ):
-            self.payload.add("ttm", int(tstamp))
+            self.payload.add("ttm", int(self.tstamp))
 
-        self.payload.add_dict(event_subject.standard_nv_pairs)
+        if self.event_subject is not None:
+            self.payload.add_dict(self.event_subject.standard_nv_pairs)
 
         event_json = SelfDescribingJson(
             "%s/screen_view/%s/1-0-0" % (MOBILE_SCHEMA_PATH, SCHEMA_TAG),
