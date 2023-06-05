@@ -38,6 +38,12 @@ class PageView(Event):
         referrer: Optional[str] = None,
     ) -> None:
         """
+        :param  event_subject:   Optional per event subject
+        :type   event_subject:   subject | None
+        :param  context:         Custom context for the event
+        :type   context:         context_array | None
+        :param  tstamp:          Optional event timestamp in milliseconds
+        :type   tstamp:          int | float | None
         :param  page_url:       URL of the viewed page
         :type   page_url:       non_empty_string
         :param  page_title:     Title of the viewed page
