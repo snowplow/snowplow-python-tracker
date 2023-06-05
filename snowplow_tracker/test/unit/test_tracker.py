@@ -251,8 +251,9 @@ class TestTracker(unittest.TestCase):
         e = mokEmitter()
 
         t = Tracker("namespace", e)
-        event = Event()
-        payload = t.complete_payload(event, None, None, None).nv_pairs
+        s = Subject()
+        event = Event(event_subject=s)
+        payload = t.complete_payload(event).nv_pairs
 
         expected = {
             "eid": _TEST_UUID,
@@ -271,11 +272,11 @@ class TestTracker(unittest.TestCase):
 
         mok_uuid.side_effect = mocked_uuid
         t = Tracker("namespace", e)
-        event = Event()
+        s = Subject()
         time_in_millis = 100010001000
-        payload = t.complete_payload(
-            event=event, event_subject=None, context=None, tstamp=time_in_millis
-        ).nv_pairs
+        event = Event(tstamp=time_in_millis, event_subject=s)
+
+        payload = t.complete_payload(event=event).nv_pairs
 
         expected = {
             "tna": "namespace",
@@ -296,14 +297,12 @@ class TestTracker(unittest.TestCase):
         mok_uuid.side_effect = mocked_uuid
 
         t = Tracker("namespace", e, encode_base64=False)
-        event = Event()
 
         geo_ctx = SelfDescribingJson(geoSchema, geoData)
         mov_ctx = SelfDescribingJson(movSchema, movData)
         ctx_array = [geo_ctx, mov_ctx]
-        payload = t.complete_payload(
-            event=event, context=ctx_array, tstamp=None, event_subject=None
-        ).nv_pairs
+        event = Event(context=ctx_array)
+        payload = t.complete_payload(event=event).nv_pairs
 
         expected_co = {
             "schema": CONTEXT_SCHEMA,
@@ -324,14 +323,12 @@ class TestTracker(unittest.TestCase):
         mok_uuid.side_effect = mocked_uuid
 
         t = Tracker("namespace", e, encode_base64=True)
-        event = Event()
 
         geo_ctx = SelfDescribingJson(geoSchema, geoData)
         mov_ctx = SelfDescribingJson(movSchema, movData)
         ctx_array = [geo_ctx, mov_ctx]
-        payload = t.complete_payload(
-            event=event, context=ctx_array, event_subject=None, tstamp=None
-        ).nv_pairs
+        event = Event(context=ctx_array)
+        payload = t.complete_payload(event=event).nv_pairs
 
         self.assertIn("cx", payload)
 
@@ -344,11 +341,9 @@ class TestTracker(unittest.TestCase):
         mok_uuid.side_effect = mocked_uuid
 
         t = Tracker("namespace", e)
-        event = Event()
-        evSubject = Subject().set_lang("EN").set_user_id("tester")
-        payload = t.complete_payload(
-            event=event, event_subject=evSubject, context=None, tstamp=None
-        ).nv_pairs
+        event_subject = Subject().set_lang("EN").set_user_id("tester")
+        event = Event(event_subject=event_subject)
+        payload = t.complete_payload(event=event).nv_pairs
 
         expected = {
             "tna": "namespace",
@@ -376,27 +371,18 @@ class TestTracker(unittest.TestCase):
         event_json = SelfDescribingJson("test.sde.schema", {"n": "v"})
         event = SelfDescribing(event_json=event_json)
         actual_pairs = event.build_payload(
-            event_subject=t.subject,
             encode_base64=t.encode_base64,
             json_encoder=t.json_encoder,
-            tstamp=None,
-            context=None,
         ).nv_pairs
 
         t.track_self_describing_event(event_json)
         self.assertEqual(mok_track.call_count, 1)
 
         complete_args_dict = mok_track.call_args_list[0][1]
-        self.assertEqual(len(complete_args_dict), 4)
+        self.assertEqual(len(complete_args_dict), 1)
 
         # payload
         actual_ue_pr = json.loads(actual_pairs["ue_pr"])
-
-        # context
-        actual_context_arg = complete_args_dict["context"]
-
-        # tstamp
-        actual_tstamp_arg = complete_args_dict["tstamp"]
 
         expectedUePr = {
             "data": {"data": {"n": "v"}, "schema": "test.sde.schema"},
@@ -405,8 +391,6 @@ class TestTracker(unittest.TestCase):
 
         self.assertDictEqual(actual_ue_pr, expectedUePr)
         self.assertEqual(actual_pairs["e"], "ue")
-        self.assertTrue(actual_context_arg is None)
-        self.assertTrue(actual_tstamp_arg is None)
 
     @mock.patch("snowplow_tracker.Tracker.track")
     def test_track_self_describing_event_all_args(self, mok_track: Any) -> None:
@@ -423,24 +407,17 @@ class TestTracker(unittest.TestCase):
 
         event = SelfDescribing(event_json=event_json)
         actual_pairs = event.build_payload(
-            event_subject=t.subject,
             encode_base64=t.encode_base64,
             json_encoder=t.json_encoder,
-            tstamp=event_tstamp,
-            context=event_context,
         ).nv_pairs
 
         t.track_self_describing_event(event_json, event_context, event_tstamp)
         self.assertEqual(mok_track.call_count, 1)
         complete_args_dict = mok_track.call_args_list[0][1]
-        self.assertEqual(len(complete_args_dict), 4)
+        self.assertEqual(len(complete_args_dict), 1)
 
         # payload
         actualUePr = json.loads(actual_pairs["ue_pr"])
-        # context
-        actualContextArg = complete_args_dict["context"]
-        # tstamp
-        actualTstampArg = complete_args_dict["tstamp"]
 
         expectedUePr = {
             "data": {"data": {"n": "v"}, "schema": "test.schema"},
@@ -449,8 +426,6 @@ class TestTracker(unittest.TestCase):
 
         self.assertDictEqual(actualUePr, expectedUePr)
         self.assertEqual(actual_pairs["e"], "ue")
-        self.assertIs(actualContextArg[0], ctx)
-        self.assertEqual(actualTstampArg, event_tstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track")
     def test_track_self_describing_event_encode(self, mok_track: Any) -> None:
@@ -464,17 +439,14 @@ class TestTracker(unittest.TestCase):
 
         event = SelfDescribing(event_json=event_json)
         actual_pairs = event.build_payload(
-            event_subject=t.subject,
             encode_base64=t.encode_base64,
             json_encoder=t.json_encoder,
-            tstamp=None,
-            context=None,
         ).nv_pairs
 
         t.track_self_describing_event(event_json)
         self.assertEqual(mok_track.call_count, 1)
         complete_args_dict = mok_track.call_args_list[0][1]
-        self.assertEqual(len(complete_args_dict), 4)
+        self.assertEqual(len(complete_args_dict), 1)
         self.assertTrue("ue_px" in actual_pairs.keys())
 
     @mock.patch("snowplow_tracker.Tracker.track")
@@ -498,11 +470,9 @@ class TestTracker(unittest.TestCase):
         )
         self.assertEqual(mok_track.call_count, 1)
         complete_args_dict = mok_track.call_args_list[0][1]
-        self.assertEqual(len(complete_args_dict), 4)
+        self.assertEqual(len(complete_args_dict), 1)
 
         actual_payload_arg = complete_args_dict["event"].payload
-        actual_context_arg = complete_args_dict["context"]
-        actual_tstamp_arg = complete_args_dict["tstamp"]
         actual_pairs = actual_payload_arg.nv_pairs
 
         expected_pairs = {
@@ -514,8 +484,6 @@ class TestTracker(unittest.TestCase):
             "se_va": 3.14,
         }
         self.assertDictEqual(actual_pairs, expected_pairs)
-        self.assertIs(actual_context_arg[0], ctx)
-        self.assertEqual(actual_tstamp_arg, ev_tstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track")
     def test_track_page_view(self, mok_track: Any) -> None:
@@ -536,11 +504,9 @@ class TestTracker(unittest.TestCase):
         )
         self.assertEqual(mok_track.call_count, 1)
         complete_args_dict = mok_track.call_args_list[0][1]
-        self.assertEqual(len(complete_args_dict), 4)
+        self.assertEqual(len(complete_args_dict), 1)
 
         actual_payload_arg = complete_args_dict["event"].payload
-        actual_context_arg = complete_args_dict["context"]
-        actual_tstamp_arg = complete_args_dict["tstamp"]
         actualPairs = actual_payload_arg.nv_pairs
 
         expectedPairs = {
@@ -550,8 +516,6 @@ class TestTracker(unittest.TestCase):
             "refr": "docs.snowplow.io",
         }
         self.assertDictEqual(actualPairs, expectedPairs)
-        self.assertIs(actual_context_arg[0], ctx)
-        self.assertEqual(actual_tstamp_arg, ev_tstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track")
     def test_track_page_ping(self, mok_track: Any) -> None:
@@ -576,11 +540,9 @@ class TestTracker(unittest.TestCase):
         )
         self.assertEqual(mok_track.call_count, 1)
         complete_args_dict = mok_track.call_args_list[0][1]
-        self.assertEqual(len(complete_args_dict), 4)
+        self.assertEqual(len(complete_args_dict), 1)
 
         actual_payload_arg = complete_args_dict["event"].payload
-        actual_context_arg = complete_args_dict["context"]
-        actual_tstamp_arg = complete_args_dict["tstamp"]
         actual_pairs = actual_payload_arg.nv_pairs
 
         expectedPairs = {
@@ -594,8 +556,6 @@ class TestTracker(unittest.TestCase):
             "pp_may": 3,
         }
         self.assertDictEqual(actual_pairs, expectedPairs)
-        self.assertIs(actual_context_arg[0], ctx)
-        self.assertEqual(actual_tstamp_arg, ev_tstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track")
     def test_track_ecommerce_transaction_item(self, mok_track: Any) -> None:
@@ -620,11 +580,9 @@ class TestTracker(unittest.TestCase):
         )
         self.assertEqual(mok_track.call_count, 1)
         complete_args_list = mok_track.call_args_list[0][1]
-        self.assertEqual(len(complete_args_list), 4)
+        self.assertEqual(len(complete_args_list), 1)
 
         actual_payload_arg = complete_args_list["event"].payload
-        actual_context_arg = complete_args_list["context"]
-        actual_tstamp_arg = complete_args_list["tstamp"]
         actual_pairs = actual_payload_arg.nv_pairs
 
         expectedPairs = {
@@ -638,8 +596,6 @@ class TestTracker(unittest.TestCase):
             "ti_cu": "itemCurrency",
         }
         self.assertDictEqual(actual_pairs, expectedPairs)
-        self.assertIs(actual_context_arg[0], ctx)
-        self.assertEqual(actual_tstamp_arg, ev_tstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track")
     def test_track_ecommerce_transaction_no_items(self, mok_track: Any) -> None:
@@ -666,11 +622,9 @@ class TestTracker(unittest.TestCase):
         )
         self.assertEqual(mok_track.call_count, 1)
         completeArgsList = mok_track.call_args_list[0][1]
-        self.assertEqual(len(completeArgsList), 4)
+        self.assertEqual(len(completeArgsList), 1)
 
         actualPayloadArg = completeArgsList["event"].payload
-        actualContextArg = completeArgsList["context"]
-        actualTstampArg = completeArgsList["tstamp"]
         actualPairs = actualPayloadArg.nv_pairs
 
         expectedPairs = {
@@ -686,8 +640,6 @@ class TestTracker(unittest.TestCase):
             "tr_cu": "transCurrency",
         }
         self.assertDictEqual(actualPairs, expectedPairs)
-        self.assertIs(actualContextArg[0], ctx)
-        self.assertEqual(actualTstampArg, evTstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track_ecommerce_transaction_item")
     @mock.patch("snowplow_tracker.Tracker.track")
@@ -725,11 +677,9 @@ class TestTracker(unittest.TestCase):
         # Transaction
         callCompleteArgsList = mok_track.call_args_list
         firstCallArgsList = callCompleteArgsList[0][1]
-        self.assertEqual(len(firstCallArgsList), 4)
+        self.assertEqual(len(firstCallArgsList), 1)
 
         actualPayloadArg = firstCallArgsList["event"].payload
-        actualContextArg = firstCallArgsList["context"]
-        actualTstampArg = firstCallArgsList["tstamp"]
         actualPairs = actualPayloadArg.nv_pairs
 
         expectedTransPairs = {
@@ -745,8 +695,6 @@ class TestTracker(unittest.TestCase):
             "tr_cu": "transCurrency",
         }
         self.assertDictEqual(actualPairs, expectedTransPairs)
-        self.assertIs(actualContextArg[0], ctx)
-        self.assertEqual(actualTstampArg, evTstamp)
 
         # Items
         calls_to_track_trans_item = mok_track_trans_item.call_count
@@ -1255,18 +1203,15 @@ class TestTracker(unittest.TestCase):
 
         screen_view = ScreenView(name="screenName", id_="screenId")
         actual_pairs = screen_view.build_payload(
-            event_subject=t.subject,
             encode_base64=False,
             json_encoder=t.json_encoder,
-            tstamp=None,
-            context=None,
         ).nv_pairs
 
         t.track_mobile_screen_view(screen_view)
 
         self.assertEqual(mok_track.call_count, 1)
         complete_args_dict = mok_track.call_args_list[0][1]
-        self.assertEqual(len(complete_args_dict), 4)
+        self.assertEqual(len(complete_args_dict), 1)
         actual_ue_pr = json.loads(actual_pairs["ue_pr"])
 
         expected = {
