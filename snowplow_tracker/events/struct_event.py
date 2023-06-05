@@ -50,6 +50,12 @@ class StructEvent(Event):
         :type   category:       non_empty_string
         :param  action:         The event itself
         :type   action:         non_empty_string
+        :param  event_subject:   Optional per event subject
+        :type   event_subject:   subject | None
+        :param  context:         Custom context for the event
+        :type   context:         context_array | None
+        :param  tstamp:          Optional event timestamp in milliseconds
+        :type   tstamp:          int | float | None
         :param  label:          Refer to the object the action is
                                 performed on
         :type   label:          string_or_none
