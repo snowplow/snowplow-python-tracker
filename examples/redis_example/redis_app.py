@@ -4,7 +4,7 @@ from snowplow_tracker import (
     PagePing,
     PageView,
     SelfDescribing,
-    StructEvent,
+    StructuredEvent,
     SelfDescribingJson,
 )
 from snowplow_tracker.typing import PayloadDict
@@ -76,7 +76,7 @@ def main():
     screen_view = ScreenView(id_="id", name="name")
     t.track(screen_view)
 
-    struct_event = StructEvent(
+    struct_event = StructuredEvent(
         category="shop", action="add-to-basket", property_="pcs", value=2
     )
     t.track(struct_event)

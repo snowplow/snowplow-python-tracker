@@ -36,7 +36,7 @@ from snowplow_tracker.events import (
     PagePing,
     PageView,
     SelfDescribing,
-    StructEvent,
+    StructuredEvent,
     ScreenView,
 )
 from snowplow_tracker.typing import (
@@ -929,7 +929,7 @@ class Tracker:
         non_empty_string(action)
         fin_subject = event_subject if event_subject is not None else self.subject
 
-        se = StructEvent(
+        se = StructuredEvent(
             category=category,
             action=action,
             context=context,

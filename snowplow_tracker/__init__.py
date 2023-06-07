@@ -13,6 +13,6 @@ from snowplow_tracker.events import (
     PageView,
     PagePing,
     SelfDescribing,
-    StructEvent,
+    StructuredEvent,
     ScreenView,
 )

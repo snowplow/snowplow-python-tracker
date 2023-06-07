@@ -20,7 +20,7 @@ from snowplow_tracker import subject as _subject
 from snowplow_tracker.self_describing_json import SelfDescribingJson
 
 
-class StructEvent(Event):
+class StructuredEvent(Event):
     """
     Constructs a Structured event object.
 
@@ -38,24 +38,18 @@ class StructEvent(Event):
         self,
         category: str,
         action: str,
-        event_subject: Optional[_subject.Subject] = None,
-        context: Optional[List[SelfDescribingJson]] = None,
-        tstamp: Optional[float] = None,
         label: Optional[str] = None,
         property_: Optional[str] = None,
         value: Optional[int] = None,
+        event_subject: Optional[_subject.Subject] = None,
+        context: Optional[List[SelfDescribingJson]] = None,
+        true_timestamp: Optional[float] = None,
     ) -> None:
         """
         :param  category:       Category of the event
         :type   category:       non_empty_string
         :param  action:         The event itself
         :type   action:         non_empty_string
-        :param  event_subject:   Optional per event subject
-        :type   event_subject:   subject | None
-        :param  context:         Custom context for the event
-        :type   context:         context_array | None
-        :param  tstamp:          Optional event timestamp in milliseconds
-        :type   tstamp:          int | float | None
         :param  label:          Refer to the object the action is
                                 performed on
         :type   label:          string_or_none
@@ -64,9 +58,15 @@ class StructEvent(Event):
         :type   property_:      string_or_none
         :param  value:          A value associated with the user action
         :type   value:          int | float | None
+        :param  event_subject:   Optional per event subject
+        :type   event_subject:   subject | None
+        :param  context:         Custom context for the event
+        :type   context:         context_array | None
+        :param  true_timestamp:          Optional event timestamp in milliseconds
+        :type   true_timestamp:          int | float | None
         """
-        super(StructEvent, self).__init__(
-            event_subject=event_subject, context=context, tstamp=tstamp
+        super(StructuredEvent, self).__init__(
+            event_subject=event_subject, context=context, true_timestamp=true_timestamp
         )
         self.payload.add("e", "se")
         self.category = category
@@ -80,57 +80,52 @@ class StructEvent(Event):
         """
         Category of the event
         """
-        return self._category
+        return self.payload.get("se_ca")
 
     @category.setter
     def category(self, value: Optional[str]):
-        self._category = value
-        self.payload.add("se_ca", self._category)
+        self.payload.add("se_ca", value)
 
     @property
     def action(self) -> Optional[str]:
         """
         The event itself
         """
-        return self._action
+        return self.payload.get("se_ac")
 
     @action.setter
     def action(self, value: Optional[str]):
-        self._action = value
-        self.payload.add("se_ac", self._action)
+        self.payload.add("se_ac", value)
 
     @property
     def label(self) -> Optional[str]:
         """
         Refer to the object the action is performed on
         """
-        return self._label
+        return self.payload.get("se_la")
 
     @label.setter
     def label(self, value: Optional[str]):
-        self._label = value
-        self.payload.add("se_la", self._label)
+        self.payload.add("se_la", value)
 
     @property
     def property_(self) -> Optional[str]:
         """
         Property associated with either the action or the object
         """
-        return self._property_
+        return self.payload.get("se_pr")
 
     @property_.setter
     def property_(self, value: Optional[str]):
-        self._property_ = value
-        self.payload.add("se_pr", self._property_)
+        self.payload.add("se_pr", value)
 
     @property
     def value(self) -> Optional[int]:
         """
         A value associated with the user action
         """
-        return self._value
+        return self.payload.get("se_va")
 
     @value.setter
     def value(self, value: Optional[int]):
-        self._value = value
-        self.payload.add("se_va", self._value)
+        self.payload.add("se_va", value)

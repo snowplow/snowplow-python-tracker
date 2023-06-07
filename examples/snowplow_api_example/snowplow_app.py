@@ -9,7 +9,7 @@ from snowplow_tracker import (
     PageView,
     ScreenView,
     SelfDescribing,
-    StructEvent,
+    StructuredEvent,
 )
 
 
@@ -62,7 +62,7 @@ def main():
     screen_view = ScreenView(id_="id", name="name")
     tracker.track(screen_view)
 
-    struct_event = StructEvent(
+    struct_event = StructuredEvent(
         category="shop", action="add-to-basket", property_="pcs", value=2
     )
     tracker.track(struct_event)
