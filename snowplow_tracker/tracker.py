@@ -187,7 +187,7 @@ class Tracker:
         :rtype:                 Tracker
         """
         warn(
-            "track_page_view will be deprecated in future versions. Please use the new Event API to create events.",
+            "track_page_view will be removed in future versions. Please use the new PageView class to track the event.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -242,7 +242,7 @@ class Tracker:
         :rtype:                 Tracker
         """
         warn(
-            "track_page_ping will be deprecated in future versions. Please use the new Event API to create events.",
+            "track_page_ping will be removed in future versions. Please use the new PagePing class to track the event.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -298,7 +298,7 @@ class Tracker:
         :rtype:                 Tracker
         """
         warn(
-            "track_link_click will be deprecated in future versions. Please use the new Event API to create events.",
+            "track_link_click will be removed in future versions. Please use the new SelfDescribing class to track the event.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -495,7 +495,7 @@ class Tracker:
         :rtype:                 Tracker
         """
         warn(
-            "track_form_change will be deprecated in future versions. Please use the new Event API to create events.",
+            "track_form_change will be removed in future versions. Please use the new SelfDescribing class to track the event.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -554,7 +554,7 @@ class Tracker:
         :rtype:                 Tracker
         """
         warn(
-            "track_form_submit will be deprecated in future versions. Please use the new Event API to create events.",
+            "track_form_submit will be removed in future versions. Please use the new SelfDescribing class to track the event.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -612,7 +612,7 @@ class Tracker:
         :rtype:                 Tracker
         """
         warn(
-            "track_site_search will be deprecated in future versions. Please use the new Event API to create events.",
+            "track_site_search will be removed in future versions. Please use the new SelfDescribing class to track the event.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -806,7 +806,7 @@ class Tracker:
         :rtype:                 Tracker
         """
         warn(
-            "track_screen_view will be deprecated in future versions. Please use track_mobile_screen_view.",
+            "track_screen_view will be removed in future versions. Please use the new ScreenView class to track the event.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -868,7 +868,7 @@ class Tracker:
         :rtype:                 Tracker
         """
         warn(
-            "track_mobile_screen_view will be deprecated in future versions. Please use the new Event API to create events.",
+            "track_mobile_screen_view will be removed in future versions. Please use the new ScreenView class to track the event.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -915,7 +915,7 @@ class Tracker:
         :rtype:                 Tracker
         """
         warn(
-            "track_struct_event will be deprecated in future versions. Please use the new Event API to create events.",
+            "track_struct_event will be removed in future versions. Please use the new Structured class to track the event.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -959,7 +959,7 @@ class Tracker:
         :rtype:                  Tracker
         """
         warn(
-            "track_self_describing_event will be deprecated in future versions. Please use the new Event API to create events.",
+            "track_self_describing_event will be removed in future versions. Please use the new SelfDescribing class to track the event.",
             DeprecationWarning,
             stacklevel=2,
         )
