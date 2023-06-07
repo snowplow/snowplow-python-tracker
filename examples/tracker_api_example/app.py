@@ -54,7 +54,8 @@ def main():
     )
     t.track(link_click)
 
-    screen_view = ScreenView(id_="id", name="name", event_subject=t.subject)
+    id = t.get_uuid()
+    screen_view = ScreenView(id_=id, name="name", event_subject=t.subject)
     t.track(screen_view)
 
     struct_event = StructuredEvent(
