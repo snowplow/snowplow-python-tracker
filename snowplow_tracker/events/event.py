@@ -42,7 +42,7 @@ class Event(object):
         dict_: Optional[PayloadDict] = None,
         event_subject: Optional[_subject.Subject] = None,
         context: Optional[List[SelfDescribingJson]] = None,
-        tstamp: Optional[float] = None,
+        true_timestamp: Optional[float] = None,
     ) -> None:
         """
         Constructor
@@ -52,14 +52,14 @@ class Event(object):
         :type   event_subject:   subject | None
         :param  context:         Custom context for the event
         :type   context:         context_array | None
-        :param  tstamp:          Optional event timestamp in milliseconds
-        :type   tstamp:          int | float | None
+        :param  true_timestamp:          Optional event timestamp in milliseconds
+        :type   true_timestamp:          int | float | None
 
         """
         self.payload = payload.Payload(dict_=dict_)
         self.event_subject = event_subject
         self.context = context
-        self.tstamp = tstamp
+        self.true_timestamp = true_timestamp
 
     def build_payload(
         self,
@@ -89,7 +89,7 @@ class Event(object):
             )
 
         if isinstance(
-            self.tstamp,
+            self.true_timestamp,
             (
                 int,
                 float,
@@ -124,12 +124,12 @@ class Event(object):
         self._context = value
 
     @property
-    def tstamp(self) -> Optional[str]:
+    def true_timestamp(self) -> Optional[str]:
         """
         Optional event timestamp in milliseconds
         """
-        return self._tstamp
+        return self._true_timestamp
 
-    @tstamp.setter
-    def tstamp(self, value: Optional[_subject.Subject]):
-        self._tstamp = value
+    @true_timestamp.setter
+    def true_timestamp(self, value: Optional[_subject.Subject]):
+        self._true_timestamp = value

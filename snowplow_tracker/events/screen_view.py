@@ -48,6 +48,7 @@ class ScreenView(Event):
         previous_id: Optional[str] = None,
         previous_type: Optional[str] = None,
         transition_type: Optional[str] = None,
+        true_timestamp: Optional[float] = None,
     ) -> None:
         """
         :param  event_subject:   Optional per event subject
@@ -70,9 +71,11 @@ class ScreenView(Event):
         :type   previous_type   string | None
         :param  transition_type The type of transition that led to the screen being viewed.
         :type   transition_type string | None
+        :param  true_timestamp:  Optional event timestamp in milliseconds
+        :type   true_timestamp:  int | float | None
         """
         super(ScreenView, self).__init__(
-            event_subject=event_subject, context=context, tstamp=tstamp
+            event_subject=event_subject, context=context, true_timestamp=true_timestamp
         )
         self.payload.add("e", "ue")
         self.screen_view_properties = {}

@@ -40,6 +40,7 @@ class PagePing(Event):
         max_x: Optional[int] = None,
         min_y: Optional[int] = None,
         max_y: Optional[int] = None,
+        true_timestamp: Optional[float] = None,
     ) -> None:
         """
         :param  event_subject:   Optional per event subject
@@ -62,9 +63,11 @@ class PagePing(Event):
         :type   min_y:          int | None
         :param  max_y:          Maximum page y offset seen in the last ping period
         :type   max_y:          int | None
+        :param  true_timestamp:          Optional event timestamp in milliseconds
+        :type   true_timestamp:          int | float | None
         """
         super(PagePing, self).__init__(
-            event_subject=event_subject, context=context, tstamp=tstamp
+            event_subject=event_subject, context=context, true_timestamp=true_timestamp
         )
         self.payload.add("e", "pp")
         self.page_url = page_url

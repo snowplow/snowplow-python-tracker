@@ -252,7 +252,7 @@ class Tracker:
         pp = PagePing(
             page_url=page_url,
             context=context,
-            tstamp=tstamp,
+            true_timestamp=tstamp,
             event_subject=fin_subject,
         )
         pp.page_title = page_title
@@ -323,7 +323,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            tstamp=tstamp,
+            true_timestamp=tstamp,
             event_subject=fin_subject,
         )
         return self
@@ -389,7 +389,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            tstamp=tstamp,
+            true_timestamp=tstamp,
             event_subject=fin_subject,
         )
         return self
@@ -455,7 +455,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            tstamp=tstamp,
+            true_timestamp=tstamp,
             event_subject=fin_subject,
         )
         return self
@@ -523,7 +523,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            tstamp=tstamp,
+            true_timestamp=tstamp,
             event_subject=fin_subject,
         )
         return self
@@ -578,7 +578,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            tstamp=tstamp,
+            true_timestamp=tstamp,
             event_subject=fin_subject,
         )
         return self
@@ -634,7 +634,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            tstamp=tstamp,
+            true_timestamp=tstamp,
             event_subject=fin_subject,
         )
         return self
@@ -688,7 +688,7 @@ class Tracker:
 
         fin_subject = event_subject if event_subject is not None else self.subject
 
-        event = Event(event_subject=fin_subject, context=context, tstamp=tstamp)
+        event = Event(event_subject=fin_subject, context=context, true_timestamp=tstamp)
         event.payload.add("e", "ti")
         event.payload.add("ti_id", order_id)
         event.payload.add("ti_sk", sku)
@@ -755,7 +755,7 @@ class Tracker:
 
         fin_subject = event_subject if event_subject is not None else self.subject
 
-        event = Event(event_subject=fin_subject, context=context, tstamp=tstamp)
+        event = Event(event_subject=fin_subject, context=context, true_timestamp=tstamp)
         event.payload.add("e", "tr")
         event.payload.add("tr_id", order_id)
         event.payload.add("tr_tt", total_value)
@@ -825,7 +825,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            tstamp=tstamp,
+            true_timestamp=tstamp,
             event_subject=fin_subject,
         )
         return self
@@ -876,14 +876,7 @@ class Tracker:
         if id_ is None:
             id_ = self.get_uuid()
 
-        sv = ScreenView(event_subject=fin_subject, context=context, tstamp=tstamp)
-        sv.id_ = id_
-        sv.name = name
-        sv.type = type
-        sv.previous_name = previous_name
-        sv.previous_id = previous_id
-        sv.previous_type = previous_type
-        sv.transition_type = transition_type
+            true_timestamp=tstamp,
 
         self.track(event=sv)
         return self
@@ -933,7 +926,7 @@ class Tracker:
             category=category,
             action=action,
             context=context,
-            tstamp=tstamp,
+            true_timestamp=tstamp,
             event_subject=fin_subject,
         )
         se.label = label
@@ -974,7 +967,7 @@ class Tracker:
         sd = SelfDescribing(
             event_json=event_json,
             context=context,
-            tstamp=tstamp,
+            true_timestamp=tstamp,
             event_subject=fin_subject,
         )
         self.track(
@@ -1013,7 +1006,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            tstamp=tstamp,
+            true_timestamp=tstamp,
             event_subject=fin_subject,
         )
         return self

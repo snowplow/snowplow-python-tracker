@@ -32,10 +32,7 @@ class PageView(Event):
         self,
         event_subject: Optional[_subject.Subject] = None,
         context: Optional[List[SelfDescribingJson]] = None,
-        tstamp: Optional[float] = None,
-        page_url: Optional[str] = None,
-        page_title: Optional[str] = None,
-        referrer: Optional[str] = None,
+        true_timestamp: Optional[float] = None,
     ) -> None:
         """
         :param  event_subject:   Optional per event subject
@@ -50,9 +47,11 @@ class PageView(Event):
         :type   page_title:     string_or_none
         :param  referrer:       Referrer of the page
         :type   referrer:       string_or_none
+        :param  true_timestamp:          Optional event timestamp in milliseconds
+        :type   true_timestamp:          int | float | None
         """
         super(PageView, self).__init__(
-            event_subject=event_subject, context=context, tstamp=tstamp
+            event_subject=event_subject, context=context, true_timestamp=true_timestamp
         )
         self.payload.add("e", "pv")
         self.page_url = page_url

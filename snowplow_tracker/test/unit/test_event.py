@@ -43,7 +43,7 @@ class TestEvent(unittest.TestCase):
         event_subject = Subject()
         tstamp = 1399021242030
 
-        event = Event(event_subject=event_subject, tstamp=tstamp)
+        event = Event(event_subject=event_subject, true_timestamp=tstamp)
 
         payload = event.build_payload(
             json_encoder=None,

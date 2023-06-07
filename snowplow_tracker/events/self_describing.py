@@ -39,7 +39,7 @@ class SelfDescribing(Event):
         event_json: SelfDescribingJson,
         event_subject: Optional[_subject.Subject] = None,
         context: Optional[List[SelfDescribingJson]] = None,
-        tstamp: Optional[float] = None,
+        true_timestamp: Optional[float] = None,
     ) -> None:
         """
         :param  event_json:      The properties of the event. Has two field:
@@ -50,11 +50,11 @@ class SelfDescribing(Event):
         :type   event_subject:   subject | None
         :param  context:         Custom context for the event
         :type   context:         context_array | None
-        :param  tstamp:          Optional event timestamp in milliseconds
-        :type   tstamp:          int | float | None
+        :param  true_timestamp:          Optional event timestamp in milliseconds
+        :type   true_timestamp:          int | float | None
         """
         super(SelfDescribing, self).__init__(
-            event_subject=event_subject, context=context, tstamp=tstamp
+            event_subject=event_subject, context=context, true_timestamp=true_timestamp
         )
         self.payload.add("e", "ue")
         self.event_json = event_json
