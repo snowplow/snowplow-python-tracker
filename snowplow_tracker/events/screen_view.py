@@ -18,6 +18,7 @@
 from typing import Optional, List
 from snowplow_tracker.typing import JsonEncoderFunction
 from snowplow_tracker.events.event import Event
+from snowplow_tracker.events.self_describing import SelfDescribing
 from snowplow_tracker import SelfDescribingJson
 from snowplow_tracker.constants import (
     UNSTRUCT_EVENT_SCHEMA,
@@ -181,35 +182,18 @@ class ScreenView(Event):
         :type   subject:         subject | None
         :rtype:                  payload.Payload
         """
-        if self.context is not None:
-            context_jsons = list(map(lambda c: c.to_json(), self.context))
-            context_envelope = SelfDescribingJson(
-                CONTEXT_SCHEMA, context_jsons
-            ).to_json()
-            self.payload.add_json(
-                context_envelope, encode_base64, "cx", "co", json_encoder
-            )
-
-        if isinstance(
-            self.tstamp,
-            (
-                int,
-                float,
-            ),
-        ):
-            self.payload.add("ttm", int(self.tstamp))
-
-        if self.event_subject is not None:
-            self.payload.add_dict(self.event_subject.standard_nv_pairs)
-
         event_json = SelfDescribingJson(
             "%s/screen_view/%s/1-0-0" % (MOBILE_SCHEMA_PATH, SCHEMA_TAG),
             self.screen_view_properties,
         )
-
-        envelope = SelfDescribingJson(
-            UNSTRUCT_EVENT_SCHEMA, event_json.to_json()
-        ).to_json()
-        self.payload.add_json(envelope, encode_base64, "ue_px", "ue_pr", json_encoder)
+        self_describing = SelfDescribing(
+            event_json=event_json,
+            event_subject=self.event_subject,
+            context=self.context,
+            true_timestamp=self.true_timestamp,
+        )
+        return self_describing.build_payload(
+            encode_base64, json_encoder, subject=subject
+        )
 
         return self.payload

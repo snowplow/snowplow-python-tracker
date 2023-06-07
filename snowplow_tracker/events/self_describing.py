@@ -87,30 +87,12 @@ class SelfDescribing(Event):
         :type   subject:         subject | None
         :rtype:                  payload.Payload
         """
-        if self.context is not None:
-            context_jsons = list(map(lambda c: c.to_json(), self.context))
-            context_envelope = SelfDescribingJson(
-                CONTEXT_SCHEMA, context_jsons
-            ).to_json()
-            self.payload.add_json(
-                context_envelope, encode_base64, "cx", "co", json_encoder
-            )
-
-        if isinstance(
-            self.tstamp,
-            (
-                int,
-                float,
-            ),
-        ):
-            self.payload.add("ttm", int(self.tstamp))
-
-        if self.event_subject is not None:
-            self.payload.add_dict(self.event_subject.standard_nv_pairs)
 
         envelope = SelfDescribingJson(
             UNSTRUCT_EVENT_SCHEMA, self.event_json.to_json()
         ).to_json()
         self.payload.add_json(envelope, encode_base64, "ue_px", "ue_pr", json_encoder)
 
-        return self.payload
+        return super(SelfDescribing, self).build_payload(
+            encode_base64=encode_base64, json_encoder=json_encoder, subject=subject
+        )
