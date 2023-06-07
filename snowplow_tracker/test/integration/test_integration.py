@@ -522,7 +522,6 @@ class IntegrationTest(unittest.TestCase):
             t.track_struct_event("Test", "A")  # 483 bytes. Send
             t.track_struct_event("Test", "AA")  # 162
 
-        print(querystrings[-1]["data"])
         self.assertEqual(len(querystrings[-1]["data"]), 3)
         self.assertEqual(default_emitter.bytes_queued, 156 + len(_version.__version__))
 
@@ -551,7 +550,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(actual_a, unicode_a)
 
         uepr_string = unquote_plus(from_querystring("ue_pr", querystrings[-1]))
-        actual_b = json.loads(uepr_string)["data"]["data"]["id"]
+        actual_b = json.loads(uepr_string)["data"]["data"]["name"]
         self.assertEqual(actual_b, unicode_b)
 
     def test_unicode_post(self) -> None:
@@ -574,5 +573,5 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(in_test_ctx, unicode_a)
 
         sv_event = querystrings[-1]
-        in_uepr_name = json.loads(sv_event["data"][0]["ue_pr"])["data"]["data"]["id"]
+        in_uepr_name = json.loads(sv_event["data"][0]["ue_pr"])["data"]["data"]["name"]
         self.assertEqual(in_uepr_name, unicode_b)
