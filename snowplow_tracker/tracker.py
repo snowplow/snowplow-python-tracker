@@ -153,6 +153,7 @@ class Tracker:
         payload = event.build_payload(
             encode_base64=self.encode_base64,
             json_encoder=self.json_encoder,
+            subject=self.subject,
         )
 
         payload.add("eid", Tracker.get_uuid())

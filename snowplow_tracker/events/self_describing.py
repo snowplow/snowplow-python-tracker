@@ -76,18 +76,15 @@ class SelfDescribing(Event):
         self,
         encode_base64: bool,
         json_encoder: Optional[JsonEncoderFunction],
+        subject: Optional[_subject.Subject] = None,
     ) -> "payload.Payload":
         """
-        :param  event_subject:   Optional per event subject
-        :type   event_subject:   subject | None
         :param encode_base64:    Whether JSONs in the payload should be base-64 encoded
         :type  encode_base64:    bool
         :param json_encoder:     Custom JSON serializer that gets called on non-serializable object
         :type  json_encoder:     function | None
-        :param  tstamp:          Optional event timestamp in milliseconds
-        :type   tstamp:          int | float | None
-        :param  context:         Custom context for the event
-        :type   context:         context_array | None
+        :param  subject:         Optional per event subject
+        :type   subject:         subject | None
         :rtype:                  payload.Payload
         """
         if self.context is not None:
