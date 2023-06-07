@@ -35,6 +35,8 @@ class ScreenView(Event):
     Constructs a ScreenView event object.
 
     When tracked, generates a SelfDescribing event (event type "ue").
+
+    Schema: `iglu:com.snowplowanalytics.mobile/screen_view/jsonschema/1-0-0`
     """
 
     def __init__(
