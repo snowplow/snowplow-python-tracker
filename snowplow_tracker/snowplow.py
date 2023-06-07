@@ -85,7 +85,7 @@ class Snowplow:
         )
 
         tracker = Tracker(
-            emitter,
+            emitters=emitter,
             namespace=namespace,
             app_id=app_id,
             subject=subject,
