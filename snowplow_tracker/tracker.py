@@ -280,23 +280,23 @@ class Tracker:
         event_subject: Optional[_subject.Subject] = None,
     ) -> "Tracker":
         """
-        :param  target_url:     Target URL of the link
-        :type   target_url:     non_empty_string
-        :param  element_id:     ID attribute of the HTML element
-        :type   element_id:     string_or_none
+        :param  target_url:         Target URL of the link
+        :type   target_url:         non_empty_string
+        :param  element_id:         ID attribute of the HTML element
+        :type   element_id:         string_or_none
         :param  element_classes:    Classes of the HTML element
         :type   element_classes:    list(str) | tuple(str,\\*) | None
         :param  element_target:     ID attribute of the HTML element
         :type   element_target:     string_or_none
         :param  element_content:    The content of the HTML element
         :type   element_content:    string_or_none
-        :param  context:        Custom context for the event
-        :type   context:        context_array | None
-        :param  tstamp:         Optional event timestamp in milliseconds
-        :type   tstamp:         int | float | None
-        :param  event_subject:  Optional per event subject
-        :type   event_subject:  subject | None
-        :rtype:                 Tracker
+        :param  context:            Custom context for the event
+        :type   context:            context_array | None
+        :param  tstamp:             Optional event timestamp in milliseconds
+        :type   tstamp:             int | float | None
+        :param  event_subject:      Optional per event subject
+        :type   event_subject:      subject | None
+        :rtype:                     Tracker
         """
         warn(
             "track_link_click will be removed in future versions. Please use the new SelfDescribing class to track the event.",
@@ -475,25 +475,25 @@ class Tracker:
         event_subject: Optional[_subject.Subject] = None,
     ) -> "Tracker":
         """
-        :param  form_id:        ID attribute of the HTML form
-        :type   form_id:        non_empty_string
-        :param  element_id:     ID attribute of the HTML element
-        :type   element_id:     string_or_none
-        :param  node_name:      Type of input element
-        :type   node_name:      form_node_name
-        :param  value:          Value of the input element
-        :type   value:          string_or_none
-        :param  type_:          Type of data the element represents
-        :type   type_:          non_empty_string, form_type
+        :param  form_id:            ID attribute of the HTML form
+        :type   form_id:            non_empty_string
+        :param  element_id:         ID attribute of the HTML element
+        :type   element_id:         string_or_none
+        :param  node_name:          Type of input element
+        :type   node_name:          form_node_name
+        :param  value:              Value of the input element
+        :type   value:              string_or_none
+        :param  type_:              Type of data the element represents
+        :type   type_:              non_empty_string, form_type
         :param  element_classes:    Classes of the HTML element
         :type   element_classes:    list(str) | tuple(str,\\*) | None
-        :param  context:        Custom context for the event
-        :type   context:        context_array | None
-        :param  tstamp:         Optional event timestamp in milliseconds
-        :type   tstamp:         int | float | None
-        :param  event_subject:  Optional per event subject
-        :type   event_subject:  subject | None
-        :rtype:                 Tracker
+        :param  context:            Custom context for the event
+        :type   context:            context_array | None
+        :param  tstamp:             Optional event timestamp in milliseconds
+        :type   tstamp:             int | float | None
+        :param  event_subject:      Optional per event subject
+        :type   event_subject:      subject | None
+        :rtype:                     Tracker
         """
         warn(
             "track_form_change will be removed in future versions. Please use the new SelfDescribing class to track the event.",
@@ -658,27 +658,27 @@ class Tracker:
         This is an internal method called by track_ecommerce_transaction.
         It is not for public use.
 
-        :param  order_id:    Order ID
-        :type   order_id:    non_empty_string
-        :param  sku:         Item SKU
-        :type   sku:         non_empty_string
-        :param  price:       Item price
-        :type   price:       int | float
-        :param  quantity:    Item quantity
-        :type   quantity:    int
-        :param  name:        Item name
-        :type   name:        string_or_none
-        :param  category:    Item category
-        :type   category:    string_or_none
-        :param  currency:    The currency the price is expressed in
-        :type   currency:    string_or_none
-        :param  context:     Custom context for the event
-        :type   context:     context_array | None
-        :param  tstamp:      Optional event timestamp in milliseconds
-        :type   tstamp:      int | float | None
+        :param  order_id:       Order ID
+        :type   order_id:       non_empty_string
+        :param  sku:            Item SKU
+        :type   sku:            non_empty_string
+        :param  price:          Item price
+        :type   price:          int | float
+        :param  quantity:       Item quantity
+        :type   quantity:       int
+        :param  name:           Item name
+        :type   name:           string_or_none
+        :param  category:       Item category
+        :type   category:       string_or_none
+        :param  currency:       The currency the price is expressed in
+        :type   currency:       string_or_none
+        :param  context:        Custom context for the event
+        :type   context:        context_array | None
+        :param  tstamp:         Optional event timestamp in milliseconds
+        :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:              Tracker
+        :rtype:                 Tracker
         """
         warn(
             "track_ecommerce_transaction_item will be deprecated in future versions.",
@@ -834,8 +834,8 @@ class Tracker:
 
     def track_mobile_screen_view(
         self,
+        name: str,
         id_: Optional[str] = None,
-        name: Optional[str] = None,
         type: Optional[str] = None,
         previous_name: Optional[str] = None,
         previous_id: Optional[str] = None,
@@ -846,10 +846,10 @@ class Tracker:
         event_subject: Optional[_subject.Subject] = None,
     ) -> "Tracker":
         """
-        :param  id_:            Screen view ID. This must be of type UUID.
-        :type   id_:            string | None
         :param  name:           The name of the screen view event
         :type   name:           string_or_none
+        :param  id_:            Screen view ID. This must be of type UUID.
+        :type   id_:            string | None
         :param  type:           The type of screen that was viewed e.g feed / carousel.
         :type   type:           string | None
         :param  previous_name:  The name of the previous screen.
@@ -945,6 +945,7 @@ class Tracker:
             true_timestamp=tstamp,
             event_subject=fin_subject,
         )
+
         self.track(
             event=se,
         )
