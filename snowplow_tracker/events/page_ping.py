@@ -30,25 +30,18 @@ class PagePing(Event):
 
     def __init__(
         self,
-        event_subject: Optional[_subject.Subject] = None,
-        context: Optional[List[SelfDescribingJson]] = None,
-        tstamp: Optional[float] = None,
-        page_url: Optional[str] = None,
+        page_url: str,
         page_title: Optional[str] = None,
         referrer: Optional[str] = None,
         min_x: Optional[int] = None,
         max_x: Optional[int] = None,
         min_y: Optional[int] = None,
         max_y: Optional[int] = None,
+        event_subject: Optional[_subject.Subject] = None,
+        context: Optional[List[SelfDescribingJson]] = None,
         true_timestamp: Optional[float] = None,
     ) -> None:
         """
-        :param  event_subject:   Optional per event subject
-        :type   event_subject:   subject | None
-        :param  context:         Custom context for the event
-        :type   context:         context_array | None
-        :param  tstamp:          Optional event timestamp in milliseconds
-        :type   tstamp:          int | float | None
         :param  page_url:       URL of the viewed page
         :type   page_url:       non_empty_string
         :param  page_title:     Title of the viewed page
@@ -63,6 +56,10 @@ class PagePing(Event):
         :type   min_y:          int | None
         :param  max_y:          Maximum page y offset seen in the last ping period
         :type   max_y:          int | None
+        :param  event_subject:   Optional per event subject
+        :type   event_subject:   subject | None
+        :param  context:         Custom context for the event
+        :type   context:         context_array | None
         :param  true_timestamp:          Optional event timestamp in milliseconds
         :type   true_timestamp:          int | float | None
         """

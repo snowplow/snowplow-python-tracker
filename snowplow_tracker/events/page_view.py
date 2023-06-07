@@ -30,6 +30,9 @@ class PageView(Event):
 
     def __init__(
         self,
+        page_url: str,
+        page_title: Optional[str] = None,
+        referrer: Optional[str] = None,
         event_subject: Optional[_subject.Subject] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         true_timestamp: Optional[float] = None,
@@ -47,6 +50,10 @@ class PageView(Event):
         :type   page_title:     string_or_none
         :param  referrer:       Referrer of the page
         :type   referrer:       string_or_none
+        :param  event_subject:   Optional per event subject
+        :type   event_subject:   subject | None
+        :param  context:         Custom context for the event
+        :type   context:         context_array | None
         :param  true_timestamp:          Optional event timestamp in milliseconds
         :type   true_timestamp:          int | float | None
         """

@@ -48,19 +48,15 @@ class ScreenView(Event):
         previous_id: Optional[str] = None,
         previous_type: Optional[str] = None,
         transition_type: Optional[str] = None,
+        event_subject: Optional[_subject.Subject] = None,
+        context: Optional[List[SelfDescribingJson]] = None,
         true_timestamp: Optional[float] = None,
     ) -> None:
         """
-        :param  event_subject:   Optional per event subject
-        :type   event_subject:   subject | None
-        :param  context:         Custom context for the event
-        :type   context:         context_array | None
-        :param  tstamp:          Optional event timestamp in milliseconds
-        :type   tstamp:          int | float | None
         :param  id_:            Screen view ID. This must be of type UUID.
-        :type   id_:            string | None
+        :type   id_:            string
         :param  name:           The name of the screen view event
-        :type   name:           string_or_none
+        :type   name:           string
         :param  type:           The type of screen that was viewed e.g feed / carousel.
         :type   type:           string | None
         :param  previous_name:  The name of the previous screen.
@@ -71,6 +67,10 @@ class ScreenView(Event):
         :type   previous_type   string | None
         :param  transition_type The type of transition that led to the screen being viewed.
         :type   transition_type string | None
+        :param  event_subject:   Optional per event subject
+        :type   event_subject:   subject | None
+        :param  context:         Custom context for the event
+        :type   context:         context_array | None
         :param  true_timestamp:  Optional event timestamp in milliseconds
         :type   true_timestamp:  int | float | None
         """
