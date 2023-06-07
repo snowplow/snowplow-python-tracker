@@ -196,11 +196,13 @@ class Tracker:
         fin_subject = event_subject if event_subject is not None else self.subject
 
         pv = PageView(
-            page_url=page_url, event_subject=fin_subject, context=context, tstamp=tstamp
+            page_url=page_url,
+            page_title=page_title,
+            referrer=referrer,
+            event_subject=fin_subject,
+            context=context,
+            true_timestamp=tstamp,
         )
-        pv.page_title = page_title
-        pv.page_url = page_url
-        pv.referrer = referrer
 
         self.track(event=pv)
         return self
@@ -252,17 +254,16 @@ class Tracker:
 
         pp = PagePing(
             page_url=page_url,
+            page_title=page_title,
+            referrer=referrer,
+            min_x=min_x,
+            max_x=max_x,
+            min_y=min_y,
+            max_y=max_y,
             context=context,
             true_timestamp=tstamp,
             event_subject=fin_subject,
         )
-        pp.page_title = page_title
-        pp.page_url = page_url
-        pp.referrer = referrer
-        pp.min_x = min_x
-        pp.max_x = max_x
-        pp.min_y = min_y
-        pp.max_y = max_y
 
         self.track(event=pp)
         return self
@@ -877,7 +878,18 @@ class Tracker:
         if id_ is None:
             id_ = self.get_uuid()
 
+        sv = ScreenView(
+            name=name,
+            id_=id_,
+            type=type,
+            previous_name=previous_name,
+            previous_id=previous_id,
+            previous_type=previous_type,
+            transition_type=transition_type,
+            event_subject=fin_subject,
+            context=context,
             true_timestamp=tstamp,
+        )
 
         self.track(event=sv)
         return self
@@ -926,13 +938,13 @@ class Tracker:
         se = StructuredEvent(
             category=category,
             action=action,
+            label=label,
+            property_=property_,
+            value=value,
             context=context,
             true_timestamp=tstamp,
             event_subject=fin_subject,
         )
-        se.label = label
-        se.property_ = property_
-        se.value = value
         self.track(
             event=se,
         )
