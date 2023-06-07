@@ -80,81 +80,74 @@ class PagePing(Event):
         """
         URL of the viewed page
         """
-        return self._page_url
+        return self.payload.get("url")
 
     @page_url.setter
     def page_url(self, value: Optional[str]):
-        self._page_url = value
-        self.payload.add("url", self._page_url)
+        self.payload.add("url", value)
 
     @property
     def page_title(self) -> Optional[str]:
         """
         URL of the viewed page
         """
-        return self._page_title
+        return self.payload.get("page")
 
     @page_title.setter
     def page_title(self, value: Optional[str]):
-        self._page_title = value
-        self.payload.add("page", self._page_title)
+        self.payload.add("page", value)
 
     @property
     def referrer(self) -> Optional[str]:
         """
         The referrer of the page
         """
-        return self._referrer
+        return self.payload.get("refr")
 
     @referrer.setter
     def referrer(self, value: Optional[str]):
-        self._referrer = value
-        self.payload.add("refr", self._referrer)
+        self.payload.add("refr", value)
 
     @property
     def min_x(self) -> Optional[int]:
         """
         Minimum page x offset seen in the last ping period
         """
-        return self._min_x
+        return self.payload.get("pp_mix")
 
     @min_x.setter
     def min_x(self, value: Optional[int]):
-        self._min_x = value
-        self.payload.add("pp_mix", self._min_x)
+        self.payload.add("pp_mix", value)
 
     @property
     def max_x(self) -> Optional[int]:
         """
         Maximum page x offset seen in the last ping period
         """
-        return self._max_x
+        return self.payload.get("pp_max")
 
     @min_x.setter
     def max_x(self, value: Optional[int]):
-        self._max_x = value
-        self.payload.add("pp_max", self._max_x)
+        self.payload.add("pp_max", value)
 
     @property
     def min_y(self) -> Optional[int]:
         """
         Minimum page y offset seen in the last ping period
         """
-        return self._min_y
+        return self.payload.get("pp_miy")
 
     @min_y.setter
     def min_y(self, value: Optional[int]):
-        self._min_y = value
-        self.payload.add("pp_miy", self._min_y)
+        self.payload.add("pp_miy", value)
 
     @property
     def max_y(self) -> Optional[int]:
         """
         Maximum page y offset seen in the last ping period
         """
-        return self._max_y
+        return self.payload.get("pp_may")
 
     @min_y.setter
     def max_y(self, value: Optional[int]):
-        self._max_y = value
-        self.payload.add("pp_may", self._max_y)
+        self.payload.add("pp_may", value)

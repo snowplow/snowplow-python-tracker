@@ -38,12 +38,6 @@ class PageView(Event):
         true_timestamp: Optional[float] = None,
     ) -> None:
         """
-        :param  event_subject:   Optional per event subject
-        :type   event_subject:   subject | None
-        :param  context:         Custom context for the event
-        :type   context:         context_array | None
-        :param  tstamp:          Optional event timestamp in milliseconds
-        :type   tstamp:          int | float | None
         :param  page_url:       URL of the viewed page
         :type   page_url:       non_empty_string
         :param  page_title:     Title of the viewed page
@@ -74,8 +68,7 @@ class PageView(Event):
 
     @page_url.setter
     def page_url(self, value: Optional[str]):
-        self._page_url = value
-        self.payload.add("url", self._page_url)
+        self.payload.add("url", value)
 
     @property
     def page_title(self) -> Optional[str]:
@@ -86,8 +79,7 @@ class PageView(Event):
 
     @page_title.setter
     def page_title(self, value: Optional[str]):
-        self._page_title = value
-        self.payload.add("page", self._page_title)
+        self.payload.add("page", value)
 
     @property
     def referrer(self) -> Optional[str]:
@@ -98,5 +90,4 @@ class PageView(Event):
 
     @referrer.setter
     def referrer(self, value: Optional[str]):
-        self._referrer = value
-        self.payload.add("refr", self._referrer)
+        self.payload.add("refr", value)

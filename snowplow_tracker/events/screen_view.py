@@ -38,11 +38,8 @@ class ScreenView(Event):
 
     def __init__(
         self,
-        event_subject: Optional[_subject.Subject] = None,
-        context: Optional[List[SelfDescribingJson]] = None,
-        tstamp: Optional[float] = None,
-        id_: Optional[str] = None,
-        name: Optional[str] = None,
+        id_: str,
+        name: str,
         type: Optional[str] = None,
         previous_name: Optional[str] = None,
         previous_id: Optional[str] = None,
@@ -88,95 +85,86 @@ class ScreenView(Event):
         self.transition_type = transition_type
 
     @property
-    def id_(self) -> Optional[str]:
+    def id_(self) -> str:
         """
         Screen view ID. This must be of type UUID.
         """
-        return self._id_
+        return self.screen_view_properties["id"]
 
     @id_.setter
-    def id_(self, value: Optional[str]):
-        self._id_ = value
-        if self._id_ is not None:
-            self.screen_view_properties["id"] = self._id_
+    def id_(self, value: str):
+        self.screen_view_properties["id"] = value
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str:
         """
         The name of the screen view event
         """
-        return self._name
+        return self.screen_view_properties["name"]
 
     @name.setter
     def name(self, value: Optional[str]):
-        self._name = value
-        if self._name is not None:
-            self.screen_view_properties["name"] = self._name
+        self.screen_view_properties["name"] = value
 
     @property
     def type(self) -> Optional[str]:
         """
         The type of screen that was viewed e.g feed / carousel
         """
-        return self._type
+        return self.screen_view_properties["type"]
 
     @type.setter
     def type(self, value: Optional[str]):
-        self._type = value
-        if self._type is not None:
-            self.screen_view_properties["type"] = self._type
+        if value is not None:
+            self.screen_view_properties["type"] = value
 
     @property
     def previous_name(self) -> Optional[str]:
         """
         The name of the previous screen.
         """
-        return self._previous_name
+        return self.screen_view_properties["previousName"]
 
     @previous_name.setter
     def previous_name(self, value: Optional[str]):
-        self._previous_name = value
-        if self._previous_name is not None:
-            self.screen_view_properties["previousName"] = self._previous_name
+        if value is not None:
+            self.screen_view_properties["previousName"] = value
 
     @property
     def previous_id(self) -> Optional[str]:
         """
         The screenview ID of the previous screenview.
         """
-        return self._previous_id
+        return self.screen_view_properties["previousId"]
 
     @previous_id.setter
     def previous_id(self, value: Optional[str]):
-        self._previous_id = value
-        if self._previous_id is not None:
-            self.screen_view_properties["previousId"] = self._previous_id
+        if value is not None:
+            self.screen_view_properties["previousId"] = value
 
     @property
     def previous_type(self) -> Optional[str]:
         """
         The screen type of the previous screenview
         """
-        return self._previous_type
+        return self.screen_view_properties["previousType"]
 
     @previous_type.setter
     def previous_type(self, value: Optional[str]):
-        self._previous_type = value
-        if self._previous_type is not None:
-            self.screen_view_properties["previousType"] = self._previous_type
+        if value is not None:
+            self.screen_view_properties["previousType"] = value
 
     @property
     def transition_type(self) -> Optional[str]:
         """
         The type of transition that led to the screen being viewed
         """
-        return self._transition_type
+        return self.screen_view_properties["transitionType"]
 
     @transition_type.setter
     def transition_type(self, value: Optional[str]):
-        self._transition_type = value
-        if self._transition_type is not None:
-            self.screen_view_properties["transitionType"] = self._transition_type
+        if value is not None:
+            self.screen_view_properties["transitionType"] = value
 
     def build_payload(
         self,
