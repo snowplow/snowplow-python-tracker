@@ -20,9 +20,24 @@ import uuid
 from typing import Any, Optional, Union, List, Dict, Sequence
 from warnings import warn
 
-from snowplow_tracker import payload, _version, SelfDescribingJson
-from snowplow_tracker import subject as _subject
+from snowplow_tracker import payload, SelfDescribingJson
+from snowplow_tracker.subject import Subject
 from snowplow_tracker.contracts import non_empty_string, one_of, non_empty, form_element
+from snowplow_tracker.constants import (
+    VERSION,
+    DEFAULT_ENCODE_BASE64,
+    BASE_SCHEMA_PATH,
+    SCHEMA_TAG,
+)
+
+from snowplow_tracker.events import (
+    Event,
+    PagePing,
+    PageView,
+    SelfDescribing,
+    StructuredEvent,
+    ScreenView,
+)
 from snowplow_tracker.typing import (
     JsonEncoderFunction,
     EmitterProtocol,
@@ -34,19 +49,6 @@ from snowplow_tracker.typing import (
 )
 
 """
-Constants & config
-"""
-
-VERSION = "py-%s" % _version.__version__
-DEFAULT_ENCODE_BASE64 = True
-BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow"
-MOBILE_SCHEMA_PATH = "iglu:com.snowplowanalytics.mobile"
-SCHEMA_TAG = "jsonschema"
-CONTEXT_SCHEMA = "%s/contexts/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
-UNSTRUCT_EVENT_SCHEMA = "%s/unstruct_event/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
-ContextArray = List[SelfDescribingJson]
-
-"""
 Tracker class
 """
 
@@ -56,7 +58,7 @@ class Tracker:
         self,
         namespace: str,
         emitters: Union[List[EmitterProtocol], EmitterProtocol],
-        subject: Optional[_subject.Subject] = None,
+        subject: Optional[Subject] = None,
         app_id: Optional[str] = None,
         encode_base64: bool = DEFAULT_ENCODE_BASE64,
         json_encoder: Optional[JsonEncoderFunction] = None,
@@ -76,7 +78,7 @@ class Tracker:
         :type  json_encoder:     function | None
         """
         if subject is None:
-            subject = _subject.Subject()
+            subject = Subject()
 
         if type(emitters) is list:
             non_empty(emitters)
@@ -122,62 +124,42 @@ class Tracker:
     Tracking methods
     """
 
-    def track(self, pb: payload.Payload) -> Optional[str]:
+    def track(
+        self,
+        event: Event,
+    ) -> Optional[str]:
         """
-        Send the payload to a emitter. Returns the tracked event ID.
-
-        :param  pb:              Payload builder
-        :type   pb:              payload
+        Send the event payload to a emitter. Returns the tracked event ID.
+        :param  event:           Event
+        :type   event:           events.Event
         :rtype:                  String
         """
-        for emitter in self.emitters:
-            emitter.input(pb.nv_pairs)
 
-        if "eid" in pb.nv_pairs.keys():
-            return pb.nv_pairs["eid"]
+        payload = self.complete_payload(
+            event=event,
+        )
+
+        for emitter in self.emitters:
+            emitter.input(payload.nv_pairs)
+
+        if "eid" in payload.nv_pairs.keys():
+            return payload.nv_pairs["eid"]
 
     def complete_payload(
         self,
-        pb: payload.Payload,
-        context: Optional[List[SelfDescribingJson]],
-        tstamp: Optional[float],
-        event_subject: Optional[_subject.Subject],
-    ) -> Optional[str]:
-        """
-        Called by all tracking events to add the standard name-value pairs
-        to the Payload object irrespective of the tracked event.
+        event: Event,
+    ) -> payload.Payload:
+        payload = event.build_payload(
+            encode_base64=self.encode_base64,
+            json_encoder=self.json_encoder,
+            subject=self.subject,
+        )
 
-        :param  pb:              Payload builder
-        :type   pb:              payload
-        :param  context:         Custom context for the event
-        :type   context:         context_array | None
-        :param  tstamp:          Optional event timestamp in milliseconds
-        :type   tstamp:          int | float | None
-        :param  event_subject:   Optional per event subject
-        :type   event_subject:   subject | None
-        :rtype:                  String
-        """
-        pb.add("eid", Tracker.get_uuid())
+        payload.add("eid", Tracker.get_uuid())
+        payload.add("dtm", Tracker.get_timestamp())
+        payload.add_dict(self.standard_nv_pairs)
 
-        pb.add("dtm", Tracker.get_timestamp())
-        if tstamp is not None:
-            pb.add("ttm", Tracker.get_timestamp(tstamp))
-
-        if context is not None:
-            context_jsons = list(map(lambda c: c.to_json(), context))
-            context_envelope = SelfDescribingJson(
-                CONTEXT_SCHEMA, context_jsons
-            ).to_json()
-            pb.add_json(
-                context_envelope, self.encode_base64, "cx", "co", self.json_encoder
-            )
-
-        pb.add_dict(self.standard_nv_pairs)
-
-        fin_subject = event_subject if event_subject is not None else self.subject
-        pb.add_dict(fin_subject.standard_nv_pairs)
-
-        return self.track(pb)
+        return payload
 
     def track_page_view(
         self,
@@ -186,7 +168,7 @@ class Tracker:
         referrer: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  page_url:       URL of the viewed page
@@ -203,15 +185,22 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
-        non_empty_string(page_url)
+        warn(
+            "track_page_view will be removed in future versions. Please use the new PageView class to track the event.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
-        pb = payload.Payload()
-        pb.add("e", "pv")  # pv: page view
-        pb.add("url", page_url)
-        pb.add("page", page_title)
-        pb.add("refr", referrer)
+        pv = PageView(
+            page_url=page_url,
+            page_title=page_title,
+            referrer=referrer,
+            event_subject=event_subject,
+            context=context,
+            true_timestamp=tstamp,
+        )
 
-        self.complete_payload(pb, context, tstamp, event_subject)
+        self.track(event=pv)
         return self
 
     def track_page_ping(
@@ -225,7 +214,7 @@ class Tracker:
         max_y: Optional[int] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  page_url:       URL of the viewed page
@@ -250,19 +239,26 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
-        non_empty_string(page_url)
+        warn(
+            "track_page_ping will be removed in future versions. Please use the new PagePing class to track the event.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
-        pb = payload.Payload()
-        pb.add("e", "pp")  # pp: page ping
-        pb.add("url", page_url)
-        pb.add("page", page_title)
-        pb.add("refr", referrer)
-        pb.add("pp_mix", min_x)
-        pb.add("pp_max", max_x)
-        pb.add("pp_miy", min_y)
-        pb.add("pp_may", max_y)
+        pp = PagePing(
+            page_url=page_url,
+            page_title=page_title,
+            referrer=referrer,
+            min_x=min_x,
+            max_x=max_x,
+            min_y=min_y,
+            max_y=max_y,
+            context=context,
+            true_timestamp=tstamp,
+            event_subject=event_subject,
+        )
 
-        self.complete_payload(pb, context, tstamp, event_subject)
+        self.track(event=pp)
         return self
 
     def track_link_click(
@@ -274,27 +270,32 @@ class Tracker:
         element_content: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
-        :param  target_url:     Target URL of the link
-        :type   target_url:     non_empty_string
-        :param  element_id:     ID attribute of the HTML element
-        :type   element_id:     string_or_none
+        :param  target_url:         Target URL of the link
+        :type   target_url:         non_empty_string
+        :param  element_id:         ID attribute of the HTML element
+        :type   element_id:         string_or_none
         :param  element_classes:    Classes of the HTML element
         :type   element_classes:    list(str) | tuple(str,\\*) | None
         :param  element_target:     ID attribute of the HTML element
         :type   element_target:     string_or_none
         :param  element_content:    The content of the HTML element
         :type   element_content:    string_or_none
-        :param  context:        Custom context for the event
-        :type   context:        context_array | None
-        :param  tstamp:         Optional event timestamp in milliseconds
-        :type   tstamp:         int | float | None
-        :param  event_subject:  Optional per event subject
-        :type   event_subject:  subject | None
-        :rtype:                 Tracker
+        :param  context:            Custom context for the event
+        :type   context:            context_array | None
+        :param  tstamp:             Optional event timestamp in milliseconds
+        :type   tstamp:             int | float | None
+        :param  event_subject:      Optional per event subject
+        :type   event_subject:      subject | None
+        :rtype:                     Tracker
         """
+        warn(
+            "track_link_click will be removed in future versions. Please use the new SelfDescribing class to track the event.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty_string(target_url)
 
         properties = {}
@@ -312,7 +313,12 @@ class Tracker:
             "%s/link_click/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            true_timestamp=tstamp,
+            event_subject=event_subject,
+        )
         return self
 
     def track_add_to_cart(
@@ -325,7 +331,7 @@ class Tracker:
         currency: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  sku:            Item SKU or ID
@@ -371,7 +377,12 @@ class Tracker:
             "%s/add_to_cart/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            true_timestamp=tstamp,
+            event_subject=event_subject,
+        )
         return self
 
     def track_remove_from_cart(
@@ -384,7 +395,7 @@ class Tracker:
         currency: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  sku:            Item SKU or ID
@@ -430,7 +441,12 @@ class Tracker:
             "%s/remove_from_cart/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            true_timestamp=tstamp,
+            event_subject=event_subject,
+        )
         return self
 
     def track_form_change(
@@ -443,29 +459,35 @@ class Tracker:
         element_classes: Optional[ElementClasses] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
-        :param  form_id:        ID attribute of the HTML form
-        :type   form_id:        non_empty_string
-        :param  element_id:     ID attribute of the HTML element
-        :type   element_id:     string_or_none
-        :param  node_name:      Type of input element
-        :type   node_name:      form_node_name
-        :param  value:          Value of the input element
-        :type   value:          string_or_none
-        :param  type_:          Type of data the element represents
-        :type   type_:          non_empty_string, form_type
+        :param  form_id:            ID attribute of the HTML form
+        :type   form_id:            non_empty_string
+        :param  element_id:         ID attribute of the HTML element
+        :type   element_id:         string_or_none
+        :param  node_name:          Type of input element
+        :type   node_name:          form_node_name
+        :param  value:              Value of the input element
+        :type   value:              string_or_none
+        :param  type_:              Type of data the element represents
+        :type   type_:              non_empty_string, form_type
         :param  element_classes:    Classes of the HTML element
         :type   element_classes:    list(str) | tuple(str,\\*) | None
-        :param  context:        Custom context for the event
-        :type   context:        context_array | None
-        :param  tstamp:         Optional event timestamp in milliseconds
-        :type   tstamp:         int | float | None
-        :param  event_subject:  Optional per event subject
-        :type   event_subject:  subject | None
-        :rtype:                 Tracker
+        :param  context:            Custom context for the event
+        :type   context:            context_array | None
+        :param  tstamp:             Optional event timestamp in milliseconds
+        :type   tstamp:             int | float | None
+        :param  event_subject:      Optional per event subject
+        :type   event_subject:      subject | None
+        :rtype:                     Tracker
         """
+        warn(
+            "track_form_change will be removed in future versions. Please use the new SelfDescribing class to track the event.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         non_empty_string(form_id)
         one_of(node_name, FORM_NODE_NAMES)
         if type_ is not None:
@@ -485,7 +507,12 @@ class Tracker:
             "%s/change_form/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            true_timestamp=tstamp,
+            event_subject=event_subject,
+        )
         return self
 
     def track_form_submit(
@@ -495,7 +522,7 @@ class Tracker:
         elements: Optional[List[Dict[str, Any]]] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  form_id:        ID attribute of the HTML form
@@ -512,7 +539,13 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
+        warn(
+            "track_form_submit will be removed in future versions. Please use the new SelfDescribing class to track the event.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty_string(form_id)
+
         for element in elements or []:
             form_element(element)
 
@@ -527,7 +560,12 @@ class Tracker:
             "%s/submit_form/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            true_timestamp=tstamp,
+            event_subject=event_subject,
+        )
         return self
 
     def track_site_search(
@@ -538,7 +576,7 @@ class Tracker:
         page_results: Optional[int] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  terms:          Search terms
@@ -557,6 +595,11 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
+        warn(
+            "track_site_search will be removed in future versions. Please use the new SelfDescribing class to track the event.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         non_empty(terms)
 
         properties = {}
@@ -572,7 +615,12 @@ class Tracker:
             "%s/site_search/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG), properties
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            true_timestamp=tstamp,
+            event_subject=event_subject,
+        )
         return self
 
     def track_ecommerce_transaction_item(
@@ -586,33 +634,33 @@ class Tracker:
         currency: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         This is an internal method called by track_ecommerce_transaction.
         It is not for public use.
 
-        :param  order_id:    Order ID
-        :type   order_id:    non_empty_string
-        :param  sku:         Item SKU
-        :type   sku:         non_empty_string
-        :param  price:       Item price
-        :type   price:       int | float
-        :param  quantity:    Item quantity
-        :type   quantity:    int
-        :param  name:        Item name
-        :type   name:        string_or_none
-        :param  category:    Item category
-        :type   category:    string_or_none
-        :param  currency:    The currency the price is expressed in
-        :type   currency:    string_or_none
-        :param  context:     Custom context for the event
-        :type   context:     context_array | None
-        :param  tstamp:      Optional event timestamp in milliseconds
-        :type   tstamp:      int | float | None
+        :param  order_id:       Order ID
+        :type   order_id:       non_empty_string
+        :param  sku:            Item SKU
+        :type   sku:            non_empty_string
+        :param  price:          Item price
+        :type   price:          int | float
+        :param  quantity:       Item quantity
+        :type   quantity:       int
+        :param  name:           Item name
+        :type   name:           string_or_none
+        :param  category:       Item category
+        :type   category:       string_or_none
+        :param  currency:       The currency the price is expressed in
+        :type   currency:       string_or_none
+        :param  context:        Custom context for the event
+        :type   context:        context_array | None
+        :param  tstamp:         Optional event timestamp in milliseconds
+        :type   tstamp:         int | float | None
         :param  event_subject:  Optional per event subject
         :type   event_subject:  subject | None
-        :rtype:              Tracker
+        :rtype:                 Tracker
         """
         warn(
             "track_ecommerce_transaction_item will be deprecated in future versions.",
@@ -622,17 +670,19 @@ class Tracker:
         non_empty_string(order_id)
         non_empty_string(sku)
 
-        pb = payload.Payload()
-        pb.add("e", "ti")
-        pb.add("ti_id", order_id)
-        pb.add("ti_sk", sku)
-        pb.add("ti_nm", name)
-        pb.add("ti_ca", category)
-        pb.add("ti_pr", price)
-        pb.add("ti_qu", quantity)
-        pb.add("ti_cu", currency)
+        event = Event(
+            event_subject=event_subject, context=context, true_timestamp=tstamp
+        )
+        event.payload.add("e", "ti")
+        event.payload.add("ti_id", order_id)
+        event.payload.add("ti_sk", sku)
+        event.payload.add("ti_nm", name)
+        event.payload.add("ti_ca", category)
+        event.payload.add("ti_pr", price)
+        event.payload.add("ti_qu", quantity)
+        event.payload.add("ti_cu", currency)
 
-        self.complete_payload(pb, context, tstamp, event_subject)
+        self.track(event=event)
         return self
 
     def track_ecommerce_transaction(
@@ -649,7 +699,7 @@ class Tracker:
         items: Optional[List[Dict[str, Any]]] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  order_id:       ID of the eCommerce transaction
@@ -687,29 +737,32 @@ class Tracker:
         )
         non_empty_string(order_id)
 
-        pb = payload.Payload()
-        pb.add("e", "tr")
-        pb.add("tr_id", order_id)
-        pb.add("tr_tt", total_value)
-        pb.add("tr_af", affiliation)
-        pb.add("tr_tx", tax_value)
-        pb.add("tr_sh", shipping)
-        pb.add("tr_ci", city)
-        pb.add("tr_st", state)
-        pb.add("tr_co", country)
-        pb.add("tr_cu", currency)
+        event = Event(
+            event_subject=event_subject, context=context, true_timestamp=tstamp
+        )
+        event.payload.add("e", "tr")
+        event.payload.add("tr_id", order_id)
+        event.payload.add("tr_tt", total_value)
+        event.payload.add("tr_af", affiliation)
+        event.payload.add("tr_tx", tax_value)
+        event.payload.add("tr_sh", shipping)
+        event.payload.add("tr_ci", city)
+        event.payload.add("tr_st", state)
+        event.payload.add("tr_co", country)
+        event.payload.add("tr_cu", currency)
 
         tstamp = Tracker.get_timestamp(tstamp)
 
-        self.complete_payload(pb, context, tstamp, event_subject)
+        self.track(event=event)
 
         if items is None:
             items = []
         for item in items:
-            item["tstamp"] = tstamp
-            item["event_subject"] = event_subject
             item["order_id"] = order_id
             item["currency"] = currency
+            item["tstamp"] = tstamp
+            item["event_subject"] = event_subject
+            item["context"] = context
             self.track_ecommerce_transaction_item(**item)
 
         return self
@@ -720,7 +773,7 @@ class Tracker:
         id_: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  name:           The name of the screen view event
@@ -736,7 +789,7 @@ class Tracker:
         :rtype:                 Tracker
         """
         warn(
-            "track_screen_view will be deprecated in future versions. Please use track_mobile_screen_view.",
+            "track_screen_view will be removed in future versions. Please use the new ScreenView class to track the event.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -751,13 +804,18 @@ class Tracker:
             screen_view_properties,
         )
 
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            true_timestamp=tstamp,
+            event_subject=event_subject,
+        )
         return self
 
     def track_mobile_screen_view(
         self,
+        name: str,
         id_: Optional[str] = None,
-        name: Optional[str] = None,
         type: Optional[str] = None,
         previous_name: Optional[str] = None,
         previous_id: Optional[str] = None,
@@ -765,13 +823,13 @@ class Tracker:
         transition_type: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
-        :param  id_:            Screen view ID. This must be of type UUID.
-        :type   id_:            string | None
         :param  name:           The name of the screen view event
         :type   name:           string_or_none
+        :param  id_:            Screen view ID. This must be of type UUID.
+        :type   id_:            string | None
         :param  type:           The type of screen that was viewed e.g feed / carousel.
         :type   type:           string | None
         :param  previous_name:  The name of the previous screen.
@@ -790,31 +848,28 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
-        screen_view_properties = {}
-
+        warn(
+            "track_mobile_screen_view will be removed in future versions. Please use the new ScreenView class to track the event.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         if id_ is None:
             id_ = self.get_uuid()
 
-        screen_view_properties["id"] = id_
-
-        if name is not None:
-            screen_view_properties["name"] = name
-        if type is not None:
-            screen_view_properties["type"] = type
-        if previous_name is not None:
-            screen_view_properties["previousName"] = previous_name
-        if previous_id is not None:
-            screen_view_properties["previousId"] = previous_id
-        if previous_type is not None:
-            screen_view_properties["previousType"] = previous_type
-        if transition_type is not None:
-            screen_view_properties["transitionType"] = transition_type
-
-        event_json = SelfDescribingJson(
-            "%s/screen_view/%s/1-0-0" % (MOBILE_SCHEMA_PATH, SCHEMA_TAG),
-            screen_view_properties,
+        sv = ScreenView(
+            name=name,
+            id_=id_,
+            type=type,
+            previous_name=previous_name,
+            previous_id=previous_id,
+            previous_type=previous_type,
+            transition_type=transition_type,
+            event_subject=event_subject,
+            context=context,
+            true_timestamp=tstamp,
         )
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+
+        self.track(event=sv)
         return self
 
     def track_struct_event(
@@ -826,7 +881,7 @@ class Tracker:
         value: Optional[float] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  category:       Category of the event
@@ -849,18 +904,25 @@ class Tracker:
         :type   event_subject:  subject | None
         :rtype:                 Tracker
         """
-        non_empty_string(category)
-        non_empty_string(action)
+        warn(
+            "track_struct_event will be removed in future versions. Please use the new Structured class to track the event.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        se = StructuredEvent(
+            category=category,
+            action=action,
+            label=label,
+            property_=property_,
+            value=value,
+            context=context,
+            true_timestamp=tstamp,
+            event_subject=event_subject,
+        )
 
-        pb = payload.Payload()
-        pb.add("e", "se")
-        pb.add("se_ca", category)
-        pb.add("se_ac", action)
-        pb.add("se_la", label)
-        pb.add("se_pr", property_)
-        pb.add("se_va", value)
-
-        self.complete_payload(pb, context, tstamp, event_subject)
+        self.track(
+            event=se,
+        )
         return self
 
     def track_self_describing_event(
@@ -868,7 +930,7 @@ class Tracker:
         event_json: SelfDescribingJson,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  event_json:      The properties of the event. Has two field:
@@ -883,17 +945,21 @@ class Tracker:
         :type   event_subject:   subject | None
         :rtype:                  Tracker
         """
+        warn(
+            "track_self_describing_event will be removed in future versions. Please use the new SelfDescribing class to track the event.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
-        envelope = SelfDescribingJson(
-            UNSTRUCT_EVENT_SCHEMA, event_json.to_json()
-        ).to_json()
-
-        pb = payload.Payload()
-
-        pb.add("e", "ue")
-        pb.add_json(envelope, self.encode_base64, "ue_px", "ue_pr", self.json_encoder)
-
-        self.complete_payload(pb, context, tstamp, event_subject)
+        sd = SelfDescribing(
+            event_json=event_json,
+            context=context,
+            true_timestamp=tstamp,
+            event_subject=event_subject,
+        )
+        self.track(
+            event=sd,
+        )
         return self
 
     # Alias
@@ -902,7 +968,7 @@ class Tracker:
         event_json: SelfDescribingJson,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  event_json:      The properties of the event. Has two field:
@@ -922,7 +988,13 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
-        self.track_self_describing_event(event_json, context, tstamp, event_subject)
+
+        self.track_self_describing_event(
+            event_json=event_json,
+            context=context,
+            true_timestamp=tstamp,
+            event_subject=event_subject,
+        )
         return self
 
     def flush(self, is_async: bool = False) -> "Tracker":
@@ -942,7 +1014,7 @@ class Tracker:
                     emitter.sync_flush()
         return self
 
-    def set_subject(self, subject: Optional[_subject.Subject]) -> "Tracker":
+    def set_subject(self, subject: Optional[Subject]) -> "Tracker":
         """
         Set the subject of the events fired by the tracker
 

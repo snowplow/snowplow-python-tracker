@@ -105,14 +105,15 @@ class IntegrationTest(unittest.TestCase):
         t = tracker.Tracker("namespace", [get_emitter], default_subject)
         with HTTMock(pass_response_content):
             t.track_ecommerce_transaction(
-                "6a8078be",
-                35,
+                order_id="6a8078be",
+                total_value=35,
                 city="London",
                 currency="GBP",
                 items=[
                     {"sku": "pbz0026", "price": 20, "quantity": 1},
                     {"sku": "pbz0038", "price": 15, "quantity": 1},
                 ],
+                tstamp=1399021242240,
             )
 
         expected_fields = {
@@ -161,7 +162,7 @@ class IntegrationTest(unittest.TestCase):
             "namespace", [get_emitter], default_subject, encode_base64=False
         )
         with HTTMock(pass_response_content):
-            t.track_mobile_screen_view("534", "Game HUD 2")
+            t.track_mobile_screen_view(id_="534", name="Game HUD 2")
         expected_fields = {"e": "ue"}
         for key in expected_fields:
             self.assertEqual(
@@ -520,6 +521,7 @@ class IntegrationTest(unittest.TestCase):
             t.track_struct_event("Test", "A")  # 322 bytes
             t.track_struct_event("Test", "A")  # 483 bytes. Send
             t.track_struct_event("Test", "AA")  # 162
+
         self.assertEqual(len(querystrings[-1]["data"]), 3)
         self.assertEqual(default_emitter.bytes_queued, 156 + len(_version.__version__))
 
@@ -548,7 +550,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(actual_a, unicode_a)
 
         uepr_string = unquote_plus(from_querystring("ue_pr", querystrings[-1]))
-        actual_b = json.loads(uepr_string)["data"]["data"]["id"]
+        actual_b = json.loads(uepr_string)["data"]["data"]["name"]
         self.assertEqual(actual_b, unicode_b)
 
     def test_unicode_post(self) -> None:
@@ -571,5 +573,5 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(in_test_ctx, unicode_a)
 
         sv_event = querystrings[-1]
-        in_uepr_name = json.loads(sv_event["data"][0]["ue_pr"])["data"]["data"]["id"]
+        in_uepr_name = json.loads(sv_event["data"][0]["ue_pr"])["data"]["data"]["name"]
         self.assertEqual(in_uepr_name, unicode_b)

@@ -1,5 +1,5 @@
 # """
-#     self_describing_json.py
+#     constants.py
 
 #     Copyright (c) 2013-2023 Snowplow Analytics Ltd. All rights reserved.
 
@@ -14,30 +14,14 @@
 #     express or implied. See the Apache License Version 2.0 for the specific
 #     language governing permissions and limitations there under.
 # """
+from typing import List
+from snowplow_tracker import _version, SelfDescribingJson
 
-import json
-from typing import Union
-
-from snowplow_tracker.typing import PayloadDict, PayloadDictList
-from snowplow_tracker.contracts import non_empty_string
-
-
-class SelfDescribingJson(object):
-    def __init__(self, schema: str, data: Union[PayloadDict, PayloadDictList]) -> None:
-        self.schema = schema
-        self.data = data
-
-    @property
-    def schema(self) -> str:
-        return self._schema
-
-    @schema.setter
-    def schema(self, value: str):
-        non_empty_string(value)
-        self._schema = value
-
-    def to_json(self) -> PayloadDict:
-        return {"schema": self.schema, "data": self.data}
-
-    def to_string(self) -> str:
-        return json.dumps(self.to_json())
+VERSION = "py-%s" % _version.__version__
+DEFAULT_ENCODE_BASE64 = True
+BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow"
+MOBILE_SCHEMA_PATH = "iglu:com.snowplowanalytics.mobile"
+SCHEMA_TAG = "jsonschema"
+CONTEXT_SCHEMA = "%s/contexts/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
+UNSTRUCT_EVENT_SCHEMA = "%s/unstruct_event/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
+ContextArray = List[SelfDescribingJson]
