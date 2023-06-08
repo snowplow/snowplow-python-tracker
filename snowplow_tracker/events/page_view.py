@@ -60,14 +60,14 @@ class PageView(Event):
         self.referrer = referrer
 
     @property
-    def page_url(self) -> Optional[str]:
+    def page_url(self) -> str:
         """
         URL of the viewed page
         """
         return self.payload.get("url")
 
     @page_url.setter
-    def page_url(self, value: Optional[str]):
+    def page_url(self, value: str):
         self.payload.add("url", value)
 
     @property

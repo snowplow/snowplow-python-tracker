@@ -106,7 +106,7 @@ class ScreenView(Event):
         return self.screen_view_properties["name"]
 
     @name.setter
-    def name(self, value: Optional[str]):
+    def name(self, value: str):
         self.screen_view_properties["name"] = value
 
     @property

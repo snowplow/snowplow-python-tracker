@@ -123,12 +123,12 @@ class Event(object):
         self._context = value
 
     @property
-    def true_timestamp(self) -> Optional[str]:
+    def true_timestamp(self) -> Optional[float]:
         """
         Optional event timestamp in milliseconds
         """
         return self._true_timestamp
 
     @true_timestamp.setter
-    def true_timestamp(self, value: Optional[_subject.Subject]):
+    def true_timestamp(self, value: Optional[float]):
         self._true_timestamp = value
