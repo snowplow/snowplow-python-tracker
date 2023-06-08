@@ -18,6 +18,7 @@ from snowplow_tracker.events.event import Event
 from typing import Optional, List
 from snowplow_tracker.subject import Subject
 from snowplow_tracker.self_describing_json import SelfDescribingJson
+from snowplow_tracker.contracts import non_empty_string
 
 
 class StructuredEvent(Event):
@@ -84,6 +85,7 @@ class StructuredEvent(Event):
 
     @category.setter
     def category(self, value: Optional[str]):
+        non_empty_string(value)
         self.payload.add("se_ca", value)
 
     @property
@@ -95,6 +97,7 @@ class StructuredEvent(Event):
 
     @action.setter
     def action(self, value: Optional[str]):
+        non_empty_string(value)
         self.payload.add("se_ac", value)
 
     @property

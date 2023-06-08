@@ -18,6 +18,7 @@ from snowplow_tracker.events.event import Event
 from typing import Optional, List
 from snowplow_tracker.self_describing_json import SelfDescribingJson
 from snowplow_tracker.subject import Subject
+from snowplow_tracker.contracts import non_empty_string
 
 
 class PagePing(Event):
@@ -76,14 +77,15 @@ class PagePing(Event):
         self.max_y = max_y
 
     @property
-    def page_url(self) -> Optional[str]:
+    def page_url(self) -> str:
         """
         URL of the viewed page
         """
         return self.payload.get("url")
 
     @page_url.setter
-    def page_url(self, value: Optional[str]):
+    def page_url(self, value: str):
+        non_empty_string(value)
         self.payload.add("url", value)
 
     @property
@@ -126,7 +128,7 @@ class PagePing(Event):
         """
         return self.payload.get("pp_max")
 
-    @min_x.setter
+    @max_x.setter
     def max_x(self, value: Optional[int]):
         self.payload.add("pp_max", value)
 
@@ -148,6 +150,6 @@ class PagePing(Event):
         """
         return self.payload.get("pp_may")
 
-    @min_y.setter
+    @max_y.setter
     def max_y(self, value: Optional[int]):
         self.payload.add("pp_may", value)

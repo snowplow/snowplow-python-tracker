@@ -21,13 +21,12 @@ from snowplow_tracker.events.event import Event
 from snowplow_tracker.events.self_describing import SelfDescribing
 from snowplow_tracker import SelfDescribingJson
 from snowplow_tracker.constants import (
-    UNSTRUCT_EVENT_SCHEMA,
-    CONTEXT_SCHEMA,
     MOBILE_SCHEMA_PATH,
     SCHEMA_TAG,
 )
 from snowplow_tracker import payload
 from snowplow_tracker.subject import Subject
+from snowplow_tracker.contracts import non_empty_string
 
 
 class ScreenView(Event):
@@ -96,6 +95,7 @@ class ScreenView(Event):
 
     @id_.setter
     def id_(self, value: str):
+        non_empty_string(value)
         self.screen_view_properties["id"] = value
 
     @property
@@ -107,6 +107,7 @@ class ScreenView(Event):
 
     @name.setter
     def name(self, value: str):
+        non_empty_string(value)
         self.screen_view_properties["name"] = value
 
     @property
@@ -197,5 +198,3 @@ class ScreenView(Event):
         return self_describing.build_payload(
             encode_base64, json_encoder, subject=subject
         )
-
-        return self.payload

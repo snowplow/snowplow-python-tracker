@@ -18,6 +18,7 @@ from snowplow_tracker.events.event import Event
 from typing import Optional, List
 from snowplow_tracker.subject import Subject
 from snowplow_tracker.self_describing_json import SelfDescribingJson
+from snowplow_tracker.contracts import non_empty_string
 
 
 class PageView(Event):
@@ -68,6 +69,7 @@ class PageView(Event):
 
     @page_url.setter
     def page_url(self, value: str):
+        non_empty_string(value)
         self.payload.add("url", value)
 
     @property

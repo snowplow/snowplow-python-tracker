@@ -21,7 +21,7 @@ from snowplow_tracker import SelfDescribingJson
 from snowplow_tracker.constants import UNSTRUCT_EVENT_SCHEMA
 from snowplow_tracker import payload
 from snowplow_tracker.subject import Subject
-from snowplow_tracker.constants import CONTEXT_SCHEMA
+from snowplow_tracker.contracts import non_empty
 
 
 class SelfDescribing(Event):
@@ -70,6 +70,7 @@ class SelfDescribing(Event):
 
     @event_json.setter
     def event_json(self, value: SelfDescribingJson):
+        non_empty(value)
         self._event_json = value
 
     def build_payload(
