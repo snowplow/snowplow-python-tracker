@@ -70,7 +70,6 @@ class SelfDescribing(Event):
 
     @event_json.setter
     def event_json(self, value: SelfDescribingJson):
-        non_empty(value)
         self._event_json = value
 
     def build_payload(
