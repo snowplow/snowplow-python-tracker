@@ -76,7 +76,6 @@ class ScreenView(Event):
         super(ScreenView, self).__init__(
             event_subject=event_subject, context=context, true_timestamp=true_timestamp
         )
-        self.payload.add("e", "ue")
         self.screen_view_properties = {}
         self.id_ = id_
         self.name = name
