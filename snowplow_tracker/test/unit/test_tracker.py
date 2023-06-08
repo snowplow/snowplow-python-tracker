@@ -1188,7 +1188,6 @@ class TestTracker(unittest.TestCase):
         }
 
         callArgs = mok_track_unstruct.call_args_list[0][1]
-        print(callArgs)
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertTrue(callArgs["context"] is None)
@@ -1209,10 +1208,10 @@ class TestTracker(unittest.TestCase):
             json_encoder=t.json_encoder,
         ).nv_pairs
 
-        t.track_mobile_screen_view(screen_view)
+        t.track(screen_view)
 
         self.assertEqual(mok_track.call_count, 1)
-        complete_args_dict = mok_track.call_args_list[0][1]
+        complete_args_dict = mok_track.call_args_list[0][0]
         self.assertEqual(len(complete_args_dict), 1)
         actual_ue_pr = json.loads(actual_pairs["ue_pr"])
 
