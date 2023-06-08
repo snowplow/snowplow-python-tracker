@@ -27,7 +27,6 @@ from snowplow_tracker.constants import (
     VERSION,
     DEFAULT_ENCODE_BASE64,
     BASE_SCHEMA_PATH,
-    MOBILE_SCHEMA_PATH,
     SCHEMA_TAG,
 )
 
@@ -191,15 +190,12 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
-        non_empty_string(page_url)
-
-        fin_subject = event_subject if event_subject is not None else self.subject
 
         pv = PageView(
             page_url=page_url,
             page_title=page_title,
             referrer=referrer,
-            event_subject=fin_subject,
+            event_subject=event_subject,
             context=context,
             true_timestamp=tstamp,
         )
@@ -248,9 +244,6 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
-        non_empty_string(page_url)
-
-        fin_subject = event_subject if event_subject is not None else self.subject
 
         pp = PagePing(
             page_url=page_url,
@@ -262,7 +255,7 @@ class Tracker:
             max_y=max_y,
             context=context,
             true_timestamp=tstamp,
-            event_subject=fin_subject,
+            event_subject=event_subject,
         )
 
         self.track(event=pp)
@@ -305,8 +298,6 @@ class Tracker:
         )
         non_empty_string(target_url)
 
-        fin_subject = event_subject if event_subject is not None else self.subject
-
         properties = {}
         properties["targetUrl"] = target_url
         if element_id is not None:
@@ -326,7 +317,7 @@ class Tracker:
             event_json=event_json,
             context=context,
             true_timestamp=tstamp,
-            event_subject=fin_subject,
+            event_subject=event_subject,
         )
         return self
 
@@ -370,8 +361,6 @@ class Tracker:
         )
         non_empty_string(sku)
 
-        fin_subject = event_subject if event_subject is not None else self.subject
-
         properties = {}
         properties["sku"] = sku
         properties["quantity"] = quantity
@@ -392,7 +381,7 @@ class Tracker:
             event_json=event_json,
             context=context,
             true_timestamp=tstamp,
-            event_subject=fin_subject,
+            event_subject=event_subject,
         )
         return self
 
@@ -436,8 +425,6 @@ class Tracker:
         )
         non_empty_string(sku)
 
-        fin_subject = event_subject if event_subject is not None else self.subject
-
         properties = {}
         properties["sku"] = sku
         properties["quantity"] = quantity
@@ -458,7 +445,7 @@ class Tracker:
             event_json=event_json,
             context=context,
             true_timestamp=tstamp,
-            event_subject=fin_subject,
+            event_subject=event_subject,
         )
         return self
 
@@ -501,8 +488,6 @@ class Tracker:
             stacklevel=2,
         )
 
-        fin_subject = event_subject if event_subject is not None else self.subject
-
         non_empty_string(form_id)
         one_of(node_name, FORM_NODE_NAMES)
         if type_ is not None:
@@ -526,7 +511,7 @@ class Tracker:
             event_json=event_json,
             context=context,
             true_timestamp=tstamp,
-            event_subject=fin_subject,
+            event_subject=event_subject,
         )
         return self
 
@@ -561,8 +546,6 @@ class Tracker:
         )
         non_empty_string(form_id)
 
-        fin_subject = event_subject if event_subject is not None else self.subject
-
         for element in elements or []:
             form_element(element)
 
@@ -581,7 +564,7 @@ class Tracker:
             event_json=event_json,
             context=context,
             true_timestamp=tstamp,
-            event_subject=fin_subject,
+            event_subject=event_subject,
         )
         return self
 
@@ -618,7 +601,6 @@ class Tracker:
             stacklevel=2,
         )
         non_empty(terms)
-        fin_subject = event_subject if event_subject is not None else self.subject
 
         properties = {}
         properties["terms"] = terms
@@ -637,7 +619,7 @@ class Tracker:
             event_json=event_json,
             context=context,
             true_timestamp=tstamp,
-            event_subject=fin_subject,
+            event_subject=event_subject,
         )
         return self
 
@@ -688,9 +670,9 @@ class Tracker:
         non_empty_string(order_id)
         non_empty_string(sku)
 
-        fin_subject = event_subject if event_subject is not None else self.subject
-
-        event = Event(event_subject=fin_subject, context=context, true_timestamp=tstamp)
+        event = Event(
+            event_subject=event_subject, context=context, true_timestamp=tstamp
+        )
         event.payload.add("e", "ti")
         event.payload.add("ti_id", order_id)
         event.payload.add("ti_sk", sku)
@@ -755,9 +737,9 @@ class Tracker:
         )
         non_empty_string(order_id)
 
-        fin_subject = event_subject if event_subject is not None else self.subject
-
-        event = Event(event_subject=fin_subject, context=context, true_timestamp=tstamp)
+        event = Event(
+            event_subject=event_subject, context=context, true_timestamp=tstamp
+        )
         event.payload.add("e", "tr")
         event.payload.add("tr_id", order_id)
         event.payload.add("tr_tt", total_value)
@@ -811,8 +793,6 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
-        fin_subject = event_subject if event_subject is not None else self.subject
-
         screen_view_properties = {}
         if name is not None:
             screen_view_properties["name"] = name
@@ -828,7 +808,7 @@ class Tracker:
             event_json=event_json,
             context=context,
             true_timestamp=tstamp,
-            event_subject=fin_subject,
+            event_subject=event_subject,
         )
         return self
 
@@ -873,8 +853,6 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
-        fin_subject = event_subject if event_subject is not None else self.subject
-
         if id_ is None:
             id_ = self.get_uuid()
 
@@ -886,7 +864,7 @@ class Tracker:
             previous_id=previous_id,
             previous_type=previous_type,
             transition_type=transition_type,
-            event_subject=fin_subject,
+            event_subject=event_subject,
             context=context,
             true_timestamp=tstamp,
         )
@@ -931,10 +909,6 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
-        non_empty_string(category)
-        non_empty_string(action)
-        fin_subject = event_subject if event_subject is not None else self.subject
-
         se = StructuredEvent(
             category=category,
             action=action,
@@ -943,7 +917,7 @@ class Tracker:
             value=value,
             context=context,
             true_timestamp=tstamp,
-            event_subject=fin_subject,
+            event_subject=event_subject,
         )
 
         self.track(
@@ -976,13 +950,12 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
-        fin_subject = event_subject if event_subject is not None else self.subject
 
         sd = SelfDescribing(
             event_json=event_json,
             context=context,
             true_timestamp=tstamp,
-            event_subject=fin_subject,
+            event_subject=event_subject,
         )
         self.track(
             event=sd,
@@ -1015,13 +988,12 @@ class Tracker:
             DeprecationWarning,
             stacklevel=2,
         )
-        fin_subject = event_subject if event_subject is not None else self.subject
 
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
             true_timestamp=tstamp,
-            event_subject=fin_subject,
+            event_subject=event_subject,
         )
         return self
 
