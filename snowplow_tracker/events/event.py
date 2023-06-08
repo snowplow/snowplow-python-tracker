@@ -58,7 +58,7 @@ class Event(object):
         """
         self.payload = payload.Payload(dict_=dict_)
         self.event_subject = event_subject
-        self.context = context
+        self.context = context or []
         self.true_timestamp = true_timestamp
 
     def build_payload(
@@ -76,7 +76,7 @@ class Event(object):
         :type   subject:         subject | None
         :rtype:                  payload.Payload
         """
-        if self.context is not None:
+        if len(self.context) > 0:
             context_jsons = list(map(lambda c: c.to_json(), self.context))
             context_envelope = SelfDescribingJson(
                 CONTEXT_SCHEMA, context_jsons
@@ -112,14 +112,14 @@ class Event(object):
         self._event_subject = value
 
     @property
-    def context(self) -> Optional[List[SelfDescribingJson]]:
+    def context(self) -> List[SelfDescribingJson]:
         """
         Custom context for the event
         """
         return self._context
 
     @context.setter
-    def context(self, value: Optional[List[SelfDescribingJson]]):
+    def context(self, value: List[SelfDescribingJson]):
         self._context = value
 
     @property
