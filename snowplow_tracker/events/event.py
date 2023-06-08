@@ -46,14 +46,14 @@ class Event(object):
     ) -> None:
         """
         Constructor
-        :param  dict_:           Optional Dictionary to be added to the Events Payload
-        :type   dict_:           dict(string:\\*) | None
-        :param  event_subject:   Optional per event subject
-        :type   event_subject:   subject | None
-        :param  context:         Custom context for the event
-        :type   context:         context_array | None
-        :param  true_timestamp:          Optional event timestamp in milliseconds
-        :type   true_timestamp:          int | float | None
+        :param  dict_:              Optional Dictionary to be added to the Events Payload
+        :type   dict_:              dict(string:\\*) | None
+        :param  event_subject:      Optional per event subject
+        :type   event_subject:      subject | None
+        :param  context:            Custom context for the event
+        :type   context:            context_array | None
+        :param  true_timestamp:     Optional event timestamp in milliseconds
+        :type   true_timestamp:     int | float | None
 
         """
         self.payload = payload.Payload(dict_=dict_)
