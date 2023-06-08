@@ -27,7 +27,7 @@ from snowplow_tracker.constants import (
     SCHEMA_TAG,
 )
 from snowplow_tracker import payload
-from snowplow_tracker import subject as _subject
+from snowplow_tracker.subject import Subject
 
 
 class ScreenView(Event):
@@ -48,7 +48,7 @@ class ScreenView(Event):
         previous_id: Optional[str] = None,
         previous_type: Optional[str] = None,
         transition_type: Optional[str] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         true_timestamp: Optional[float] = None,
     ) -> None:
@@ -173,7 +173,7 @@ class ScreenView(Event):
         self,
         encode_base64: bool,
         json_encoder: Optional[JsonEncoderFunction],
-        subject: Optional[_subject.Subject] = None,
+        subject: Optional[Subject] = None,
     ) -> "payload.Payload":
         """
         :param encode_base64:    Whether JSONs in the payload should be base-64 encoded

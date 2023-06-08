@@ -20,7 +20,7 @@ from snowplow_tracker.events.event import Event
 from snowplow_tracker import SelfDescribingJson
 from snowplow_tracker.constants import UNSTRUCT_EVENT_SCHEMA
 from snowplow_tracker import payload
-from snowplow_tracker import subject as _subject
+from snowplow_tracker.subject import Subject
 from snowplow_tracker.constants import CONTEXT_SCHEMA
 
 
@@ -37,7 +37,7 @@ class SelfDescribing(Event):
     def __init__(
         self,
         event_json: SelfDescribingJson,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         true_timestamp: Optional[float] = None,
     ) -> None:
@@ -76,7 +76,7 @@ class SelfDescribing(Event):
         self,
         encode_base64: bool,
         json_encoder: Optional[JsonEncoderFunction],
-        subject: Optional[_subject.Subject] = None,
+        subject: Optional[Subject] = None,
     ) -> "payload.Payload":
         """
         :param encode_base64:    Whether JSONs in the payload should be base-64 encoded

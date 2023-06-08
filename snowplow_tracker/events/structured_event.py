@@ -16,7 +16,7 @@
 # """
 from snowplow_tracker.events.event import Event
 from typing import Optional, List
-from snowplow_tracker import subject as _subject
+from snowplow_tracker.subject import Subject
 from snowplow_tracker.self_describing_json import SelfDescribingJson
 
 
@@ -41,7 +41,7 @@ class StructuredEvent(Event):
         label: Optional[str] = None,
         property_: Optional[str] = None,
         value: Optional[int] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         true_timestamp: Optional[float] = None,
     ) -> None:

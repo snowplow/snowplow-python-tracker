@@ -21,7 +21,7 @@ from typing import Any, Optional, Union, List, Dict, Sequence
 from warnings import warn
 
 from snowplow_tracker import payload, SelfDescribingJson
-from snowplow_tracker import subject as _subject
+from snowplow_tracker.subject import Subject
 from snowplow_tracker.contracts import non_empty_string, one_of, non_empty, form_element
 from snowplow_tracker.constants import (
     VERSION,
@@ -59,7 +59,7 @@ class Tracker:
         self,
         namespace: str,
         emitters: Union[List[EmitterProtocol], EmitterProtocol],
-        subject: Optional[_subject.Subject] = None,
+        subject: Optional[Subject] = None,
         app_id: Optional[str] = None,
         encode_base64: bool = DEFAULT_ENCODE_BASE64,
         json_encoder: Optional[JsonEncoderFunction] = None,
@@ -79,7 +79,7 @@ class Tracker:
         :type  json_encoder:     function | None
         """
         if subject is None:
-            subject = _subject.Subject()
+            subject = Subject()
 
         if type(emitters) is list:
             non_empty(emitters)
@@ -169,7 +169,7 @@ class Tracker:
         referrer: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  page_url:       URL of the viewed page
@@ -218,7 +218,7 @@ class Tracker:
         max_y: Optional[int] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  page_url:       URL of the viewed page
@@ -277,7 +277,7 @@ class Tracker:
         element_content: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  target_url:         Target URL of the link
@@ -340,7 +340,7 @@ class Tracker:
         currency: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  sku:            Item SKU or ID
@@ -406,7 +406,7 @@ class Tracker:
         currency: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  sku:            Item SKU or ID
@@ -472,7 +472,7 @@ class Tracker:
         element_classes: Optional[ElementClasses] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  form_id:            ID attribute of the HTML form
@@ -537,7 +537,7 @@ class Tracker:
         elements: Optional[List[Dict[str, Any]]] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  form_id:        ID attribute of the HTML form
@@ -593,7 +593,7 @@ class Tracker:
         page_results: Optional[int] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  terms:          Search terms
@@ -652,7 +652,7 @@ class Tracker:
         currency: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         This is an internal method called by track_ecommerce_transaction.
@@ -717,7 +717,7 @@ class Tracker:
         items: Optional[List[Dict[str, Any]]] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  order_id:       ID of the eCommerce transaction
@@ -791,7 +791,7 @@ class Tracker:
         id_: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  name:           The name of the screen view event
@@ -843,7 +843,7 @@ class Tracker:
         transition_type: Optional[str] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  name:           The name of the screen view event
@@ -903,7 +903,7 @@ class Tracker:
         value: Optional[float] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  category:       Category of the event
@@ -956,7 +956,7 @@ class Tracker:
         event_json: SelfDescribingJson,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  event_json:      The properties of the event. Has two field:
@@ -995,7 +995,7 @@ class Tracker:
         event_json: SelfDescribingJson,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
     ) -> "Tracker":
         """
         :param  event_json:      The properties of the event. Has two field:
@@ -1042,7 +1042,7 @@ class Tracker:
                     emitter.sync_flush()
         return self
 
-    def set_subject(self, subject: Optional[_subject.Subject]) -> "Tracker":
+    def set_subject(self, subject: Optional[Subject]) -> "Tracker":
         """
         Set the subject of the events fired by the tracker
 

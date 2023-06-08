@@ -17,7 +17,7 @@
 from snowplow_tracker.events.event import Event
 from typing import Optional, List
 from snowplow_tracker.self_describing_json import SelfDescribingJson
-from snowplow_tracker import subject as _subject
+from snowplow_tracker.subject import Subject
 
 
 class PagePing(Event):
@@ -37,7 +37,7 @@ class PagePing(Event):
         max_x: Optional[int] = None,
         min_y: Optional[int] = None,
         max_y: Optional[int] = None,
-        event_subject: Optional[_subject.Subject] = None,
+        event_subject: Optional[Subject] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         true_timestamp: Optional[float] = None,
     ) -> None:
