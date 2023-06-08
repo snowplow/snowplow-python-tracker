@@ -19,12 +19,22 @@ import json
 from typing import Union
 
 from snowplow_tracker.typing import PayloadDict, PayloadDictList
+from snowplow_tracker.contracts import non_empty_string
 
 
 class SelfDescribingJson(object):
     def __init__(self, schema: str, data: Union[PayloadDict, PayloadDictList]) -> None:
         self.schema = schema
         self.data = data
+
+    @property
+    def schema(self) -> str:
+        return self._schema
+
+    @schema.setter
+    def schema(self, value: str):
+        non_empty_string(value)
+        self._schema = value
 
     def to_json(self) -> PayloadDict:
         return {"schema": self.schema, "data": self.data}
