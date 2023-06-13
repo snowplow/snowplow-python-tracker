@@ -94,7 +94,10 @@ class Event(object):
         ):
             self.payload.add("ttm", int(self.true_timestamp))
 
-        fin_subject = self.event_subject.combine_subject(subject)
+        if self.event_subject is not None:
+            fin_subject = self.event_subject.combine_subject(subject)
+        else:
+            fin_subject = subject
 
         if fin_subject is not None:
             self.payload.add_dict(fin_subject.standard_nv_pairs)
