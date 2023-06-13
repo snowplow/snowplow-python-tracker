@@ -15,6 +15,7 @@
 #     language governing permissions and limitations there under.
 # """
 
+from typing import Optional
 from snowplow_tracker.contracts import one_of, greater_than
 from snowplow_tracker.typing import SupportedPlatform, SUPPORTED_PLATFORMS
 
@@ -29,7 +30,6 @@ class Subject(object):
     """
 
     def __init__(self) -> None:
-
         self.standard_nv_pairs = {"p": DEFAULT_PLATFORM}
 
     def set_platform(self, value: SupportedPlatform) -> "Subject":
@@ -172,4 +172,9 @@ class Subject(object):
         :rtype:                 subject
         """
         self.standard_nv_pairs["tnuid"] = nuid
+        return self
+
+    def combine_subject(self, subject: Optional["Subject"]) -> "Subject":
+        if subject is not None:
+            self.standard_nv_pairs.update(subject.standard_nv_pairs)
         return self
