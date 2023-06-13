@@ -175,6 +175,13 @@ class Subject(object):
         return self
 
     def combine_subject(self, subject: Optional["Subject"]) -> "Subject":
+        """
+        Merges another instance of Subject, with self taking priority
+        :param  subject     Subject to update
+        :type   subject     subject
+        :rtype              subject
+
+        """
         if subject is not None:
-            self.standard_nv_pairs.update(subject.standard_nv_pairs)
+            subject.standard_nv_pairs.update(self.standard_nv_pairs)
         return self
