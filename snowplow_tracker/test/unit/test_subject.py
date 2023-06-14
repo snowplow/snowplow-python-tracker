@@ -93,12 +93,12 @@ class TestSubject(unittest.TestCase):
         s.set_domain_session_id("domain_session_id")
 
         s2 = _subject.Subject()
-        s.set_domain_user_id("domain_user_id")
-        s.set_lang("en")
+        s2.set_domain_user_id("domain_user_id")
+        s2.set_lang("en")
 
-        s.combine_subject(s2)
+        fin_payload_dict = s.combine_subject(s2)
 
-        expected_subject = {
+        expected_fin_payload_dict = {
             "p": "pc",
             "cd": 10,
             "sid": "domain_session_id",
@@ -106,4 +106,11 @@ class TestSubject(unittest.TestCase):
             "lang": "en",
         }
 
+        expected_subject = {
+            "p": "pc",
+            "cd": 10,
+            "sid": "domain_session_id",
+        }
+
+        self.assertDictEqual(fin_payload_dict, expected_fin_payload_dict)
         self.assertDictEqual(s.standard_nv_pairs, expected_subject)
