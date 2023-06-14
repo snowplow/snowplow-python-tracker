@@ -179,7 +179,7 @@ class Subject(object):
         Merges another instance of Subject, with self taking priority
         :param  subject     Subject to update
         :type   subject     subject
-        :rtype              subject
+        :rtype              PayloadDict
 
         """
         if subject is not None:
