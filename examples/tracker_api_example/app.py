@@ -31,10 +31,13 @@ def main():
 
     print("Sending events to " + e.endpoint)
 
+    event_subject = Subject()
+    event_subject.set_color_depth(10)
+
     page_view = PageView(
         page_url="https://www.snowplow.io",
         page_title="Homepage",
-        event_subject=t.subject,
+        event_subject=event_subject,
     )
     t.track(page_view)
 
