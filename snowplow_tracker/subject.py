@@ -17,7 +17,7 @@
 
 from typing import Optional
 from snowplow_tracker.contracts import one_of, greater_than
-from snowplow_tracker.typing import SupportedPlatform, SUPPORTED_PLATFORMS
+from snowplow_tracker.typing import SupportedPlatform, SUPPORTED_PLATFORMS, PayloadDict
 
 DEFAULT_PLATFORM = "pc"
 
@@ -174,7 +174,7 @@ class Subject(object):
         self.standard_nv_pairs["tnuid"] = nuid
         return self
 
-    def combine_subject(self, subject: Optional["Subject"]) -> "Subject":
+    def combine_subject(self, subject: Optional["Subject"]) -> PayloadDict:
         """
         Merges another instance of Subject, with self taking priority
         :param  subject     Subject to update
@@ -183,5 +183,6 @@ class Subject(object):
 
         """
         if subject is not None:
-            subject.standard_nv_pairs.update(self.standard_nv_pairs)
-        return self
+            return {**subject.standard_nv_pairs, **self.standard_nv_pairs}
+
+        return self.standard_nv_pairs
