@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>snowplow_tracker package &mdash; Snowplow Python Tracker 0.15 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>snowplow_tracker package &mdash; Snowplow Python Tracker 1.0.0 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -134,7 +134,7 @@
 <span id="snowplow-tracker-emitters-module"></span><h2>snowplow_tracker.emitters module<a class="headerlink" href="#module-snowplow_tracker.emitters" title="Permalink to this headline"></a></h2>
 <dl class="class">
 <dt id="snowplow_tracker.emitters.AsyncEmitter">
-<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">AsyncEmitter</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str, protocol: Literal[http, https] = 'http', port: Optional[int] = None, method: Literal[get, post] = 'post', batch_size: Optional[int] = None, on_success: Optional[Callable[[List[Dict[str, Any]]], None]] = None, on_failure: Optional[Callable[[int, List[Dict[str, Any]]], None]] = None, thread_count: int = 1, byte_limit: Optional[int] = None, request_timeout: Union[float, Tuple[float, float], None] = None, max_retry_delay_seconds: int = 60, buffer_capacity: int = None, custom_retry_codes: Dict[int, bool] = {}, event_store: Optional[snowplow_tracker.event_store.EventStore] = None, session: Optional[requests.sessions.Session] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.AsyncEmitter" title="Permalink to this definition"></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">AsyncEmitter</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str, protocol: typing_extensions.Literal['http', 'https'][http, https] = 'http', port: Optional[int] = None, method: typing_extensions.Literal['get', 'post'][get, post] = 'post', batch_size: Optional[int] = None, on_success: Optional[Callable[[List[Dict[str, Any]]], None]] = None, on_failure: Optional[Callable[[int, List[Dict[str, Any]]], None]] = None, thread_count: int = 1, byte_limit: Optional[int] = None, request_timeout: Union[float, Tuple[float, float], None] = None, max_retry_delay_seconds: int = 60, buffer_capacity: int = None, custom_retry_codes: Dict[int, bool] = {}, event_store: Optional[snowplow_tracker.event_store.EventStore] = None, session: Optional[requests.sessions.Session] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.AsyncEmitter" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#snowplow_tracker.emitters.Emitter" title="snowplow_tracker.emitters.Emitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">snowplow_tracker.emitters.Emitter</span></code></a></p>
 <p>Uses threads to send HTTP requests asynchronously</p>
 <dl class="method">
@@ -160,13 +160,13 @@ This is guaranteed to be blocking, not asynchronous.</p>
 
 <dl class="class">
 <dt id="snowplow_tracker.emitters.Emitter">
-<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">Emitter</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str, protocol: Literal[http, https] = 'https', port: Optional[int] = None, method: Literal[get, post] = 'post', batch_size: Optional[int] = None, on_success: Optional[Callable[[List[Dict[str, Any]]], None]] = None, on_failure: Optional[Callable[[int, List[Dict[str, Any]]], None]] = None, byte_limit: Optional[int] = None, request_timeout: Union[float, Tuple[float, float], None] = None, max_retry_delay_seconds: int = 60, buffer_capacity: Optional[int] = None, custom_retry_codes: Dict[int, bool] = {}, event_store: Optional[snowplow_tracker.event_store.EventStore] = None, session: Optional[requests.sessions.Session] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.Emitter" title="Permalink to this definition"></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.emitters.</code><code class="sig-name descname">Emitter</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str, protocol: typing_extensions.Literal['http', 'https'][http, https] = 'https', port: Optional[int] = None, method: typing_extensions.Literal['get', 'post'][get, post] = 'post', batch_size: Optional[int] = None, on_success: Optional[Callable[[List[Dict[str, Any]]], None]] = None, on_failure: Optional[Callable[[int, List[Dict[str, Any]]], None]] = None, byte_limit: Optional[int] = None, request_timeout: Union[float, Tuple[float, float], None] = None, max_retry_delay_seconds: int = 60, buffer_capacity: Optional[int] = None, custom_retry_codes: Dict[int, bool] = {}, event_store: Optional[snowplow_tracker.event_store.EventStore] = None, session: Optional[requests.sessions.Session] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.emitters.Emitter" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Synchronously send Snowplow events to a Snowplow collector
 Supports both GET and POST requests</p>
 <dl class="method">
 <dt id="snowplow_tracker.emitters.Emitter.as_collector_uri">
-<em class="property">static </em><code class="sig-name descname">as_collector_uri</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str</em>, <em class="sig-param">protocol: Literal[http</em>, <em class="sig-param">https] = 'https'</em>, <em class="sig-param">port: Optional[int] = None</em>, <em class="sig-param">method: Literal[get</em>, <em class="sig-param">post] = 'post'</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#snowplow_tracker.emitters.Emitter.as_collector_uri" title="Permalink to this definition"></a></dt>
+<em class="property">static </em><code class="sig-name descname">as_collector_uri</code><span class="sig-paren">(</span><em class="sig-param">endpoint: str</em>, <em class="sig-param">protocol: typing_extensions.Literal['http'</em>, <em class="sig-param">'https'][http</em>, <em class="sig-param">https] = 'https'</em>, <em class="sig-param">port: Optional[int] = None</em>, <em class="sig-param">method: typing_extensions.Literal['get'</em>, <em class="sig-param">'post'][get</em>, <em class="sig-param">post] = 'post'</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#snowplow_tracker.emitters.Emitter.as_collector_uri" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -371,6 +371,11 @@ This is guaranteed to be blocking, not asynchronous.</p>
 <em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.self_describing_json.</code><code class="sig-name descname">SelfDescribingJson</code><span class="sig-paren">(</span><em class="sig-param">schema: str, data: Union[Dict[str, Any], List[Dict[str, Any]]]</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.self_describing_json.SelfDescribingJson" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="method">
+<dt id="snowplow_tracker.self_describing_json.SelfDescribingJson.schema">
+<em class="property">property </em><code class="sig-name descname">schema</code><a class="headerlink" href="#snowplow_tracker.self_describing_json.SelfDescribingJson.schema" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="snowplow_tracker.self_describing_json.SelfDescribingJson.to_json">
 <code class="sig-name descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict[str, Any]<a class="headerlink" href="#snowplow_tracker.self_describing_json.SelfDescribingJson.to_json" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -391,6 +396,15 @@ This is guaranteed to be blocking, not asynchronous.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class for an event subject, where we view events as of the form</p>
 <p>(Subject) -&gt; (Verb) -&gt; (Object)</p>
+<dl class="method">
+<dt id="snowplow_tracker.subject.Subject.combine_subject">
+<code class="sig-name descname">combine_subject</code><span class="sig-paren">(</span><em class="sig-param">subject: Optional[Subject]</em><span class="sig-paren">)</span> &#x2192; Dict[str, Any]<a class="headerlink" href="#snowplow_tracker.subject.Subject.combine_subject" title="Permalink to this definition"></a></dt>
+<dd><p>Merges another instance of Subject, with self taking priority
+:param  subject     Subject to update
+:type   subject     subject
+:rtype              PayloadDict</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="snowplow_tracker.subject.Subject.set_color_depth">
 <code class="sig-name descname">set_color_depth</code><span class="sig-paren">(</span><em class="sig-param">depth: int</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.subject.Subject<a class="headerlink" href="#snowplow_tracker.subject.Subject.set_color_depth" title="Permalink to this definition"></a></dt>
@@ -481,7 +495,7 @@ This overwrites the nuid field set by the collector</p>
 
 <dl class="method">
 <dt id="snowplow_tracker.subject.Subject.set_platform">
-<code class="sig-name descname">set_platform</code><span class="sig-paren">(</span><em class="sig-param">value: Literal[pc, tv, mob, cnsl, iot, web, srv, app]</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.subject.Subject<a class="headerlink" href="#snowplow_tracker.subject.Subject.set_platform" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname">set_platform</code><span class="sig-paren">(</span><em class="sig-param">value: typing_extensions.Literal['pc', 'tv', 'mob', 'cnsl', 'iot', 'web', 'srv', 'app'][pc, tv, mob, cnsl, iot, web, srv, app]</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.subject.Subject<a class="headerlink" href="#snowplow_tracker.subject.Subject.set_platform" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>value</strong> (<em>supported_platform</em>) – One of [“pc”, “tv”, “mob”, “cnsl”, “iot”, “web”, “srv”, “app”]</p>
@@ -569,15 +583,9 @@ This overwrites the nuid field set by the collector</p>
 </div>
 <div class="section" id="module-snowplow_tracker.tracker">
 <span id="snowplow-tracker-tracker-module"></span><h2>snowplow_tracker.tracker module<a class="headerlink" href="#module-snowplow_tracker.tracker" title="Permalink to this headline"></a></h2>
-<dl class="data">
-<dt id="snowplow_tracker.tracker.ContextArray">
-<code class="sig-prename descclassname">snowplow_tracker.tracker.</code><code class="sig-name descname">ContextArray</code><em class="property"> = typing.List[snowplow_tracker.self_describing_json.SelfDescribingJson]</em><a class="headerlink" href="#snowplow_tracker.tracker.ContextArray" title="Permalink to this definition"></a></dt>
-<dd><p>Tracker class</p>
-</dd></dl>
-
 <dl class="class">
 <dt id="snowplow_tracker.tracker.Tracker">
-<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.tracker.</code><code class="sig-name descname">Tracker</code><span class="sig-paren">(</span><em class="sig-param">emitters: Union[List[snowplow_tracker.typing.EmitterProtocol], snowplow_tracker.typing.EmitterProtocol], subject: Optional[snowplow_tracker.subject.Subject] = None, namespace: Optional[str] = None, app_id: Optional[str] = None, encode_base64: bool = True, json_encoder: Optional[Callable[[Any], Any]] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.tracker.Tracker" title="Permalink to this definition"></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.tracker.</code><code class="sig-name descname">Tracker</code><span class="sig-paren">(</span><em class="sig-param">namespace: str, emitters: Union[List[snowplow_tracker.typing.EmitterProtocol], snowplow_tracker.typing.EmitterProtocol], subject: Optional[snowplow_tracker.subject.Subject] = None, app_id: Optional[str] = None, encode_base64: bool = True, json_encoder: Optional[Callable[[Any], Any]] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.tracker.Tracker" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="snowplow_tracker.tracker.Tracker.add_emitter">
@@ -595,23 +603,8 @@ This overwrites the nuid field set by the collector</p>
 
 <dl class="method">
 <dt id="snowplow_tracker.tracker.Tracker.complete_payload">
-<code class="sig-name descname">complete_payload</code><span class="sig-paren">(</span><em class="sig-param">pb: snowplow_tracker.payload.Payload, context: Optional[List[snowplow_tracker.self_describing_json.SelfDescribingJson]], tstamp: Optional[float], event_subject: Optional[snowplow_tracker.subject.Subject]</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.tracker.Tracker<a class="headerlink" href="#snowplow_tracker.tracker.Tracker.complete_payload" title="Permalink to this definition"></a></dt>
-<dd><p>Called by all tracking events to add the standard name-value pairs
-to the Payload object irrespective of the tracked event.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pb</strong> (<em>payload</em>) – Payload builder</p></li>
-<li><p><strong>context</strong> (<em>context_array | None</em>) – Custom context for the event</p></li>
-<li><p><strong>tstamp</strong> (<em>int | float | None</em>) – Optional event timestamp in milliseconds</p></li>
-<li><p><strong>event_subject</strong> (<em>subject | None</em>) – Optional per event subject</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
-</dd>
-</dl>
-</dd></dl>
+<code class="sig-name descname">complete_payload</code><span class="sig-paren">(</span><em class="sig-param">event: snowplow_tracker.events.event.Event</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.payload.Payload<a class="headerlink" href="#snowplow_tracker.tracker.Tracker.complete_payload" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="snowplow_tracker.tracker.Tracker.flush">
@@ -629,7 +622,7 @@ to the Payload object irrespective of the tracked event.</p>
 
 <dl class="method">
 <dt id="snowplow_tracker.tracker.Tracker.get_namespace">
-<code class="sig-name descname">get_namespace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.tracker.Tracker.get_namespace" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname">get_namespace</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#snowplow_tracker.tracker.Tracker.get_namespace" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -673,16 +666,11 @@ event.</p>
 
 <dl class="method">
 <dt id="snowplow_tracker.tracker.Tracker.track">
-<code class="sig-name descname">track</code><span class="sig-paren">(</span><em class="sig-param">pb: snowplow_tracker.payload.Payload</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.tracker.Tracker<a class="headerlink" href="#snowplow_tracker.tracker.Tracker.track" title="Permalink to this definition"></a></dt>
-<dd><p>Send the payload to a emitter</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>pb</strong> (<em>payload</em>) – Payload builder</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
-</dd>
-</dl>
+<code class="sig-name descname">track</code><span class="sig-paren">(</span><em class="sig-param">event: snowplow_tracker.events.event.Event</em><span class="sig-paren">)</span> &#x2192; Optional[str]<a class="headerlink" href="#snowplow_tracker.tracker.Tracker.track" title="Permalink to this definition"></a></dt>
+<dd><p>Send the event payload to a emitter. Returns the tracked event ID.
+:param  event:           Event
+:type   event:           events.Event
+:rtype:                  String</p>
 </dd></dl>
 
 <dl class="method">
@@ -703,7 +691,7 @@ event.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -730,7 +718,7 @@ event.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -756,14 +744,14 @@ It is not for public use.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="snowplow_tracker.tracker.Tracker.track_form_change">
-<code class="sig-name descname">track_form_change</code><span class="sig-paren">(</span><em class="sig-param">form_id: str, element_id: Optional[str], node_name: Literal[INPUT, TEXTAREA, SELECT], value: Optional[str], type_: Optional[str] = None, element_classes: Union[List[str], Tuple[str, Any], None] = None, context: Optional[List[snowplow_tracker.self_describing_json.SelfDescribingJson]] = None, tstamp: Optional[float] = None, event_subject: Optional[snowplow_tracker.subject.Subject] = None</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.tracker.Tracker<a class="headerlink" href="#snowplow_tracker.tracker.Tracker.track_form_change" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname">track_form_change</code><span class="sig-paren">(</span><em class="sig-param">form_id: str, element_id: Optional[str], node_name: typing_extensions.Literal['INPUT', 'TEXTAREA', 'SELECT'][INPUT, TEXTAREA, SELECT], value: Optional[str], type_: Optional[str] = None, element_classes: Union[List[str], Tuple[str, Any], None] = None, context: Optional[List[snowplow_tracker.self_describing_json.SelfDescribingJson]] = None, tstamp: Optional[float] = None, event_subject: Optional[snowplow_tracker.subject.Subject] = None</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.tracker.Tracker<a class="headerlink" href="#snowplow_tracker.tracker.Tracker.track_form_change" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -779,7 +767,7 @@ It is not for public use.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -799,7 +787,7 @@ It is not for public use.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -821,19 +809,19 @@ It is not for public use.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="snowplow_tracker.tracker.Tracker.track_mobile_screen_view">
-<code class="sig-name descname">track_mobile_screen_view</code><span class="sig-paren">(</span><em class="sig-param">id_: Optional[str] = None</em>, <em class="sig-param">name: Optional[str] = None</em>, <em class="sig-param">type: Optional[str] = None</em>, <em class="sig-param">previous_name: Optional[str] = None</em>, <em class="sig-param">previous_id: Optional[str] = None</em>, <em class="sig-param">previous_type: Optional[str] = None</em>, <em class="sig-param">transition_type: Optional[str] = None</em>, <em class="sig-param">context: Optional[List[snowplow_tracker.self_describing_json.SelfDescribingJson]] = None</em>, <em class="sig-param">tstamp: Optional[float] = None</em>, <em class="sig-param">event_subject: Optional[snowplow_tracker.subject.Subject] = None</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.tracker.Tracker<a class="headerlink" href="#snowplow_tracker.tracker.Tracker.track_mobile_screen_view" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname">track_mobile_screen_view</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">id_: Optional[str] = None</em>, <em class="sig-param">type: Optional[str] = None</em>, <em class="sig-param">previous_name: Optional[str] = None</em>, <em class="sig-param">previous_id: Optional[str] = None</em>, <em class="sig-param">previous_type: Optional[str] = None</em>, <em class="sig-param">transition_type: Optional[str] = None</em>, <em class="sig-param">context: Optional[List[snowplow_tracker.self_describing_json.SelfDescribingJson]] = None</em>, <em class="sig-param">tstamp: Optional[float] = None</em>, <em class="sig-param">event_subject: Optional[snowplow_tracker.subject.Subject] = None</em><span class="sig-paren">)</span> &#x2192; snowplow_tracker.tracker.Tracker<a class="headerlink" href="#snowplow_tracker.tracker.Tracker.track_mobile_screen_view" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>id</strong> (<em>string | None</em>) – Screen view ID. This must be of type UUID.</p></li>
 <li><p><strong>name</strong> (<em>string_or_none</em>) – The name of the screen view event</p></li>
+<li><p><strong>id</strong> (<em>string | None</em>) – Screen view ID. This must be of type UUID.</p></li>
 <li><p><strong>type</strong> (<em>string | None</em>) – The type of screen that was viewed e.g feed / carousel.</p></li>
 <li><p><strong>previous_name</strong> (<em>string | None</em>) – The name of the previous screen.</p></li>
 <li><p><strong>previous_id</strong> (<em>string | None</em>) – The screenview ID of the previous screenview.</p></li>
@@ -850,7 +838,7 @@ It is not for public use.</p>
 :type   tstamp:         int | float | None
 :param  event_subject:  Optional per event subject
 :type   event_subject:  subject | None
-:rtype:                 tracker</p>
+:rtype:                 Tracker</p>
 </dd></dl>
 
 <dl class="method">
@@ -872,7 +860,7 @@ It is not for public use.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -892,7 +880,7 @@ It is not for public use.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -915,7 +903,7 @@ It is not for public use.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -934,7 +922,7 @@ It is not for public use.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -954,7 +942,7 @@ A “schema” field identifying the schema against which the data is validated<
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -975,7 +963,7 @@ A “schema” field identifying the schema against which the data is validated<
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -999,7 +987,7 @@ or the object</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1019,7 +1007,7 @@ A “schema” field identifying the schema against which the data is validated<
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tracker</p>
+<dd class="field-even"><p><a class="reference internal" href="#snowplow_tracker.tracker.Tracker" title="snowplow_tracker.tracker.Tracker">Tracker</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1032,26 +1020,10 @@ A “schema” field identifying the schema against which the data is validated<
 <dl class="class">
 <dt id="snowplow_tracker.typing.EmitterProtocol">
 <em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.typing.</code><code class="sig-name descname">EmitterProtocol</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.typing.EmitterProtocol" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Protocol</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">typing_extensions.Protocol</span></code></p>
 <dl class="method">
 <dt id="snowplow_tracker.typing.EmitterProtocol.input">
 <code class="sig-name descname">input</code><span class="sig-paren">(</span><em class="sig-param">payload: Dict[str, Any]</em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#snowplow_tracker.typing.EmitterProtocol.input" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="snowplow_tracker.typing.RedisProtocol">
-<em class="property">class </em><code class="sig-prename descclassname">snowplow_tracker.typing.</code><code class="sig-name descname">RedisProtocol</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#snowplow_tracker.typing.RedisProtocol" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Protocol</span></code></p>
-<dl class="method">
-<dt id="snowplow_tracker.typing.RedisProtocol.lpop">
-<code class="sig-name descname">lpop</code><span class="sig-paren">(</span><em class="sig-param">name: Any</em>, <em class="sig-param">count: Optional[int] = Ellipsis</em><span class="sig-paren">)</span> &#x2192; Any<a class="headerlink" href="#snowplow_tracker.typing.RedisProtocol.lpop" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="snowplow_tracker.typing.RedisProtocol.rpush">
-<code class="sig-name descname">rpush</code><span class="sig-paren">(</span><em class="sig-param">name: Any</em>, <em class="sig-param">*values: Any</em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#snowplow_tracker.typing.RedisProtocol.rpush" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
