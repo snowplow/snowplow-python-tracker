@@ -8,9 +8,11 @@ from snowplow_tracker.tracker_configuration import TrackerConfiguration
 from snowplow_tracker.snowplow import Snowplow
 from snowplow_tracker.contracts import disable_contracts, enable_contracts
 from snowplow_tracker.event_store import EventStore
-
-# celery extra
-from .celery import CeleryEmitter
-
-# redis extra
-from .redis import RedisEmitter, RedisWorker
+from snowplow_tracker.events import (
+    Event,
+    PageView,
+    PagePing,
+    SelfDescribing,
+    StructuredEvent,
+    ScreenView,
+)

@@ -1,4 +1,12 @@
-from snowplow_tracker import Tracker
+from snowplow_tracker import (
+    Tracker,
+    ScreenView,
+    PagePing,
+    PageView,
+    SelfDescribing,
+    StructuredEvent,
+    SelfDescribingJson,
+)
 from snowplow_tracker.typing import PayloadDict
 import json
 import redis
@@ -49,11 +57,30 @@ class RedisEmitter(object):
 def main():
     emitter = RedisEmitter()
 
-    t = Tracker(emitter)
+    t = Tracker(namespace="snowplow_tracker", emitters=emitter)
 
-    t.track_page_view("https://www.snowplow.io", "Homepage")
-    t.track_page_ping("https://www.snowplow.io", "Homepage")
-    t.track_link_click("https://www.snowplow.io")
+    page_view = PageView(page_url="https://www.snowplow.io", page_title="Homepage")
+    t.track(page_view)
+
+    page_ping = PagePing(page_url="https://www.snowplow.io", page_title="Homepage")
+    t.track(page_ping)
+
+    link_click = SelfDescribing(
+        SelfDescribingJson(
+            "iglu:com.snowplowanalytics.snowplow/link_click/jsonschema/1-0-1",
+            {"targetUrl": "https://www.snowplow.io"},
+        )
+    )
+    t.track(link_click)
+
+    id = t.get_uuid()
+    screen_view = ScreenView(id_=id, name="name")
+    t.track(screen_view)
+
+    struct_event = StructuredEvent(
+        category="shop", action="add-to-basket", property_="pcs", value=2
+    )
+    t.track(struct_event)
 
 
 if __name__ == "__main__":

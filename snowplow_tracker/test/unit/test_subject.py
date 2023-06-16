@@ -86,3 +86,31 @@ class TestSubject(unittest.TestCase):
             s.standard_nv_pairs["vid"]
         with pytest.raises(KeyError):
             s.standard_nv_pairs["tnuid"]
+
+    def test_combine_subject(self) -> None:
+        s = _subject.Subject()
+        s.set_color_depth(10)
+        s.set_domain_session_id("domain_session_id")
+
+        s2 = _subject.Subject()
+        s2.set_domain_user_id("domain_user_id")
+        s2.set_lang("en")
+
+        fin_payload_dict = s.combine_subject(s2)
+
+        expected_fin_payload_dict = {
+            "p": "pc",
+            "cd": 10,
+            "sid": "domain_session_id",
+            "duid": "domain_user_id",
+            "lang": "en",
+        }
+
+        expected_subject = {
+            "p": "pc",
+            "cd": 10,
+            "sid": "domain_session_id",
+        }
+
+        self.assertDictEqual(fin_payload_dict, expected_fin_payload_dict)
+        self.assertDictEqual(s.standard_nv_pairs, expected_subject)

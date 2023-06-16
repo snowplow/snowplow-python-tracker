@@ -67,11 +67,3 @@ SupportedPlatform = Literal["pc", "tv", "mob", "cnsl", "iot", "web", "srv", "app
 class EmitterProtocol(Protocol):
     def input(self, payload: PayloadDict) -> None:
         ...
-
-
-class RedisProtocol(Protocol):
-    def rpush(self, name: Any, *values: Any) -> int:
-        ...
-
-    def lpop(self, name: Any, count: Optional[int] = ...) -> Any:
-        ...

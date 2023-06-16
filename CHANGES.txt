@@ -1,3 +1,12 @@
+Version 1.0.0 (2023-06-16)
+--------------------------
+Remove Redis and Celery Emitters (#335)
+Make tracker namespace mandatory (#337) 
+Track function to return event_id (#338) 
+Fix namespace assignment in Snowplow API (#341) 
+Refactor track_xxx() methods (#343) 
+Update payload builder to combine event subjects (#347) 
+
 Version 0.15.0 (2023-04-19)
 ---------------------------
 Use Requests Session for sending eventss (#221)

@@ -13,18 +13,6 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9, "3.10", "3.11"]
-        extras-required: [".", ".[redis]"]
-
-    services:
-      redis:
-        image: redis
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
 
     steps:
     - name: Checkout
@@ -42,7 +30,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade "${{ env.pip_v }}" setuptools wheel
-        python -m pip install -e ${{ matrix.extras-required }}
+        python -m pip install -e .
         python -m pip install -r requirements-test.txt
 
     - name: Build
@@ -58,6 +46,12 @@ jobs:
         cd examples
         cd tracker_api_example
         python app.py "localhost:9090"
+
+    - name: Snowplow Demo
+      run: |
+        cd examples
+        cd snowplow_api_example
+        python snowplow_app.py "localhost:9090"
 
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop

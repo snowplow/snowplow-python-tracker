@@ -1,5 +1,5 @@
 # """
-#     _version.py
+#     constants.py
 
 #     Copyright (c) 2013-2023 Snowplow Analytics Ltd. All rights reserved.
 
@@ -14,7 +14,14 @@
 #     express or implied. See the Apache License Version 2.0 for the specific
 #     language governing permissions and limitations there under.
 # """
+from typing import List
+from snowplow_tracker import _version, SelfDescribingJson
 
-__version_info__ = (1, 0, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
-__build_version__ = __version__ + ""
+VERSION = "py-%s" % _version.__version__
+DEFAULT_ENCODE_BASE64 = True
+BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow"
+MOBILE_SCHEMA_PATH = "iglu:com.snowplowanalytics.mobile"
+SCHEMA_TAG = "jsonschema"
+CONTEXT_SCHEMA = "%s/contexts/%s/1-0-1" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
+UNSTRUCT_EVENT_SCHEMA = "%s/unstruct_event/%s/1-0-0" % (BASE_SCHEMA_PATH, SCHEMA_TAG)
+ContextArray = List[SelfDescribingJson]

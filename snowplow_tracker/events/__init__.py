@@ -1,5 +1,5 @@
 # """
-#     _version.py
+#     __init__.py
 
 #     Copyright (c) 2013-2023 Snowplow Analytics Ltd. All rights reserved.
 
@@ -14,7 +14,9 @@
 #     express or implied. See the Apache License Version 2.0 for the specific
 #     language governing permissions and limitations there under.
 # """
-
-__version_info__ = (1, 0, 0)
-__version__ = ".".join(str(x) for x in __version_info__)
-__build_version__ = __version__ + ""
+from snowplow_tracker.events.event import Event
+from snowplow_tracker.events.page_ping import PagePing
+from snowplow_tracker.events.page_view import PageView
+from snowplow_tracker.events.self_describing import SelfDescribing
+from snowplow_tracker.events.structured_event import StructuredEvent
+from snowplow_tracker.events.screen_view import ScreenView

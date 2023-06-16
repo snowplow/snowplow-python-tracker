@@ -5,6 +5,11 @@ from snowplow_tracker import (
     Subject,
     TrackerConfiguration,
     SelfDescribingJson,
+    PagePing,
+    PageView,
+    ScreenView,
+    SelfDescribing,
+    StructuredEvent,
 )
 
 
@@ -15,11 +20,12 @@ def get_url_from_args():
 
 
 def main():
-
     collector_url = get_url_from_args()
     # Configure Emitter
     custom_retry_codes = {500: False, 401: True}
-    emitter_config = EmitterConfiguration(batch_size=5, custom_retry_codes=custom_retry_codes)
+    emitter_config = EmitterConfiguration(
+        batch_size=5, custom_retry_codes=custom_retry_codes
+    )
 
     # Configure Tracker
     tracker_config = TrackerConfiguration(encode_base64=True)
@@ -39,19 +45,28 @@ def main():
 
     tracker = Snowplow.get_tracker("ns")
 
-    tracker.track_page_view("https://www.snowplow.io", "Homepage")
-    tracker.track_page_ping("https://www.snowplow.io", "Homepage")
-    tracker.track_link_click("https://www.snowplow.io/about")
-    tracker.track_page_view("https://www.snowplow.io/about", "About")
+    page_view = PageView(page_url="https://www.snowplow.io", page_title="Homepage")
+    tracker.track(page_view)
 
-    tracker.track_self_describing_event(
+    page_ping = PagePing(page_url="https://www.snowplow.io", page_title="Homepage")
+    tracker.track(page_ping)
+
+    link_click = SelfDescribing(
         SelfDescribingJson(
             "iglu:com.snowplowanalytics.snowplow/link_click/jsonschema/1-0-1",
-            {"targetUrl": "example.com"},
+            {"targetUrl": "https://www.snowplow.io"},
         )
     )
-    tracker.track_struct_event("shop", "add-to-basket", None, "pcs", 2)
+    tracker.track(link_click)
 
+    id = tracker.get_uuid()
+    screen_view = ScreenView(id_=id, name="name")
+    tracker.track(screen_view)
+
+    struct_event = StructuredEvent(
+        category="shop", action="add-to-basket", property_="pcs", value=2
+    )
+    tracker.track(struct_event)
     tracker.flush()
 
 
