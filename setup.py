@@ -23,7 +23,14 @@ try:
 except ImportError:
     from distutils.core import setup
 
-authors_list = ["Anuj More", "Alexander Dean", "Fred Blundun", "Paul Boocock"]
+authors_list = [
+    "Anuj More",
+    "Alexander Dean",
+    "Fred Blundun",
+    "Paul Boocock",
+    "Matus Tomlein",
+    "Jack Keene",
+]
 authors_str = ", ".join(authors_list)
 
 authors_email_list = [
@@ -33,7 +40,7 @@ authors_email_str = ", ".join(authors_email_list)
 
 setup(
     name="snowplow-tracker",
-    version="0.15.0",
+    version="1.0.0",
     author=authors_str,
     author_email=authors_email_str,
     packages=["snowplow_tracker", "snowplow_tracker.test", "snowplow_tracker.events"],
