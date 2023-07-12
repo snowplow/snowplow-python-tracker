@@ -1,3 +1,7 @@
+Version 1.0.1 (2023-07-12)
+--------------------------
+Fix tstamp parameter in track_self_describing_event (#350) (Thanks to @andehen)
+
 Version 1.0.0 (2023-06-16)
 --------------------------
 Remove Redis and Celery Emitters (#335)
