@@ -771,7 +771,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertIs(callArgs["context"][0], ctx)
-        self.assertEqual(callArgs["true_timestamp"], evTstamp)
+        self.assertEqual(callArgs["tstamp"], evTstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_link_click_optional_none(self, mok_track_unstruct: Any) -> None:
@@ -795,7 +795,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertTrue(callArgs["context"] is None)
-        self.assertTrue(callArgs["true_timestamp"] is None)
+        self.assertTrue(callArgs["tstamp"] is None)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_add_to_cart(self, mok_track_unstruct: Any) -> None:
@@ -835,7 +835,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertIs(callArgs["context"][0], ctx)
-        self.assertEqual(callArgs["true_timestamp"], evTstamp)
+        self.assertEqual(callArgs["tstamp"], evTstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_add_to_cart_optional_none(self, mok_track_unstruct: Any) -> None:
@@ -857,7 +857,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertTrue(callArgs["context"] is None)
-        self.assertTrue(callArgs["true_timestamp"] is None)
+        self.assertTrue(callArgs["tstamp"] is None)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_remove_from_cart(self, mok_track_unstruct: Any) -> None:
@@ -897,7 +897,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertIs(callArgs["context"][0], ctx)
-        self.assertEqual(callArgs["true_timestamp"], evTstamp)
+        self.assertEqual(callArgs["tstamp"], evTstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_remove_from_cart_optional_none(
@@ -921,7 +921,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertTrue(callArgs["context"] is None)
-        self.assertTrue(callArgs["true_timestamp"] is None)
+        self.assertTrue(callArgs["tstamp"] is None)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_change(self, mok_track_unstruct: Any) -> None:
@@ -961,7 +961,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertIs(callArgs["context"][0], ctx)
-        self.assertEqual(callArgs["true_timestamp"], evTstamp)
+        self.assertEqual(callArgs["tstamp"], evTstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_change_optional_none(self, mok_track_unstruct: Any) -> None:
@@ -987,7 +987,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertTrue(callArgs["context"] is None)
-        self.assertTrue(callArgs["true_timestamp"] is None)
+        self.assertTrue(callArgs["tstamp"] is None)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_submit(self, mok_track_unstruct: Any) -> None:
@@ -1029,7 +1029,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertIs(callArgs["context"][0], ctx)
-        self.assertEqual(callArgs["true_timestamp"], evTstamp)
+        self.assertEqual(callArgs["tstamp"], evTstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_submit_invalid_element_type(
@@ -1104,7 +1104,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertIs(callArgs["context"][0], ctx)
-        self.assertEqual(callArgs["true_timestamp"], evTstamp)
+        self.assertEqual(callArgs["tstamp"], evTstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_submit_optional_none(self, mok_track_unstruct: Any) -> None:
@@ -1122,7 +1122,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertTrue(callArgs["context"] is None)
-        self.assertTrue(callArgs["true_timestamp"] is None)
+        self.assertTrue(callArgs["tstamp"] is None)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_form_submit_empty_elems(self, mok_track_unstruct: Any) -> None:
@@ -1170,7 +1170,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertIs(callArgs["context"][0], ctx)
-        self.assertEqual(callArgs["true_timestamp"], evTstamp)
+        self.assertEqual(callArgs["tstamp"], evTstamp)
 
     @mock.patch("snowplow_tracker.Tracker.track_self_describing_event")
     def test_track_site_search_optional_none(self, mok_track_unstruct: Any) -> None:
@@ -1191,7 +1191,7 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertTrue(callArgs["context"] is None)
-        self.assertTrue(callArgs["true_timestamp"] is None)
+        self.assertTrue(callArgs["tstamp"] is None)
 
     @mock.patch("snowplow_tracker.Tracker.track")
     def test_track_mobile_screen_view(self, mok_track: Any) -> None:
@@ -1246,4 +1246,4 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(callArgs), 4)
         self.assertDictEqual(callArgs["event_json"].to_json(), expected)
         self.assertIs(callArgs["context"][0], ctx)
-        self.assertEqual(callArgs["true_timestamp"], evTstamp)
+        self.assertEqual(callArgs["tstamp"], evTstamp)

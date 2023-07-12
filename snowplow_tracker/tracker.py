@@ -316,7 +316,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            true_timestamp=tstamp,
+            tstamp=tstamp,
             event_subject=event_subject,
         )
         return self
@@ -380,7 +380,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            true_timestamp=tstamp,
+            tstamp=tstamp,
             event_subject=event_subject,
         )
         return self
@@ -444,7 +444,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            true_timestamp=tstamp,
+            tstamp=tstamp,
             event_subject=event_subject,
         )
         return self
@@ -510,7 +510,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            true_timestamp=tstamp,
+            tstamp=tstamp,
             event_subject=event_subject,
         )
         return self
@@ -563,7 +563,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            true_timestamp=tstamp,
+            tstamp=tstamp,
             event_subject=event_subject,
         )
         return self
@@ -618,7 +618,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            true_timestamp=tstamp,
+            tstamp=tstamp,
             event_subject=event_subject,
         )
         return self
@@ -807,7 +807,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            true_timestamp=tstamp,
+            tstamp=tstamp,
             event_subject=event_subject,
         )
         return self
@@ -992,7 +992,7 @@ class Tracker:
         self.track_self_describing_event(
             event_json=event_json,
             context=context,
-            true_timestamp=tstamp,
+            tstamp=tstamp,
             event_subject=event_subject,
         )
         return self
