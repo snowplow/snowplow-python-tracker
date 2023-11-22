@@ -22,8 +22,6 @@ import requests
 import random
 from typing import Optional, Union, Tuple, Dict
 from queue import Queue
-import gzip
-import brotli
 
 from snowplow_tracker.self_describing_json import SelfDescribingJson
 from snowplow_tracker.typing import (
