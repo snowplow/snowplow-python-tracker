@@ -264,8 +264,8 @@ class Emitter(object):
             )
             prepared = req.prepare()
             self.print_request(prepared) # 
-            s = requests.Session()
-            s.send(prepared,timeout=self.request_timeout)
+            r = requests.Session()
+            r.send(prepared,timeout=self.request_timeout)
         except requests.RequestException as e:
             logger.warning(e)
             return -1
