@@ -1,0 +1,10 @@
+version: 2
+updates:
+  # python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Disable version updates for pip dependencies in deference to https://github.com/dbt-labs/dbt-core/issues/8409
+    # this will not affect secrity related updates
+    open-pull-requests-limit: 0
