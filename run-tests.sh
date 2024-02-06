@@ -78,6 +78,14 @@ function deploy {
     source deactivate
   fi
 
+  # pyenv install 3.12.0
+  if [ ! -e ~/.pyenv/versions/tracker312 ]; then
+    pyenv virtualenv 3.12.0 tracker312
+    pyenv activate tracker312
+    pip install .
+    pip install -r requirements-test.txt
+    source deactivate
+  fi
 }
 
 
@@ -109,6 +117,10 @@ function run_tests {
   pyenv activate tracker311
   pytest
   source deactivate
+
+  pyenv activate tracker312
+  pytest
+  source deactivate
 }
 
 function refresh_deploy {
@@ -119,6 +131,7 @@ function refresh_deploy {
   pyenv uninstall -f tracker39
   pyenv uninstall -f tracker310
   pyenv uninstall -f tracker311
+  pyenv uninstall -f tracker312
 }
 
 
