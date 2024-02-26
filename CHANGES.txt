@@ -1,3 +1,7 @@
+Version 1.0.2 (2024-02-26)
+--------------------------
+Add Python 3.12 to CI tests (#356) (Thanks to @edgarrmondragon)
+
 Version 1.0.1 (2023-07-12)
 --------------------------
 Fix tstamp parameter in track_self_describing_event (#350) (Thanks to @andehen)
