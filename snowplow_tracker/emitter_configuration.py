@@ -39,7 +39,9 @@ class EmitterConfiguration(object):
         :param batch_size:     The maximum number of queued events before the buffer is flushed. Default is 10.
         :type  batch_size:     int | None
         :param on_success:      Callback executed after every HTTP request in a flush has status code 200
-                                Gets passed the number of events flushed.
+                                Gets passed one argument:
+                                1) If method is "post": The sent data in string form;
+                                   If method is "get":  An array of dictionaries corresponding to the sent events' payloads
         :type  on_success:      function | None
         :param on_failure:      Callback executed if at least one HTTP request in a flush has status code other than 200
                                 Gets passed two arguments:
