@@ -44,6 +44,7 @@ setup(
     author=authors_str,
     author_email=authors_email_str,
     packages=["snowplow_tracker", "snowplow_tracker.test", "snowplow_tracker.events"],
+    package_data={"snowplow_tracker": ["py.typed"]},
     url="http://snowplow.io",
     license="Apache License 2.0",
     description="Snowplow event tracker for Python. Add analytics to your Python and Django apps, webapps and games",
