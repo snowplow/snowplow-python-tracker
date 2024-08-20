@@ -81,7 +81,7 @@ class StructuredEvent(Event):
         """
         Category of the event
         """
-        return self.payload.get("se_ca")
+        return self.payload.nv_pairs.get("se_ca")
 
     @category.setter
     def category(self, value: Optional[str]):
@@ -93,7 +93,7 @@ class StructuredEvent(Event):
         """
         The event itself
         """
-        return self.payload.get("se_ac")
+        return self.payload.nv_pairs.get("se_ac")
 
     @action.setter
     def action(self, value: Optional[str]):
@@ -105,7 +105,7 @@ class StructuredEvent(Event):
         """
         Refer to the object the action is performed on
         """
-        return self.payload.get("se_la")
+        return self.payload.nv_pairs.get("se_la")
 
     @label.setter
     def label(self, value: Optional[str]):
@@ -116,7 +116,7 @@ class StructuredEvent(Event):
         """
         Property associated with either the action or the object
         """
-        return self.payload.get("se_pr")
+        return self.payload.nv_pairs.get("se_pr")
 
     @property_.setter
     def property_(self, value: Optional[str]):
@@ -127,7 +127,7 @@ class StructuredEvent(Event):
         """
         A value associated with the user action
         """
-        return self.payload.get("se_va")
+        return self.payload.nv_pairs.get("se_va")
 
     @value.setter
     def value(self, value: Optional[int]):

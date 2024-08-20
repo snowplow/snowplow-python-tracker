@@ -65,7 +65,7 @@ class PageView(Event):
         """
         URL of the viewed page
         """
-        return self.payload.get("url")
+        return self.payload.nv_pairs["url"]
 
     @page_url.setter
     def page_url(self, value: str):
@@ -77,7 +77,7 @@ class PageView(Event):
         """
         Title of the viewed page
         """
-        return self.payload.get("page")
+        return self.payload.nv_pairs.get("page")
 
     @page_title.setter
     def page_title(self, value: Optional[str]):
@@ -88,7 +88,7 @@ class PageView(Event):
         """
         The referrer of the page
         """
-        return self.payload.get("refr")
+        return self.payload.nv_pairs.get("refr")
 
     @referrer.setter
     def referrer(self, value: Optional[str]):
