@@ -81,7 +81,7 @@ class PagePing(Event):
         """
         URL of the viewed page
         """
-        return self.payload.get("url")
+        return self.payload.nv_pairs["url"]
 
     @page_url.setter
     def page_url(self, value: str):
@@ -93,7 +93,7 @@ class PagePing(Event):
         """
         URL of the viewed page
         """
-        return self.payload.get("page")
+        return self.payload.nv_pairs.get("page")
 
     @page_title.setter
     def page_title(self, value: Optional[str]):
@@ -104,7 +104,7 @@ class PagePing(Event):
         """
         The referrer of the page
         """
-        return self.payload.get("refr")
+        return self.payload.nv_pairs.get("refr")
 
     @referrer.setter
     def referrer(self, value: Optional[str]):
@@ -115,7 +115,7 @@ class PagePing(Event):
         """
         Minimum page x offset seen in the last ping period
         """
-        return self.payload.get("pp_mix")
+        return self.payload.nv_pairs.get("pp_mix")
 
     @min_x.setter
     def min_x(self, value: Optional[int]):
@@ -126,7 +126,7 @@ class PagePing(Event):
         """
         Maximum page x offset seen in the last ping period
         """
-        return self.payload.get("pp_max")
+        return self.payload.nv_pairs.get("pp_max")
 
     @max_x.setter
     def max_x(self, value: Optional[int]):
@@ -137,7 +137,7 @@ class PagePing(Event):
         """
         Minimum page y offset seen in the last ping period
         """
-        return self.payload.get("pp_miy")
+        return self.payload.nv_pairs.get("pp_miy")
 
     @min_y.setter
     def min_y(self, value: Optional[int]):
@@ -148,7 +148,7 @@ class PagePing(Event):
         """
         Maximum page y offset seen in the last ping period
         """
-        return self.payload.get("pp_may")
+        return self.payload.nv_pairs.get("pp_may")
 
     @max_y.setter
     def max_y(self, value: Optional[int]):
