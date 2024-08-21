@@ -16,7 +16,7 @@
 # """
 
 import logging
-from typing import Optional
+from typing import Dict, Optional
 from snowplow_tracker import (
     Tracker,
     Emitter,
@@ -37,7 +37,7 @@ Snowplow Class
 
 
 class Snowplow:
-    _trackers = {}
+    _trackers: Dict[str, Tracker] = {}
 
     @staticmethod
     def create_tracker(
@@ -149,7 +149,7 @@ class Snowplow:
         cls._trackers = {}
 
     @classmethod
-    def get_tracker(cls, namespace: str) -> Tracker:
+    def get_tracker(cls, namespace: str) -> Optional[Tracker]:
         """
         Returns a Snowplow tracker from the Snowplow object if it exists
         :param  namespace:              Snowplow tracker namespace

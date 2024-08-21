@@ -15,7 +15,7 @@
 #     language governing permissions and limitations there under.
 # """
 
-from typing import Optional, List
+from typing import Dict, Optional, List
 from snowplow_tracker.typing import JsonEncoderFunction
 from snowplow_tracker.events.event import Event
 from snowplow_tracker.events.self_describing import SelfDescribing
@@ -76,7 +76,7 @@ class ScreenView(Event):
         super(ScreenView, self).__init__(
             event_subject=event_subject, context=context, true_timestamp=true_timestamp
         )
-        self.screen_view_properties = {}
+        self.screen_view_properties: Dict[str, str] = {}
         self.id_ = id_
         self.name = name
         self.type = type

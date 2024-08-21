@@ -15,6 +15,7 @@
 #     language governing permissions and limitations there under.
 # """
 
+from typing import List
 from typing_extensions import Protocol
 from snowplow_tracker.typing import PayloadDict, PayloadDictList
 from logging import Logger
@@ -25,7 +26,7 @@ class EventStore(Protocol):
     EventStore protocol. For buffering events in the Emitter.
     """
 
-    def add_event(payload: PayloadDict) -> bool:
+    def add_event(self, payload: PayloadDict) -> bool:
         """
         Add PayloadDict to buffer. Returns True if successful.
 
@@ -35,7 +36,7 @@ class EventStore(Protocol):
         """
         ...
 
-    def get_events_batch() -> PayloadDictList:
+    def get_events_batch(self) -> PayloadDictList:
         """
         Get a list of all the PayloadDicts in the buffer.
 
@@ -43,7 +44,7 @@ class EventStore(Protocol):
         """
         ...
 
-    def cleanup(batch: PayloadDictList, need_retry: bool) -> None:
+    def cleanup(self, batch: PayloadDictList, need_retry: bool) -> None:
         """
         Removes sent events from the event store. If events need to be retried they are re-added to the buffer.
 
@@ -54,7 +55,7 @@ class EventStore(Protocol):
         """
         ...
 
-    def size() -> int:
+    def size(self) -> int:
         """
         Returns the number of events in the buffer
 
@@ -76,7 +77,7 @@ class InMemoryEventStore(EventStore):
                                     When the buffer is full new events are lost.
         :type   buffer_capacity     int
         """
-        self.event_buffer = []
+        self.event_buffer: List[PayloadDict] = []
         self.buffer_capacity = buffer_capacity
         self.logger = logger
 

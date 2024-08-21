@@ -97,10 +97,9 @@ class Event(object):
         if self.event_subject is not None:
             fin_payload_dict = self.event_subject.combine_subject(subject)
         else:
-            fin_payload_dict = None if subject is None else subject.standard_nv_pairs
+            fin_payload_dict = {} if subject is None else subject.standard_nv_pairs
 
-        if fin_payload_dict is not None:
-            self.payload.add_dict(fin_payload_dict)
+        self.payload.add_dict(fin_payload_dict)
         return self.payload
 
     @property

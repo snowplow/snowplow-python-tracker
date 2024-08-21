@@ -77,7 +77,7 @@ def _get_parameter_name() -> str:
     match = _MATCH_FIRST_PARAMETER_REGEX.search(code)
     if not match:
         return "Unnamed parameter"
-    return match.groups(0)[0]
+    return str(match.groups(0)[0])
 
 
 def _check_form_element(element: Dict[str, Any]) -> bool:
