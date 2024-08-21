@@ -15,7 +15,7 @@
 #     language governing permissions and limitations there under.
 # """
 
-from typing import Optional
+from typing import Dict, Optional, Union
 from snowplow_tracker.contracts import one_of, greater_than
 from snowplow_tracker.typing import SupportedPlatform, SUPPORTED_PLATFORMS, PayloadDict
 
@@ -30,7 +30,7 @@ class Subject(object):
     """
 
     def __init__(self) -> None:
-        self.standard_nv_pairs = {"p": DEFAULT_PLATFORM}
+        self.standard_nv_pairs: Dict[str, Union[str, int]] = {"p": DEFAULT_PLATFORM}
 
     def set_platform(self, value: SupportedPlatform) -> "Subject":
         """

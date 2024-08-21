@@ -80,13 +80,13 @@ class Tracker:
         if subject is None:
             subject = Subject()
 
-        if type(emitters) is list:
+        if isinstance(emitters, list):
             non_empty(emitters)
             self.emitters = emitters
         else:
             self.emitters = [emitters]
 
-        self.subject = subject
+        self.subject: Optional[Subject] = subject
         self.encode_base64 = encode_base64
         self.json_encoder = json_encoder
 
@@ -144,6 +144,8 @@ class Tracker:
 
         if "eid" in payload.nv_pairs.keys():
             return payload.nv_pairs["eid"]
+
+        return None
 
     def complete_payload(
         self,
@@ -298,7 +300,7 @@ class Tracker:
         )
         non_empty_string(target_url)
 
-        properties = {}
+        properties: Dict[str, Union[str, ElementClasses]] = {}
         properties["targetUrl"] = target_url
         if element_id is not None:
             properties["elementId"] = element_id
@@ -361,7 +363,7 @@ class Tracker:
         )
         non_empty_string(sku)
 
-        properties = {}
+        properties: Union[Dict[str, Union[str, float, int]]] = {}
         properties["sku"] = sku
         properties["quantity"] = quantity
         if name is not None:
@@ -425,7 +427,7 @@ class Tracker:
         )
         non_empty_string(sku)
 
-        properties = {}
+        properties: Dict[str, Union[str, float, int]] = {}
         properties["sku"] = sku
         properties["quantity"] = quantity
         if name is not None:
@@ -493,7 +495,7 @@ class Tracker:
         if type_ is not None:
             one_of(type_.lower(), FORM_TYPES)
 
-        properties = dict()
+        properties: Dict[str, Union[Optional[str], ElementClasses]] = dict()
         properties["formId"] = form_id
         properties["elementId"] = element_id
         properties["nodeName"] = node_name
@@ -549,7 +551,9 @@ class Tracker:
         for element in elements or []:
             form_element(element)
 
-        properties = dict()
+        properties: Dict[
+            str, Union[str, ElementClasses, FormClasses, List[Dict[str, Any]]]
+        ] = dict()
         properties["formId"] = form_id
         if form_classes is not None:
             properties["formClasses"] = form_classes
@@ -602,7 +606,9 @@ class Tracker:
         )
         non_empty(terms)
 
-        properties = {}
+        properties: Dict[
+            str, Union[Sequence[str], Dict[str, Union[str, bool]], int]
+        ] = {}
         properties["terms"] = terms
         if filters is not None:
             properties["filters"] = filters
@@ -878,7 +884,7 @@ class Tracker:
         action: str,
         label: Optional[str] = None,
         property_: Optional[str] = None,
-        value: Optional[float] = None,
+        value: Optional[Union[int, float]] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         tstamp: Optional[float] = None,
         event_subject: Optional[Subject] = None,
@@ -1037,4 +1043,9 @@ class Tracker:
         return self
 
     def get_namespace(self) -> str:
-        return self.standard_nv_pairs["tna"]
+        # As app_id is added to the standard_nv_pairs dict above with a type of Optional[str], the type for
+        # the whole standard_nv_pairs dict is inferred to be dict[str, Optional[str]].
+        # But, we know that "tna" should always be present in the dict, since namespace is a required argument.
+        #
+        # This ignores MyPy saying Incompatible return value type (got "str | None", expected "str")
+        return self.standard_nv_pairs["tna"]  # type: ignore
