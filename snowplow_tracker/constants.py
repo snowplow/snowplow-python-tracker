@@ -18,7 +18,7 @@ from typing import List
 from snowplow_tracker import _version, SelfDescribingJson
 
 VERSION = "py-%s" % _version.__version__
-DEFAULT_ENCODE_BASE64 = True
+DEFAULT_ENCODE_BASE64: bool = True  # Type hint required for Python 3.6 MyPy check
 BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow"
 MOBILE_SCHEMA_PATH = "iglu:com.snowplowanalytics.mobile"
 SCHEMA_TAG = "jsonschema"

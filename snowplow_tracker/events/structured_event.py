@@ -15,7 +15,7 @@
 #     language governing permissions and limitations there under.
 # """
 from snowplow_tracker.events.event import Event
-from typing import Optional, List
+from typing import Optional, List, Union
 from snowplow_tracker.subject import Subject
 from snowplow_tracker.self_describing_json import SelfDescribingJson
 from snowplow_tracker.contracts import non_empty_string
@@ -41,7 +41,7 @@ class StructuredEvent(Event):
         action: str,
         label: Optional[str] = None,
         property_: Optional[str] = None,
-        value: Optional[int] = None,
+        value: Optional[Union[int, float]] = None,
         event_subject: Optional[Subject] = None,
         context: Optional[List[SelfDescribingJson]] = None,
         true_timestamp: Optional[float] = None,
@@ -84,7 +84,7 @@ class StructuredEvent(Event):
         return self.payload.nv_pairs.get("se_ca")
 
     @category.setter
-    def category(self, value: Optional[str]):
+    def category(self, value: str):
         non_empty_string(value)
         self.payload.add("se_ca", value)
 
@@ -96,7 +96,7 @@ class StructuredEvent(Event):
         return self.payload.nv_pairs.get("se_ac")
 
     @action.setter
-    def action(self, value: Optional[str]):
+    def action(self, value: str):
         non_empty_string(value)
         self.payload.add("se_ac", value)
 
@@ -123,12 +123,12 @@ class StructuredEvent(Event):
         self.payload.add("se_pr", value)
 
     @property
-    def value(self) -> Optional[int]:
+    def value(self) -> Optional[Union[int, float]]:
         """
         A value associated with the user action
         """
         return self.payload.nv_pairs.get("se_va")
 
     @value.setter
-    def value(self, value: Optional[int]):
+    def value(self, value: Optional[Union[int, float]]):
         self.payload.add("se_va", value)

@@ -20,7 +20,7 @@ import time
 import threading
 import requests
 import random
-from typing import Optional, Union, Tuple, Dict
+from typing import Optional, Union, Tuple, Dict, cast, Callable
 from queue import Queue
 
 from snowplow_tracker.self_describing_json import SelfDescribingJson
@@ -31,6 +31,7 @@ from snowplow_tracker.typing import (
     Method,
     SuccessCallback,
     FailureCallback,
+    EmitterProtocol,
 )
 from snowplow_tracker.contracts import one_of
 from snowplow_tracker.event_store import EventStore, InMemoryEventStore
@@ -48,7 +49,20 @@ PROTOCOLS = {"http", "https"}
 METHODS = {"get", "post"}
 
 
-class Emitter(object):
+# Unifes the two request methods under one interface
+class Requester:
+    post: Callable
+    get: Callable
+
+    def __init__(self, post: Callable, get: Callable):
+        # 3.6 MyPy compatibility:
+        # error: Cannot assign to a method
+        # https://github.com/python/mypy/issues/2427
+        setattr(self, "post", post)
+        setattr(self, "get", get)
+
+
+class Emitter(EmitterProtocol):
     """
     Synchronously send Snowplow events to a Snowplow collector
     Supports both GET and POST requests
@@ -151,12 +165,15 @@ class Emitter(object):
         self.retry_timer = FlushTimer(emitter=self, repeating=False)
 
         self.max_retry_delay_seconds = max_retry_delay_seconds
-        self.retry_delay = 0
+        self.retry_delay: Union[int, float] = 0
 
         self.custom_retry_codes = custom_retry_codes
         logger.info("Emitter initialized with endpoint " + self.endpoint)
 
-        self.request_method = requests if session is None else session
+        if session is None:
+            self.request_method = Requester(post=requests.post, get=requests.get)
+        else:
+            self.request_method = Requester(post=session.post, get=session.get)
 
     @staticmethod
     def as_collector_uri(
@@ -183,7 +200,7 @@ class Emitter(object):
 
         if endpoint.split("://")[0] in PROTOCOLS:
             endpoint_arr = endpoint.split("://")
-            protocol = endpoint_arr[0]
+            protocol = cast(HttpProtocol, endpoint_arr[0])
             endpoint = endpoint_arr[1]
 
         if method == "get":
@@ -427,6 +444,10 @@ class Emitter(object):
         """
         self.retry_timer.cancel()
 
+    # This is only here to satisfy the `EmitterProtocol` interface
+    def async_flush(self) -> None:
+        return
+
 
 class AsyncEmitter(Emitter):
     """
@@ -446,7 +467,7 @@ class AsyncEmitter(Emitter):
         byte_limit: Optional[int] = None,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
         max_retry_delay_seconds: int = 60,
-        buffer_capacity: int = None,
+        buffer_capacity: Optional[int] = None,
         custom_retry_codes: Dict[int, bool] = {},
         event_store: Optional[EventStore] = None,
         session: Optional[requests.Session] = None,
@@ -501,7 +522,7 @@ class AsyncEmitter(Emitter):
             event_store=event_store,
             session=session,
         )
-        self.queue = Queue()
+        self.queue: Queue = Queue()
         for i in range(thread_count):
             t = threading.Thread(target=self.consume)
             t.daemon = True
