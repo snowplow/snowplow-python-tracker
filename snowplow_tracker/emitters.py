@@ -91,7 +91,7 @@ class Emitter(object):
                             Gets passed two arguments:
                             1) The number of events which were successfully sent
                             2a) If method is "get": The unsent data in string form;
-                            2b)   If method is "post":  An array of dictionaries corresponding to the unsent events' payloads
+                            2b) If method is "post":  An array of dictionaries corresponding to the unsent events' payloads
         :type  on_failure:  function | None
         :param byte_limit:  The size event list after reaching which queued events will be flushed
         :type  byte_limit:  int | None
