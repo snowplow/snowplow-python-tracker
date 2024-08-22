@@ -40,14 +40,14 @@ class EmitterConfiguration(object):
         :type  batch_size:     int | None
         :param on_success:      Callback executed after every HTTP request in a flush has status code 200
                                 Gets passed one argument:
-                                1a) If method is "post": The sent data in string form;
-                                1b) If method is "get":  An array of dictionaries corresponding to the sent events' payloads
+                                1a) If method is "get": The sent data in string form;
+                                1b) If method is "post":  An array of dictionaries corresponding to the sent events' payloads
         :type  on_success:      function | None
         :param on_failure:      Callback executed if at least one HTTP request in a flush has status code other than 200
                                 Gets passed two arguments:
                                 1) The number of events which were successfully sent
-                                2a) If method is "post": The unsent data in string form;
-                                2b) If method is "get":  An array of dictionaries corresponding to the unsent events' payloads
+                                2a) If method is "get": The unsent data in string form;
+                                2b) If method is "post":  An array of dictionaries corresponding to the unsent events' payloads
         :type  on_failure:      function | None
         :param byte_limit:      The size event list after reaching which queued events will be flushed
         :type  byte_limit:      int | None
