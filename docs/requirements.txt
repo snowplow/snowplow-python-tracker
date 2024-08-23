@@ -1,9 +1,15 @@
-sphinx
-sphinx_rtd_theme
-sphinx_copybutton
-sphinx_minipres
-sphinx_tabs
-sphinx_togglebutton>=0.2.0
-sphinx-autobuild
+
+sphinx==7.1.2
+sphinx_rtd_theme==2.0.0
+sphinx_copybutton==0.5.2
+sphinx_minipres==0.2.1
+sphinx_tabs==3.4.5
+
+sphinx_togglebutton==0.3.2
+# Transitive dependency of togglebutton causing:
+# https://security.snyk.io/vuln/SNYK-PYTHON-SETUPTOOLS-7448482
+setuptools==70.0.0
+
+sphinx-autobuild==2021.3.14
 myst_nb>0.8.3
-sphinx_rtd_theme_ext_color_contrast
+sphinx_rtd_theme_ext_color_contrast==0.3.2
