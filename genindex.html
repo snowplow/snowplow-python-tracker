@@ -1,19 +1,22 @@
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; Snowplow Python Tracker 1.0.1 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <title>Index &mdash; Snowplow Python Tracker 1.0.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=98d46b1a"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -38,7 +41,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">snowplow_tracker</a></li>
 </ul>
@@ -78,6 +81,7 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
@@ -95,12 +99,18 @@
 </li>
       <li><a href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.add_emitter">add_emitter() (snowplow_tracker.tracker.Tracker method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="snowplow_tracker.html#snowplow_tracker.payload.Payload.add_json">add_json() (snowplow_tracker.payload.Payload method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.as_collector_uri">as_collector_uri() (snowplow_tracker.emitters.Emitter static method)</a>
 </li>
+      <li><a href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.async_flush">async_flush() (snowplow_tracker.emitters.Emitter method)</a>
+
+      <ul>
+        <li><a href="snowplow_tracker.html#snowplow_tracker.typing.EmitterProtocol.async_flush">(snowplow_tracker.typing.EmitterProtocol method)</a>
+</li>
+      </ul></li>
       <li><a href="snowplow_tracker.html#snowplow_tracker.emitters.AsyncEmitter">AsyncEmitter (class in snowplow_tracker.emitters)</a>
 </li>
       <li><a href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.attach_sent_timestamp">attach_sent_timestamp() (snowplow_tracker.emitters.Emitter static method)</a>
@@ -160,6 +170,8 @@
 </li>
         <li><a href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.flush">(snowplow_tracker.tracker.Tracker method)</a>
 </li>
+        <li><a href="snowplow_tracker.html#snowplow_tracker.typing.EmitterProtocol.flush">(snowplow_tracker.typing.EmitterProtocol method)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -173,6 +185,8 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="snowplow_tracker.html#snowplow_tracker.emitters.Requester.get">get (snowplow_tracker.emitters.Requester attribute)</a>
+</li>
       <li><a href="snowplow_tracker.html#snowplow_tracker.payload.Payload.get">get() (snowplow_tracker.payload.Payload method)</a>
 </li>
       <li><a href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.get_namespace">get_namespace() (snowplow_tracker.tracker.Tracker method)</a>
@@ -218,6 +232,31 @@
   </ul></td>
 </tr></table>
 
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    module
+
+      <ul>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.contracts">snowplow_tracker.contracts</a>
+</li>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.emitters">snowplow_tracker.emitters</a>
+</li>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.payload">snowplow_tracker.payload</a>
+</li>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.self_describing_json">snowplow_tracker.self_describing_json</a>
+</li>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.subject">snowplow_tracker.subject</a>
+</li>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.tracker">snowplow_tracker.tracker</a>
+</li>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.typing">snowplow_tracker.typing</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -244,12 +283,20 @@
       <li><a href="snowplow_tracker.html#snowplow_tracker.payload.Payload">Payload (class in snowplow_tracker.payload)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="snowplow_tracker.html#snowplow_tracker.emitters.Requester.post">post (snowplow_tracker.emitters.Requester attribute)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.reached_limit">reached_limit() (snowplow_tracker.emitters.Emitter method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="snowplow_tracker.html#snowplow_tracker.emitters.Requester">Requester (class in snowplow_tracker.emitters)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -259,7 +306,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="snowplow_tracker.html#snowplow_tracker.contracts.satisfies">satisfies() (in module snowplow_tracker.contracts)</a>
 </li>
-      <li><a href="snowplow_tracker.html#snowplow_tracker.self_describing_json.SelfDescribingJson.schema">schema() (snowplow_tracker.self_describing_json.SelfDescribingJson property)</a>
+      <li><a href="snowplow_tracker.html#snowplow_tracker.self_describing_json.SelfDescribingJson.schema">schema (snowplow_tracker.self_describing_json.SelfDescribingJson property)</a>
 </li>
       <li><a href="snowplow_tracker.html#snowplow_tracker.self_describing_json.SelfDescribingJson">SelfDescribingJson (class in snowplow_tracker.self_describing_json)</a>
 </li>
@@ -287,8 +334,6 @@
 </li>
       <li><a href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.set_subject">set_subject() (snowplow_tracker.tracker.Tracker method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_timezone">set_timezone() (snowplow_tracker.subject.Subject method)</a>
 </li>
       <li><a href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_user_id">set_user_id() (snowplow_tracker.subject.Subject method)</a>
@@ -297,20 +342,57 @@
 </li>
       <li><a href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_viewport">set_viewport() (snowplow_tracker.subject.Subject method)</a>
 </li>
-      <li><a href="snowplow_tracker.html#module-snowplow_tracker.contracts">snowplow_tracker.contracts (module)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    snowplow_tracker.contracts
+
+      <ul>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.contracts">module</a>
 </li>
-      <li><a href="snowplow_tracker.html#module-snowplow_tracker.emitters">snowplow_tracker.emitters (module)</a>
+      </ul></li>
+      <li>
+    snowplow_tracker.emitters
+
+      <ul>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.emitters">module</a>
 </li>
-      <li><a href="snowplow_tracker.html#module-snowplow_tracker.payload">snowplow_tracker.payload (module)</a>
+      </ul></li>
+      <li>
+    snowplow_tracker.payload
+
+      <ul>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.payload">module</a>
 </li>
-      <li><a href="snowplow_tracker.html#module-snowplow_tracker.self_describing_json">snowplow_tracker.self_describing_json (module)</a>
+      </ul></li>
+      <li>
+    snowplow_tracker.self_describing_json
+
+      <ul>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.self_describing_json">module</a>
 </li>
-      <li><a href="snowplow_tracker.html#module-snowplow_tracker.subject">snowplow_tracker.subject (module)</a>
+      </ul></li>
+      <li>
+    snowplow_tracker.subject
+
+      <ul>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.subject">module</a>
 </li>
-      <li><a href="snowplow_tracker.html#module-snowplow_tracker.tracker">snowplow_tracker.tracker (module)</a>
+      </ul></li>
+      <li>
+    snowplow_tracker.tracker
+
+      <ul>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.tracker">module</a>
 </li>
-      <li><a href="snowplow_tracker.html#module-snowplow_tracker.typing">snowplow_tracker.typing (module)</a>
+      </ul></li>
+      <li>
+    snowplow_tracker.typing
+
+      <ul>
+        <li><a href="snowplow_tracker.html#module-snowplow_tracker.typing">module</a>
 </li>
+      </ul></li>
       <li><a href="snowplow_tracker.html#snowplow_tracker.emitters.FlushTimer.start">start() (snowplow_tracker.emitters.FlushTimer method)</a>
 </li>
       <li><a href="snowplow_tracker.html#snowplow_tracker.subject.Subject">Subject (class in snowplow_tracker.subject)</a>
@@ -319,6 +401,8 @@
 
       <ul>
         <li><a href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.sync_flush">(snowplow_tracker.emitters.Emitter method)</a>
+</li>
+        <li><a href="snowplow_tracker.html#snowplow_tracker.typing.EmitterProtocol.sync_flush">(snowplow_tracker.typing.EmitterProtocol method)</a>
 </li>
       </ul></li>
   </ul></td>

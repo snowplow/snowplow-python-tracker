@@ -1,18 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>snowplow_tracker &mdash; Snowplow Python Tracker 1.0.1 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <title>snowplow_tracker &mdash; Snowplow Python Tracker 1.0.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=98d46b1a"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -39,7 +44,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">snowplow_tracker</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html">snowplow_tracker package</a></li>
@@ -71,23 +76,142 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="section" id="snowplow-tracker">
-<h1>snowplow_tracker<a class="headerlink" href="#snowplow-tracker" title="Permalink to this headline"></a></h1>
+  <section id="snowplow-tracker">
+<h1>snowplow_tracker<a class="headerlink" href="#snowplow-tracker" title="Permalink to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="snowplow_tracker.html">snowplow_tracker package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.contracts">snowplow_tracker.contracts module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.emitters">snowplow_tracker.emitters module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.payload">snowplow_tracker.payload module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.self_describing_json">snowplow_tracker.self_describing_json module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.subject">snowplow_tracker.subject module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.tracker">snowplow_tracker.tracker module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.typing">snowplow_tracker.typing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.contracts">snowplow_tracker.contracts module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.contracts.contracts_enabled"><code class="docutils literal notranslate"><span class="pre">contracts_enabled()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.contracts.disable_contracts"><code class="docutils literal notranslate"><span class="pre">disable_contracts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.contracts.enable_contracts"><code class="docutils literal notranslate"><span class="pre">enable_contracts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.contracts.form_element"><code class="docutils literal notranslate"><span class="pre">form_element()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.contracts.greater_than"><code class="docutils literal notranslate"><span class="pre">greater_than()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.contracts.non_empty"><code class="docutils literal notranslate"><span class="pre">non_empty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.contracts.non_empty_string"><code class="docutils literal notranslate"><span class="pre">non_empty_string()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.contracts.one_of"><code class="docutils literal notranslate"><span class="pre">one_of()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.contracts.satisfies"><code class="docutils literal notranslate"><span class="pre">satisfies()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.emitters">snowplow_tracker.emitters module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.AsyncEmitter"><code class="docutils literal notranslate"><span class="pre">AsyncEmitter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.AsyncEmitter.consume"><code class="docutils literal notranslate"><span class="pre">AsyncEmitter.consume()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.AsyncEmitter.flush"><code class="docutils literal notranslate"><span class="pre">AsyncEmitter.flush()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.AsyncEmitter.sync_flush"><code class="docutils literal notranslate"><span class="pre">AsyncEmitter.sync_flush()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter"><code class="docutils literal notranslate"><span class="pre">Emitter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.as_collector_uri"><code class="docutils literal notranslate"><span class="pre">Emitter.as_collector_uri()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.async_flush"><code class="docutils literal notranslate"><span class="pre">Emitter.async_flush()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.attach_sent_timestamp"><code class="docutils literal notranslate"><span class="pre">Emitter.attach_sent_timestamp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.cancel_flush_timer"><code class="docutils literal notranslate"><span class="pre">Emitter.cancel_flush_timer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.flush"><code class="docutils literal notranslate"><span class="pre">Emitter.flush()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.http_get"><code class="docutils literal notranslate"><span class="pre">Emitter.http_get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.http_post"><code class="docutils literal notranslate"><span class="pre">Emitter.http_post()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.input"><code class="docutils literal notranslate"><span class="pre">Emitter.input()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.is_good_status_code"><code class="docutils literal notranslate"><span class="pre">Emitter.is_good_status_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.reached_limit"><code class="docutils literal notranslate"><span class="pre">Emitter.reached_limit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.send_events"><code class="docutils literal notranslate"><span class="pre">Emitter.send_events()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.set_flush_timer"><code class="docutils literal notranslate"><span class="pre">Emitter.set_flush_timer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Emitter.sync_flush"><code class="docutils literal notranslate"><span class="pre">Emitter.sync_flush()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.FlushTimer"><code class="docutils literal notranslate"><span class="pre">FlushTimer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.FlushTimer.cancel"><code class="docutils literal notranslate"><span class="pre">FlushTimer.cancel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.FlushTimer.is_active"><code class="docutils literal notranslate"><span class="pre">FlushTimer.is_active()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.FlushTimer.start"><code class="docutils literal notranslate"><span class="pre">FlushTimer.start()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Requester"><code class="docutils literal notranslate"><span class="pre">Requester</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Requester.get"><code class="docutils literal notranslate"><span class="pre">Requester.get</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.emitters.Requester.post"><code class="docutils literal notranslate"><span class="pre">Requester.post</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.payload">snowplow_tracker.payload module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.payload.Payload"><code class="docutils literal notranslate"><span class="pre">Payload</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.payload.Payload.add"><code class="docutils literal notranslate"><span class="pre">Payload.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.payload.Payload.add_dict"><code class="docutils literal notranslate"><span class="pre">Payload.add_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.payload.Payload.add_json"><code class="docutils literal notranslate"><span class="pre">Payload.add_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.payload.Payload.get"><code class="docutils literal notranslate"><span class="pre">Payload.get()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.self_describing_json">snowplow_tracker.self_describing_json module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.self_describing_json.SelfDescribingJson"><code class="docutils literal notranslate"><span class="pre">SelfDescribingJson</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.self_describing_json.SelfDescribingJson.schema"><code class="docutils literal notranslate"><span class="pre">SelfDescribingJson.schema</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.self_describing_json.SelfDescribingJson.to_json"><code class="docutils literal notranslate"><span class="pre">SelfDescribingJson.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.self_describing_json.SelfDescribingJson.to_string"><code class="docutils literal notranslate"><span class="pre">SelfDescribingJson.to_string()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.subject">snowplow_tracker.subject module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject"><code class="docutils literal notranslate"><span class="pre">Subject</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.combine_subject"><code class="docutils literal notranslate"><span class="pre">Subject.combine_subject()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_color_depth"><code class="docutils literal notranslate"><span class="pre">Subject.set_color_depth()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_domain_session_id"><code class="docutils literal notranslate"><span class="pre">Subject.set_domain_session_id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_domain_session_index"><code class="docutils literal notranslate"><span class="pre">Subject.set_domain_session_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_domain_user_id"><code class="docutils literal notranslate"><span class="pre">Subject.set_domain_user_id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_ip_address"><code class="docutils literal notranslate"><span class="pre">Subject.set_ip_address()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_lang"><code class="docutils literal notranslate"><span class="pre">Subject.set_lang()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_network_user_id"><code class="docutils literal notranslate"><span class="pre">Subject.set_network_user_id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_platform"><code class="docutils literal notranslate"><span class="pre">Subject.set_platform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_screen_resolution"><code class="docutils literal notranslate"><span class="pre">Subject.set_screen_resolution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_timezone"><code class="docutils literal notranslate"><span class="pre">Subject.set_timezone()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_user_id"><code class="docutils literal notranslate"><span class="pre">Subject.set_user_id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_useragent"><code class="docutils literal notranslate"><span class="pre">Subject.set_useragent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.subject.Subject.set_viewport"><code class="docutils literal notranslate"><span class="pre">Subject.set_viewport()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.tracker">snowplow_tracker.tracker module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker"><code class="docutils literal notranslate"><span class="pre">Tracker</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.add_emitter"><code class="docutils literal notranslate"><span class="pre">Tracker.add_emitter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.complete_payload"><code class="docutils literal notranslate"><span class="pre">Tracker.complete_payload()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.flush"><code class="docutils literal notranslate"><span class="pre">Tracker.flush()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.get_namespace"><code class="docutils literal notranslate"><span class="pre">Tracker.get_namespace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.get_timestamp"><code class="docutils literal notranslate"><span class="pre">Tracker.get_timestamp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.get_uuid"><code class="docutils literal notranslate"><span class="pre">Tracker.get_uuid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.set_subject"><code class="docutils literal notranslate"><span class="pre">Tracker.set_subject()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track"><code class="docutils literal notranslate"><span class="pre">Tracker.track()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_add_to_cart"><code class="docutils literal notranslate"><span class="pre">Tracker.track_add_to_cart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_ecommerce_transaction"><code class="docutils literal notranslate"><span class="pre">Tracker.track_ecommerce_transaction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_ecommerce_transaction_item"><code class="docutils literal notranslate"><span class="pre">Tracker.track_ecommerce_transaction_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_form_change"><code class="docutils literal notranslate"><span class="pre">Tracker.track_form_change()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_form_submit"><code class="docutils literal notranslate"><span class="pre">Tracker.track_form_submit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_link_click"><code class="docutils literal notranslate"><span class="pre">Tracker.track_link_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_mobile_screen_view"><code class="docutils literal notranslate"><span class="pre">Tracker.track_mobile_screen_view()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_page_ping"><code class="docutils literal notranslate"><span class="pre">Tracker.track_page_ping()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_page_view"><code class="docutils literal notranslate"><span class="pre">Tracker.track_page_view()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_remove_from_cart"><code class="docutils literal notranslate"><span class="pre">Tracker.track_remove_from_cart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_screen_view"><code class="docutils literal notranslate"><span class="pre">Tracker.track_screen_view()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_self_describing_event"><code class="docutils literal notranslate"><span class="pre">Tracker.track_self_describing_event()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_site_search"><code class="docutils literal notranslate"><span class="pre">Tracker.track_site_search()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_struct_event"><code class="docutils literal notranslate"><span class="pre">Tracker.track_struct_event()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.tracker.Tracker.track_unstruct_event"><code class="docutils literal notranslate"><span class="pre">Tracker.track_unstruct_event()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="snowplow_tracker.html#module-snowplow_tracker.typing">snowplow_tracker.typing module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.typing.EmitterProtocol"><code class="docutils literal notranslate"><span class="pre">EmitterProtocol</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.typing.EmitterProtocol.async_flush"><code class="docutils literal notranslate"><span class="pre">EmitterProtocol.async_flush()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.typing.EmitterProtocol.flush"><code class="docutils literal notranslate"><span class="pre">EmitterProtocol.flush()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.typing.EmitterProtocol.input"><code class="docutils literal notranslate"><span class="pre">EmitterProtocol.input()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="snowplow_tracker.html#snowplow_tracker.typing.EmitterProtocol.sync_flush"><code class="docutils literal notranslate"><span class="pre">EmitterProtocol.sync_flush()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 </div>
-</div>
+</section>
 
 
            </div>
