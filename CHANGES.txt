@@ -1,3 +1,11 @@
+Version 1.0.3 (2024-08-27)
+--------------------------
+Fix docs action (close #367)
+Update `on_success` docstring (close #358)
+Add py.typed to package (close #360) (Thanks to @edgarrmondragon)
+Update typing
+Fix `PagePing`, `PageView`, and `StructuredEvent` property getters (close #361)
+
 Version 1.0.2 (2024-02-26)
 --------------------------
 Add Python 3.12 to CI tests (#356) (Thanks to @edgarrmondragon)
