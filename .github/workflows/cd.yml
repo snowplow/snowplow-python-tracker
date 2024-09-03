@@ -76,7 +76,7 @@ jobs:
         python-version: '3.x'
 
     - name: Download artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4.1.7
       with:
         name: distfiles_${{ github.run_id }}
         path: ${{ github.workspace }}/dist
