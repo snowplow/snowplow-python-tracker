@@ -84,6 +84,7 @@ class Emitter(EmitterProtocol):
         custom_retry_codes: Dict[int, bool] = {},
         event_store: Optional[EventStore] = None,
         session: Optional[requests.Session] = None,
+        compression = None,
     ) -> None:
         """
         :param endpoint:    The collector URL. If protocol is not set in endpoint it will automatically set to "https://" - this is done automatically.
@@ -130,6 +131,7 @@ class Emitter(EmitterProtocol):
         self.endpoint = Emitter.as_collector_uri(endpoint, protocol, port, method)
 
         self.method = method
+        self.compression = compression
 
         if event_store is None:
             if buffer_capacity is None:
@@ -256,6 +258,14 @@ class Emitter(EmitterProtocol):
             if self.bytes_queued is not None:
                 self.bytes_queued = 0
 
+    @staticmethod
+    def print_request(req):    
+        print('{}\n{}\r\n{}\r\n\r\n{}'.format(
+            '-----------START-----------',
+            req.method + ' ' + req.url,
+            '\r\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()), ""
+            ))
+
     def http_post(self, data: str) -> int:
         """
         :param data:  The array of JSONs to be sent
@@ -264,6 +274,12 @@ class Emitter(EmitterProtocol):
         logger.info("Sending POST request to %s..." % self.endpoint)
         logger.debug("Payload: %s" % data)
         try:
+            req = requests.Request('POST', url=self.endpoint,
+                data=data,
+                headers={"Content-Type": "application/json; charset=utf-8"},
+            )
+            prepared = req.prepare()
+            self.print_request(prepared) 
             r = self.request_method.post(
                 self.endpoint,
                 data=data,
@@ -325,7 +341,12 @@ class Emitter(EmitterProtocol):
 
             if self.method == "post":
                 data = SelfDescribingJson(PAYLOAD_DATA_SCHEMA, evts).to_string()
-                status_code = self.http_post(data)
+                if self.compression is not None:
+                    logger.info("Compressing payload data")
+                    compressed = self.compression(data)
+                    status_code = self.http_post(compressed)
+                else:
+                    status_code = self.http_post(data)
                 request_succeeded = Emitter.is_good_status_code(status_code)
                 if request_succeeded:
                     success_events += evts
