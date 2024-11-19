@@ -108,6 +108,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        name: Snowplow Python Tracker v${{ needs.version_check.outputs.v_tracker }}
+        name: Version ${{ needs.version_check.outputs.v_tracker }}
         draft: false
         prerelease: ${{ contains(needs.version_check.outputs.v_tracker, 'rc') }}
