@@ -1,3 +1,8 @@
+Version 1.0.4 (2024-11-19)
+--------------------------
+Test with Python 3.13 (#365) (Thanks to @edgarrmondragon)
+Shorten automatic github release title (#352)
+
 Version 1.0.3 (2024-08-27)
 --------------------------
 Fix docs action (close #367)
