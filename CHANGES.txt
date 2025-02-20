@@ -1,3 +1,8 @@
+Version 1.1.0 (2025-02-20)
+--------------------------
+Bump Ubuntu Version in GH Actions (#375)
+Avoid installing types-requests at run-time (#370) (Thanks to @edgarrmondragon)
+
 Version 1.0.4 (2024-11-19)
 --------------------------
 Test with Python 3.13 (#365) (Thanks to @edgarrmondragon)

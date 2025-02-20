@@ -15,6 +15,6 @@
 #     language governing permissions and limitations there under.
 # """
 
-__version_info__ = (1, 0, 4)
+__version_info__ = (1, 1, 0)
 __version__ = ".".join(str(x) for x in __version_info__)
 __build_version__ = __version__ + ""
