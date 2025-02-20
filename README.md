@@ -32,6 +32,7 @@ Python Support
 
 | Python version | snowplow-tracker version |
 |     :----:     |     :----:               |
+| \>=3.8         | > 1.1.0                 |
 | \>=3.5         | > 0.10.0                 |
 | 2.7            | > 0.9.1                  |
 
