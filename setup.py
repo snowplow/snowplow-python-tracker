@@ -40,7 +40,7 @@ authors_email_str = ", ".join(authors_email_list)
 
 setup(
     name="snowplow-tracker",
-    version="1.0.4",
+    version="1.1.0",
     author=authors_str,
     author_email=authors_email_str,
     packages=["snowplow_tracker", "snowplow_tracker.test", "snowplow_tracker.events"],
@@ -56,9 +56,6 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
@@ -69,7 +66,12 @@ setup(
     ],
     install_requires=[
         "requests>=2.25.1,<3.0",
-        "types-requests>=2.25.1,<3.0",
         "typing_extensions>=3.7.4",
     ],
+    extras_require={
+        "typing": [
+            "mypy>=0.971",
+            "types-requests>=2.25.1,<3.0",
+        ],
+    },
 )

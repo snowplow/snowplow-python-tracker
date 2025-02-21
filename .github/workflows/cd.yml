@@ -7,7 +7,7 @@ on:
 
 jobs:
   version_check:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     outputs:
       v_tracker: ${{ steps.version.outputs.PYTHON_TRACKER_VERSION}}
 
@@ -32,7 +32,7 @@ jobs:
 
   build:
     needs: ["version_check"]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -64,7 +64,7 @@ jobs:
 
   publish:
     needs: ["build"]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -96,7 +96,7 @@ jobs:
 
   release:
     needs: ["publish", "version_check"]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code

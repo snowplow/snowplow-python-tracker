@@ -8,14 +8,12 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         python-version:
-        - 3.6
-        - 3.7
         - 3.8
         - 3.9
         - "3.10"
@@ -52,7 +50,7 @@ jobs:
 
     - name: MyPy
       run: |
-        python -m pip install mypy
+        python -m pip install -e .[typing]
         mypy snowplow_tracker --exclude '/test'
       
     - name: Demo
@@ -74,7 +72,7 @@ jobs:
 
   coveralls_finish:
     needs: ["build"]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Coveralls finished
