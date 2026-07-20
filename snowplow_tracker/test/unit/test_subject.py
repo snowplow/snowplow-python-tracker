@@ -87,6 +87,16 @@ class TestSubject(unittest.TestCase):
         with pytest.raises(KeyError):
             s.standard_nv_pairs["tnuid"]
 
+    def test_set_color_depth_validation(self) -> None:
+        s = _subject.Subject()
+        with pytest.raises(ValueError):
+            s.set_color_depth(0)
+        with pytest.raises(ValueError):
+            s.set_color_depth(-1)
+        # Positive value must still work
+        s.set_color_depth(24)
+        self.assertEqual(s.standard_nv_pairs["cd"], 24)
+
     def test_combine_subject(self) -> None:
         s = _subject.Subject()
         s.set_color_depth(10)
