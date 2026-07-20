@@ -83,9 +83,10 @@ class Subject(object):
     def set_color_depth(self, depth: int) -> "Subject":
         """
         :param  depth:          Depth of the color on the screen
-        :type   depth:          int
+        :type   depth:          int,>0
         :rtype:                 subject
         """
+        greater_than(depth, 0)
         self.standard_nv_pairs["cd"] = depth
         return self
 
