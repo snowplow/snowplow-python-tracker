@@ -27,7 +27,6 @@ from snowplow_tracker import (
 from snowplow_tracker.typing import Method
 
 # Logging
-logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 

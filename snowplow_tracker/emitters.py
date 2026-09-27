@@ -37,7 +37,6 @@ from snowplow_tracker.contracts import one_of
 from snowplow_tracker.event_store import EventStore, InMemoryEventStore
 
 # logging
-logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
