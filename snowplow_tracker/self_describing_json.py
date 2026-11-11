@@ -16,7 +16,7 @@
 # """
 
 import json
-from typing import Union
+from typing import Any, Union
 
 from snowplow_tracker.typing import PayloadDict, PayloadDictList
 from snowplow_tracker.contracts import non_empty_string
@@ -39,5 +39,6 @@ class SelfDescribingJson(object):
     def to_json(self) -> PayloadDict:
         return {"schema": self.schema, "data": self.data}
 
-    def to_string(self) -> str:
-        return json.dumps(self.to_json())
+    def to_string(self, **kwargs: Any) -> str:
+        """Serialize the schema and data, forwarding options to json.dumps."""
+        return json.dumps(self.to_json(), **kwargs)
