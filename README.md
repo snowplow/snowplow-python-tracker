@@ -36,6 +36,21 @@ Python Support
 | \>=3.5         | > 0.10.0                 |
 | 2.7            | > 0.9.1                  |
 
+Formatting self-describing JSON
+------------------------------
+
+`SelfDescribingJson.to_string()` accepts the keyword options supported by
+`json.dumps`, such as `indent`, `sort_keys`, and `ensure_ascii`:
+
+```python
+from snowplow_tracker import SelfDescribingJson
+
+event = SelfDescribingJson("iglu:com.example/event/jsonschema/1-0-0", {"value": 1})
+print(event.to_string(indent=2, sort_keys=True))
+```
+
+Calling `to_string()` without options uses the default JSON formatting.
+
 Maintainer Quickstart
 ---------------------
 
